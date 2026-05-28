@@ -1,3 +1,4 @@
+import { Inject, Injectable } from "@nestjs/common";
 import { HashGenerator } from "../../../../shared/cryptography/hash-generator";
 import { User } from "../../../domain/entities/user.entity";
 import { UserRole } from "../../../domain/enums/user-role.enum";
@@ -6,9 +7,12 @@ import { UserRepository } from "../../repositories/user-repository";
 import { CreateUserRequestDTO } from "./dto/create-user-request.dto";
 import { CreateUserResponseDTO } from "./dto/create-user-response.dto";
 
+@Injectable()
 export class CreateUserUseCase {
   constructor(
+    @Inject("UserRepository")
     private readonly userRepository: UserRepository,
+    @Inject("HashGenerator")
     private readonly hashGenerator: HashGenerator,
   ) {}
 
