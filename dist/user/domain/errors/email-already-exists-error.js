@@ -4,7 +4,7 @@ exports.EmailAlreadyExistsError = void 0;
 const domain_error_1 = require("./domain-error");
 class EmailAlreadyExistsError extends domain_error_1.DomainError {
     constructor(reason) {
-        super(reason);
+        super(reason, 409);
     }
 }
 exports.EmailAlreadyExistsError = EmailAlreadyExistsError;

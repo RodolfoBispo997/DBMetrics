@@ -2,8 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DomainError = void 0;
 class DomainError extends Error {
-    constructor(message) {
+    constructor(message, statusCode) {
         super(message);
+        this.statusCode = statusCode;
         this.name = this.constructor.name;
     }
 }

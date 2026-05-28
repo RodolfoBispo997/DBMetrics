@@ -4,7 +4,7 @@ exports.InvalidNameError = void 0;
 const domain_error_1 = require("./domain-error");
 class InvalidNameError extends domain_error_1.DomainError {
     constructor(reason) {
-        super(reason);
+        super(reason, 400);
     }
 }
 exports.InvalidNameError = InvalidNameError;

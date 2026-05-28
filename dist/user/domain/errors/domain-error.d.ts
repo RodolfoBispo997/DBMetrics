@@ -1,3 +1,4 @@
 export declare class DomainError extends Error {
-    constructor(message: string);
+    readonly statusCode: number;
+    constructor(message: string, statusCode: number);
 }
