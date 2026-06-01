@@ -16,6 +16,9 @@ exports.UserController = void 0;
 const common_1 = require("@nestjs/common");
 const create_user_use_case_1 = require("./application/use-cases/create-user/create-user.use-case");
 const create_user_http_dto_1 = require("./presentation/dto/create-user-http.dto");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const roles_guard_1 = require("../auth/guards/roles.guard");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 let UserController = class UserController {
     constructor(createUserUseCase) {
         this.createUserUseCase = createUserUseCase;
@@ -26,6 +29,8 @@ let UserController = class UserController {
 };
 exports.UserController = UserController;
 __decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)("ADMIN"),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),

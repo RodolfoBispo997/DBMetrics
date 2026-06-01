@@ -15,6 +15,7 @@ const bcrypt_hash_comparer_1 = require("../shared/cryptography/bcrypt-hash-compa
 const jwt_1 = require("@nestjs/jwt");
 const passport_1 = require("@nestjs/passport");
 const jwt_strategy_1 = require("./strategies/jwt.strategy");
+const roles_guard_1 = require("./guards/roles.guard");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -33,6 +34,7 @@ exports.AuthModule = AuthModule = __decorate([
         providers: [
             authenticate_user_use_case_1.AuthenticateUserUseCase,
             jwt_strategy_1.JwtStrategy,
+            roles_guard_1.RolesGuard,
             {
                 provide: "UserRepository",
                 useClass: prisma_user_repository_1.PrismaUserRepository,

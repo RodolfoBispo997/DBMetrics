@@ -6,6 +6,7 @@ import { BcryptHashComparer } from "../shared/cryptography/bcrypt-hash-comparer"
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+import { RolesGuard } from "./guards/roles.guard";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
   providers: [
     AuthenticateUserUseCase,
     JwtStrategy,
+    RolesGuard,
     {
       provide: "UserRepository",
       useClass: PrismaUserRepository,
