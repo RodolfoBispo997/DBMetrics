@@ -16,6 +16,11 @@ enum UserRole {
   VIEWER
 }
 
+enum DatabaseProvider {
+  MYSQL
+  POSTGRESQL
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -26,5 +31,29 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  connections DatabaseConnection[]
+
   @@map("users")
 }
+
+model DatabaseConnection {
+  id String @id @default(uuid())
+  name String
+  provider DatabaseProvider
+  host String
+  port Int 
+  database String
+  username String
+  password String
+
+
+  user User @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("database_connections")
+  @@index([userId])
+}
+
