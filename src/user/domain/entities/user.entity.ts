@@ -7,7 +7,7 @@ import { InvalidEmailError } from "../errors/invalid-email-error";
 import { PasswordRequiredError } from "../errors/password-required-error";
 
 export class User {
-  private constructor(private props: UserProps) {}
+  private constructor(private readonly props: UserProps) {}
 
   public static create(props: CreateUserProps): User {
     const name = this.validateAndNormalizeName(props.name);
