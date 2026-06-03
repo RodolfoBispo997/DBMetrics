@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-user-id-error.js","sourceRoot":"","sources":["../../../../src/database-connection/domain/errors/invalid-user-id-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,kBAAmB,SAAQ,0BAAW;IACjD,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,gDAIC"}

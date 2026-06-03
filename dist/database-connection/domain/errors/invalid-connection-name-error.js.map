@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-connection-name-error.js","sourceRoot":"","sources":["../../../../src/database-connection/domain/errors/invalid-connection-name-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,0BAA2B,SAAQ,0BAAW;IACzD,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,gEAIC"}

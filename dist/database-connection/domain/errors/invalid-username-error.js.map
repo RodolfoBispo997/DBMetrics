@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-username-error.js","sourceRoot":"","sources":["../../../../src/database-connection/domain/errors/invalid-username-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,oBAAqB,SAAQ,0BAAW;IACnD,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,oDAIC"}
