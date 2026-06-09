@@ -1,10 +1,12 @@
 import { CreateConnectionProps } from "../types/create-database-connection-props.types";
 import { DatabaseProvider } from "../enums/database-provider.enum";
+import { UpdateDatabaseConnectionProps } from "../types/update-database-connection-props.type";
 export declare class DatabaseConnection {
     private readonly props;
     private constructor();
     static create(props: CreateConnectionProps): DatabaseConnection;
     private static validateName;
+    update(props: UpdateDatabaseConnectionProps): void;
     private static validateHost;
     private static validatePort;
     private static validateDatabase;

@@ -43,6 +43,15 @@ class DatabaseConnection {
         }
         return normalized;
     }
+    update(props) {
+        this.props.name = DatabaseConnection.validateName(props.name);
+        this.props.provider = DatabaseConnection.validateDatabaseProvider(props.provider);
+        this.props.host = DatabaseConnection.validateHost(props.host);
+        this.props.port = DatabaseConnection.validatePort(props.port);
+        this.props.database = DatabaseConnection.validateDatabase(props.database);
+        this.props.username = DatabaseConnection.validateUsername(props.username);
+        this.props.password = DatabaseConnection.validatePassword(props.password);
+    }
     static validateHost(host) {
         const normalized = host.trim().replace(/\s+/g, " ");
         if (!normalized) {

@@ -10,6 +10,7 @@ import { CreateConnectionProps } from "../types/create-database-connection-props
 import { InvalidUserIdError } from "../errors/invalid-user-id-error";
 import { DatabaseProvider } from "../enums/database-provider.enum";
 import { InvalidProviderDatabaseError } from "../errors/invalid-provider-database-error";
+import { UpdateDatabaseConnectionProps } from "../types/update-database-connection-props.type";
 
 export class DatabaseConnection {
   private constructor(private readonly props: DatabaseConnectionProps) {}
@@ -46,6 +47,25 @@ export class DatabaseConnection {
 
     return normalized;
   }
+
+  public update(props: UpdateDatabaseConnectionProps): void {
+    this.props.name = DatabaseConnection.validateName(props.name);
+
+    this.props.provider = DatabaseConnection.validateDatabaseProvider(
+      props.provider,
+    );
+
+    this.props.host = DatabaseConnection.validateHost(props.host);
+
+    this.props.port = DatabaseConnection.validatePort(props.port);
+
+    this.props.database = DatabaseConnection.validateDatabase(props.database);
+
+    this.props.username = DatabaseConnection.validateUsername(props.username);
+
+    this.props.password = DatabaseConnection.validatePassword(props.password);
+  }
+
   private static validateHost(host: string): string {
     const normalized = host.trim().replace(/\s+/g, " ");
 

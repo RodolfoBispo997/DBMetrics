@@ -19,12 +19,25 @@ const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const create_database_connection_http_dto_1 = require("./presentation/dto/create-database-connection-http.dto");
 const create_database_connection_use_case_1 = require("./application/use-cases/create-database-connection/create-database-connection.use-case");
+const list_database_connections_use_case_1 = require("./application/use-cases/list-database-connections/list-database-connections.use-case");
+const get_database_connections_by_id_use_case_1 = require("./application/use-cases/get-database-connection-by-id/get-database-connections-by-id.use-case");
 let DatabaseConnectionController = class DatabaseConnectionController {
-    constructor(createDatabaseConnectionUseCase) {
+    constructor(createDatabaseConnectionUseCase, listDatabaseConnectionsUseCase, getDatabaseConnectionByIdUseCase) {
         this.createDatabaseConnectionUseCase = createDatabaseConnectionUseCase;
+        this.listDatabaseConnectionsUseCase = listDatabaseConnectionsUseCase;
+        this.getDatabaseConnectionByIdUseCase = getDatabaseConnectionByIdUseCase;
     }
     async create(body) {
         return this.createDatabaseConnectionUseCase.execute(body);
+    }
+    async list(request) {
+        return this.listDatabaseConnectionsUseCase.execute({
+            userId: request.user.sub,
+        });
+    }
+    async findById(request, id) {
+        const userId = request.user.userId;
+        return this.getDatabaseConnectionByIdUseCase.execute({ id, userId });
     }
 };
 exports.DatabaseConnectionController = DatabaseConnectionController;
@@ -37,8 +50,27 @@ __decorate([
     __metadata("design:paramtypes", [create_database_connection_http_dto_1.CreateDatabaseConnectionHttpDTO]),
     __metadata("design:returntype", Promise)
 ], DatabaseConnectionController.prototype, "create", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DatabaseConnectionController.prototype, "list", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)(":id"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DatabaseConnectionController.prototype, "findById", null);
 exports.DatabaseConnectionController = DatabaseConnectionController = __decorate([
     (0, common_1.Controller)("database-connections"),
-    __metadata("design:paramtypes", [create_database_connection_use_case_1.CreateDatabaseConnectionUseCase])
+    __metadata("design:paramtypes", [create_database_connection_use_case_1.CreateDatabaseConnectionUseCase,
+        list_database_connections_use_case_1.ListDatabaseConnectionsUseCase,
+        get_database_connections_by_id_use_case_1.GetDatabaseConnectionByIdUseCase])
 ], DatabaseConnectionController);
 //# sourceMappingURL=database-connection.controller.js.map
