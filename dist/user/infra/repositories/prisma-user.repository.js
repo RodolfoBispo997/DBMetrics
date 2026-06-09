@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaUserRepository = void 0;
+const user_entity_1 = require("../../domain/entities/user.entity");
 const prisma_client_1 = require("../database/prisma/prisma-client");
 class PrismaUserRepository {
     async findByEmail(email) {
@@ -12,7 +13,13 @@ class PrismaUserRepository {
         if (!user) {
             return null;
         }
-        return user;
+        return user_entity_1.User.restore({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            password: user.password,
+            role: user.role,
+        });
     }
     async findById(id) {
         const user = await prisma_client_1.prisma.user.findUnique({
@@ -23,7 +30,13 @@ class PrismaUserRepository {
         if (!user) {
             return null;
         }
-        return user;
+        return user_entity_1.User.restore({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            password: user.password,
+            role: user.role,
+        });
     }
     async save(user) {
         await prisma_client_1.prisma.user.create({

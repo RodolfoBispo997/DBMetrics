@@ -21,8 +21,13 @@ export class PrismaUserRepository implements UserRepository {
       return null;
     }
 
-    // temporário
-    return user as unknown as User;
+    return User.restore({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      role: user.role as UserRole,
+    });
   }
   async findById(id: string): Promise<User | null> {
     const user = await prisma.user.findUnique({
@@ -35,8 +40,13 @@ export class PrismaUserRepository implements UserRepository {
       return null;
     }
 
-    // temporário
-    return user as unknown as User;
+    return User.restore({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      role: user.role as UserRole,
+    });
   }
 
   async save(user: User): Promise<void> {

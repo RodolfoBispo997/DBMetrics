@@ -22,6 +22,9 @@ class User {
             role: props.role ?? user_role_enum_1.UserRole.ADMIN,
         });
     }
+    static restore(props) {
+        return new User(props);
+    }
     static validateAndNormalizeName(name) {
         const normalized = name.trim().replace(/\s+/g, " ");
         if (!normalized.trim()) {

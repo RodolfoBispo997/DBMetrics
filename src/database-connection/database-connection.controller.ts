@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -15,6 +16,8 @@ import { CreateDatabaseConnectionHttpDTO } from "./presentation/dto/create-datab
 import { CreateDatabaseConnectionUseCase } from "./application/use-cases/create-database-connection/create-database-connection.use-case";
 import { ListDatabaseConnectionsUseCase } from "./application/use-cases/list-database-connections/list-database-connections.use-case";
 import { GetDatabaseConnectionByIdUseCase } from "./application/use-cases/get-database-connection-by-id/get-database-connections-by-id.use-case";
+import { UpdateDatabaseConnectionUseCase } from "./application/use-cases/update-database-connection/update-database-connection.use-case";
+import { UpdateDatabaseConnectionHttpDTO } from "./presentation/dto/update-database-connection-http.dto";
 
 @Controller("database-connections")
 export class DatabaseConnectionController {
@@ -22,6 +25,7 @@ export class DatabaseConnectionController {
     private readonly createDatabaseConnectionUseCase: CreateDatabaseConnectionUseCase,
     private readonly listDatabaseConnectionsUseCase: ListDatabaseConnectionsUseCase,
     private readonly getDatabaseConnectionByIdUseCase: GetDatabaseConnectionByIdUseCase,
+    private readonly updateDatabaseConnectionUseCase: UpdateDatabaseConnectionUseCase,
   ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -44,5 +48,26 @@ export class DatabaseConnectionController {
   async findById(@Req() request: any, @Param("id") id: string) {
     const userId = request.user.userId;
     return this.getDatabaseConnectionByIdUseCase.execute({ id, userId });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(":id")
+  async update(
+    @Req() request: any,
+    @Param("id") id: string,
+    @Body() body: UpdateDatabaseConnectionHttpDTO,
+  ) {
+    const userId = request.user.userId;
+    return this.updateDatabaseConnectionUseCase.execute({
+      id,
+      userId,
+      name: body.name,
+      provider: body.provider,
+      host: body.host,
+      port: body.port,
+      database: body.database,
+      username: body.username,
+      password: body.password,
+    });
   }
 }

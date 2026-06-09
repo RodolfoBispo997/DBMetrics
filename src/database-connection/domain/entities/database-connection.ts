@@ -38,6 +38,10 @@ export class DatabaseConnection {
     });
   }
 
+  public static restore(props: DatabaseConnectionProps): DatabaseConnection {
+    return new DatabaseConnection(props);
+  }
+
   private static validateName(name: string): string {
     const normalized = name.trim().replace(/\s+/g, " ");
 

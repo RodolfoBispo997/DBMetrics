@@ -1,6 +1,7 @@
 import { prisma } from "../../../user/infra/database/prisma/prisma-client";
 import { DatabaseConnectionRepository } from "../../application/repositories/database-connection-repository";
 import { DatabaseConnection } from "../../domain/entities/database-connection";
+import { DatabaseProvider } from "../../domain/enums/database-provider.enum";
 
 export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRepository {
   async save(connection: DatabaseConnection): Promise<void> {
@@ -26,7 +27,19 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
       },
     });
 
-    return databaseConnections as unknown as DatabaseConnection[];
+    return databaseConnections.map((connection) =>
+      DatabaseConnection.restore({
+        id: connection.id,
+        name: connection.name,
+        provider: connection.provider as DatabaseProvider,
+        host: connection.host,
+        port: connection.port,
+        database: connection.database,
+        username: connection.username,
+        password: connection.password,
+        userId: connection.userId,
+      }),
+    );
   }
 
   async findById(id: string): Promise<DatabaseConnection | null> {
@@ -40,7 +53,17 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
       return null;
     }
 
-    return databaseConnection as unknown as DatabaseConnection;
+    return DatabaseConnection.restore({
+      id: databaseConnection.id,
+      name: databaseConnection.name,
+      provider: databaseConnection.provider as DatabaseProvider,
+      host: databaseConnection.host,
+      port: databaseConnection.port,
+      database: databaseConnection.database,
+      username: databaseConnection.username,
+      password: databaseConnection.password,
+      userId: databaseConnection.userId,
+    });
   }
 
   async update(connection: DatabaseConnection): Promise<void> {

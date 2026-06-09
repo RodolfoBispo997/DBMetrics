@@ -36,6 +36,9 @@ class DatabaseConnection {
             userId: userId,
         });
     }
+    static restore(props) {
+        return new DatabaseConnection(props);
+    }
     static validateName(name) {
         const normalized = name.trim().replace(/\s+/g, " ");
         if (!normalized) {

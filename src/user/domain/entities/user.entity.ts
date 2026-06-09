@@ -22,6 +22,10 @@ export class User {
     });
   }
 
+  public static restore(props: UserProps) {
+    return new User(props);
+  }
+
   private static validateAndNormalizeName(name: string): string {
     const normalized = name.trim().replace(/\s+/g, " ");
     if (!normalized.trim()) {

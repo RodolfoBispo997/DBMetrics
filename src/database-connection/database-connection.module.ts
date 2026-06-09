@@ -5,6 +5,7 @@ import { PrismaDatabaseConnectionRepository } from "./infra/repositories/prisma-
 import { PrismaUserRepository } from "../user/infra/repositories/prisma-user.repository";
 import { ListDatabaseConnectionsUseCase } from "./application/use-cases/list-database-connections/list-database-connections.use-case";
 import { GetDatabaseConnectionByIdUseCase } from "./application/use-cases/get-database-connection-by-id/get-database-connections-by-id.use-case";
+import { UpdateDatabaseConnectionUseCase } from "./application/use-cases/update-database-connection/update-database-connection.use-case";
 
 @Module({
   controllers: [DatabaseConnectionController],
@@ -26,6 +27,12 @@ import { GetDatabaseConnectionByIdUseCase } from "./application/use-cases/get-da
     },
 
     GetDatabaseConnectionByIdUseCase,
+    {
+      provide: "DatabaseConnectionRepository",
+      useClass: PrismaDatabaseConnectionRepository,
+    },
+
+    UpdateDatabaseConnectionUseCase,
     {
       provide: "DatabaseConnectionRepository",
       useClass: PrismaDatabaseConnectionRepository,
