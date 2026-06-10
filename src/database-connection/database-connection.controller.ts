@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -18,6 +19,7 @@ import { ListDatabaseConnectionsUseCase } from "./application/use-cases/list-dat
 import { GetDatabaseConnectionByIdUseCase } from "./application/use-cases/get-database-connection-by-id/get-database-connections-by-id.use-case";
 import { UpdateDatabaseConnectionUseCase } from "./application/use-cases/update-database-connection/update-database-connection.use-case";
 import { UpdateDatabaseConnectionHttpDTO } from "./presentation/dto/update-database-connection-http.dto";
+import { DeleteDatabaseConnectionUseCase } from "./application/use-cases/delete-database-connection/delete-database-connection.use-case";
 
 @Controller("database-connections")
 export class DatabaseConnectionController {
@@ -26,6 +28,7 @@ export class DatabaseConnectionController {
     private readonly listDatabaseConnectionsUseCase: ListDatabaseConnectionsUseCase,
     private readonly getDatabaseConnectionByIdUseCase: GetDatabaseConnectionByIdUseCase,
     private readonly updateDatabaseConnectionUseCase: UpdateDatabaseConnectionUseCase,
+    private readonly deleteDatabaseConnectionUseCase: DeleteDatabaseConnectionUseCase,
   ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -69,5 +72,13 @@ export class DatabaseConnectionController {
       username: body.username,
       password: body.password,
     });
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
+  @Delete(":id")
+  async delete(@Req() request: any, @Param("id") id: string) {
+    const userId = request.user.userId;
+    return this.deleteDatabaseConnectionUseCase.execute({ id, userId });
   }
 }

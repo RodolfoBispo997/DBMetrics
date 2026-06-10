@@ -5,4 +5,5 @@ export interface DatabaseConnectionRepository {
   findManyByUserId(userId: string): Promise<DatabaseConnection[]>;
   findById(id: string): Promise<DatabaseConnection | null>;
   update(connection: DatabaseConnection): Promise<void>;
+  delete(id: string): Promise<void>;
 }

@@ -82,4 +82,12 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
       },
     });
   }
+
+  async delete(id: string) {
+    await prisma.databaseConnection.delete({
+      where: {
+        id: id,
+      },
+    });
+  }
 }

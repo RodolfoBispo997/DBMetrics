@@ -15,6 +15,7 @@ const prisma_user_repository_1 = require("../user/infra/repositories/prisma-user
 const list_database_connections_use_case_1 = require("./application/use-cases/list-database-connections/list-database-connections.use-case");
 const get_database_connections_by_id_use_case_1 = require("./application/use-cases/get-database-connection-by-id/get-database-connections-by-id.use-case");
 const update_database_connection_use_case_1 = require("./application/use-cases/update-database-connection/update-database-connection.use-case");
+const delete_database_connection_use_case_1 = require("./application/use-cases/delete-database-connection/delete-database-connection.use-case");
 let DatabaseConnectionModule = class DatabaseConnectionModule {
 };
 exports.DatabaseConnectionModule = DatabaseConnectionModule;
@@ -42,6 +43,11 @@ exports.DatabaseConnectionModule = DatabaseConnectionModule = __decorate([
                 useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,
             },
             update_database_connection_use_case_1.UpdateDatabaseConnectionUseCase,
+            {
+                provide: "DatabaseConnectionRepository",
+                useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,
+            },
+            delete_database_connection_use_case_1.DeleteDatabaseConnectionUseCase,
             {
                 provide: "DatabaseConnectionRepository",
                 useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,

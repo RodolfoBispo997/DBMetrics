@@ -74,6 +74,13 @@ class PrismaDatabaseConnectionRepository {
             },
         });
     }
+    async delete(id) {
+        await prisma_client_1.prisma.databaseConnection.delete({
+            where: {
+                id: id,
+            },
+        });
+    }
 }
 exports.PrismaDatabaseConnectionRepository = PrismaDatabaseConnectionRepository;
 //# sourceMappingURL=prisma-database-connection.repository.js.map

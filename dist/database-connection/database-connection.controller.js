@@ -23,12 +23,14 @@ const list_database_connections_use_case_1 = require("./application/use-cases/li
 const get_database_connections_by_id_use_case_1 = require("./application/use-cases/get-database-connection-by-id/get-database-connections-by-id.use-case");
 const update_database_connection_use_case_1 = require("./application/use-cases/update-database-connection/update-database-connection.use-case");
 const update_database_connection_http_dto_1 = require("./presentation/dto/update-database-connection-http.dto");
+const delete_database_connection_use_case_1 = require("./application/use-cases/delete-database-connection/delete-database-connection.use-case");
 let DatabaseConnectionController = class DatabaseConnectionController {
-    constructor(createDatabaseConnectionUseCase, listDatabaseConnectionsUseCase, getDatabaseConnectionByIdUseCase, updateDatabaseConnectionUseCase) {
+    constructor(createDatabaseConnectionUseCase, listDatabaseConnectionsUseCase, getDatabaseConnectionByIdUseCase, updateDatabaseConnectionUseCase, deleteDatabaseConnectionUseCase) {
         this.createDatabaseConnectionUseCase = createDatabaseConnectionUseCase;
         this.listDatabaseConnectionsUseCase = listDatabaseConnectionsUseCase;
         this.getDatabaseConnectionByIdUseCase = getDatabaseConnectionByIdUseCase;
         this.updateDatabaseConnectionUseCase = updateDatabaseConnectionUseCase;
+        this.deleteDatabaseConnectionUseCase = deleteDatabaseConnectionUseCase;
     }
     async create(body) {
         return this.createDatabaseConnectionUseCase.execute(body);
@@ -55,6 +57,10 @@ let DatabaseConnectionController = class DatabaseConnectionController {
             username: body.username,
             password: body.password,
         });
+    }
+    async delete(request, id) {
+        const userId = request.user.userId;
+        return this.deleteDatabaseConnectionUseCase.execute({ id, userId });
     }
 };
 exports.DatabaseConnectionController = DatabaseConnectionController;
@@ -94,11 +100,22 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, update_database_connection_http_dto_1.UpdateDatabaseConnectionHttpDTO]),
     __metadata("design:returntype", Promise)
 ], DatabaseConnectionController.prototype, "update", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)("ADMIN"),
+    (0, common_1.Delete)(":id"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DatabaseConnectionController.prototype, "delete", null);
 exports.DatabaseConnectionController = DatabaseConnectionController = __decorate([
     (0, common_1.Controller)("database-connections"),
     __metadata("design:paramtypes", [create_database_connection_use_case_1.CreateDatabaseConnectionUseCase,
         list_database_connections_use_case_1.ListDatabaseConnectionsUseCase,
         get_database_connections_by_id_use_case_1.GetDatabaseConnectionByIdUseCase,
-        update_database_connection_use_case_1.UpdateDatabaseConnectionUseCase])
+        update_database_connection_use_case_1.UpdateDatabaseConnectionUseCase,
+        delete_database_connection_use_case_1.DeleteDatabaseConnectionUseCase])
 ], DatabaseConnectionController);
 //# sourceMappingURL=database-connection.controller.js.map
