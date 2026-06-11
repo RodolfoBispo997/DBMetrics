@@ -7,42 +7,37 @@ import { ListDatabaseConnectionsUseCase } from "./application/use-cases/list-dat
 import { GetDatabaseConnectionByIdUseCase } from "./application/use-cases/get-database-connection-by-id/get-database-connections-by-id.use-case";
 import { UpdateDatabaseConnectionUseCase } from "./application/use-cases/update-database-connection/update-database-connection.use-case";
 import { DeleteDatabaseConnectionUseCase } from "./application/use-cases/delete-database-connection/delete-database-connection.use-case";
+import { TestDatabaseConnectionUseCase } from "./application/use-cases/test-database-connection/test-database-connection.use-case";
+import { DatabaseConnectionTesterFactoryImpl } from "./infra/services/database-connection-tester-factory";
+import { PostgresConnectionTester } from "./infra/services/postgres-connection-tester";
+import { MysqlConnectionTester } from "./infra/services/mysql-connection-tester";
 
 @Module({
   controllers: [DatabaseConnectionController],
   providers: [
     CreateDatabaseConnectionUseCase,
+    ListDatabaseConnectionsUseCase,
+    GetDatabaseConnectionByIdUseCase,
+    UpdateDatabaseConnectionUseCase,
+    DeleteDatabaseConnectionUseCase,
+    TestDatabaseConnectionUseCase,
+
+    PostgresConnectionTester,
+    MysqlConnectionTester,
+
     {
       provide: "DatabaseConnectionRepository",
       useClass: PrismaDatabaseConnectionRepository,
     },
+
     {
       provide: "UserRepository",
       useClass: PrismaUserRepository,
     },
 
-    ListDatabaseConnectionsUseCase,
     {
-      provide: "DatabaseConnectionRepository",
-      useClass: PrismaDatabaseConnectionRepository,
-    },
-
-    GetDatabaseConnectionByIdUseCase,
-    {
-      provide: "DatabaseConnectionRepository",
-      useClass: PrismaDatabaseConnectionRepository,
-    },
-
-    UpdateDatabaseConnectionUseCase,
-    {
-      provide: "DatabaseConnectionRepository",
-      useClass: PrismaDatabaseConnectionRepository,
-    },
-
-    DeleteDatabaseConnectionUseCase,
-    {
-      provide: "DatabaseConnectionRepository",
-      useClass: PrismaDatabaseConnectionRepository,
+      provide: "DatabaseConnectionTesterFactory",
+      useClass: DatabaseConnectionTesterFactoryImpl,
     },
   ],
 })

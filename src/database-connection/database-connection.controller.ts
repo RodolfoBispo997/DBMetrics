@@ -20,6 +20,7 @@ import { GetDatabaseConnectionByIdUseCase } from "./application/use-cases/get-da
 import { UpdateDatabaseConnectionUseCase } from "./application/use-cases/update-database-connection/update-database-connection.use-case";
 import { UpdateDatabaseConnectionHttpDTO } from "./presentation/dto/update-database-connection-http.dto";
 import { DeleteDatabaseConnectionUseCase } from "./application/use-cases/delete-database-connection/delete-database-connection.use-case";
+import { TestDatabaseConnectionUseCase } from "./application/use-cases/test-database-connection/test-database-connection.use-case";
 
 @Controller("database-connections")
 export class DatabaseConnectionController {
@@ -29,6 +30,7 @@ export class DatabaseConnectionController {
     private readonly getDatabaseConnectionByIdUseCase: GetDatabaseConnectionByIdUseCase,
     private readonly updateDatabaseConnectionUseCase: UpdateDatabaseConnectionUseCase,
     private readonly deleteDatabaseConnectionUseCase: DeleteDatabaseConnectionUseCase,
+    private readonly testDatabaseConnectionUseCase: TestDatabaseConnectionUseCase,
   ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -80,5 +82,13 @@ export class DatabaseConnectionController {
   async delete(@Req() request: any, @Param("id") id: string) {
     const userId = request.user.userId;
     return this.deleteDatabaseConnectionUseCase.execute({ id, userId });
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("ADMIN")
+  @Post(":id/test")
+  async test(@Req() request: any, @Param("id") connectionId: string) {
+    const userId = request.user.userId;
+    return this.testDatabaseConnectionUseCase.execute({ connectionId, userId });
   }
 }

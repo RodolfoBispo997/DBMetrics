@@ -16,6 +16,10 @@ const list_database_connections_use_case_1 = require("./application/use-cases/li
 const get_database_connections_by_id_use_case_1 = require("./application/use-cases/get-database-connection-by-id/get-database-connections-by-id.use-case");
 const update_database_connection_use_case_1 = require("./application/use-cases/update-database-connection/update-database-connection.use-case");
 const delete_database_connection_use_case_1 = require("./application/use-cases/delete-database-connection/delete-database-connection.use-case");
+const test_database_connection_use_case_1 = require("./application/use-cases/test-database-connection/test-database-connection.use-case");
+const database_connection_tester_factory_1 = require("./infra/services/database-connection-tester-factory");
+const postgres_connection_tester_1 = require("./infra/services/postgres-connection-tester");
+const mysql_connection_tester_1 = require("./infra/services/mysql-connection-tester");
 let DatabaseConnectionModule = class DatabaseConnectionModule {
 };
 exports.DatabaseConnectionModule = DatabaseConnectionModule;
@@ -24,6 +28,13 @@ exports.DatabaseConnectionModule = DatabaseConnectionModule = __decorate([
         controllers: [database_connection_controller_1.DatabaseConnectionController],
         providers: [
             create_database_connection_use_case_1.CreateDatabaseConnectionUseCase,
+            list_database_connections_use_case_1.ListDatabaseConnectionsUseCase,
+            get_database_connections_by_id_use_case_1.GetDatabaseConnectionByIdUseCase,
+            update_database_connection_use_case_1.UpdateDatabaseConnectionUseCase,
+            delete_database_connection_use_case_1.DeleteDatabaseConnectionUseCase,
+            test_database_connection_use_case_1.TestDatabaseConnectionUseCase,
+            postgres_connection_tester_1.PostgresConnectionTester,
+            mysql_connection_tester_1.MysqlConnectionTester,
             {
                 provide: "DatabaseConnectionRepository",
                 useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,
@@ -32,25 +43,9 @@ exports.DatabaseConnectionModule = DatabaseConnectionModule = __decorate([
                 provide: "UserRepository",
                 useClass: prisma_user_repository_1.PrismaUserRepository,
             },
-            list_database_connections_use_case_1.ListDatabaseConnectionsUseCase,
             {
-                provide: "DatabaseConnectionRepository",
-                useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,
-            },
-            get_database_connections_by_id_use_case_1.GetDatabaseConnectionByIdUseCase,
-            {
-                provide: "DatabaseConnectionRepository",
-                useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,
-            },
-            update_database_connection_use_case_1.UpdateDatabaseConnectionUseCase,
-            {
-                provide: "DatabaseConnectionRepository",
-                useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,
-            },
-            delete_database_connection_use_case_1.DeleteDatabaseConnectionUseCase,
-            {
-                provide: "DatabaseConnectionRepository",
-                useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,
+                provide: "DatabaseConnectionTesterFactory",
+                useClass: database_connection_tester_factory_1.DatabaseConnectionTesterFactoryImpl,
             },
         ],
     })
