@@ -25,14 +25,16 @@ const update_database_connection_use_case_1 = require("./application/use-cases/u
 const update_database_connection_http_dto_1 = require("./presentation/dto/update-database-connection-http.dto");
 const delete_database_connection_use_case_1 = require("./application/use-cases/delete-database-connection/delete-database-connection.use-case");
 const test_database_connection_use_case_1 = require("./application/use-cases/test-database-connection/test-database-connection.use-case");
+const get_database_metrics_use_case_1 = require("./application/use-cases/get-database-metrics/get-database-metrics.use-case");
 let DatabaseConnectionController = class DatabaseConnectionController {
-    constructor(createDatabaseConnectionUseCase, listDatabaseConnectionsUseCase, getDatabaseConnectionByIdUseCase, updateDatabaseConnectionUseCase, deleteDatabaseConnectionUseCase, testDatabaseConnectionUseCase) {
+    constructor(createDatabaseConnectionUseCase, listDatabaseConnectionsUseCase, getDatabaseConnectionByIdUseCase, updateDatabaseConnectionUseCase, deleteDatabaseConnectionUseCase, testDatabaseConnectionUseCase, getDatabaseMetricsUseCase) {
         this.createDatabaseConnectionUseCase = createDatabaseConnectionUseCase;
         this.listDatabaseConnectionsUseCase = listDatabaseConnectionsUseCase;
         this.getDatabaseConnectionByIdUseCase = getDatabaseConnectionByIdUseCase;
         this.updateDatabaseConnectionUseCase = updateDatabaseConnectionUseCase;
         this.deleteDatabaseConnectionUseCase = deleteDatabaseConnectionUseCase;
         this.testDatabaseConnectionUseCase = testDatabaseConnectionUseCase;
+        this.getDatabaseMetricsUseCase = getDatabaseMetricsUseCase;
     }
     async create(body) {
         return this.createDatabaseConnectionUseCase.execute(body);
@@ -67,6 +69,10 @@ let DatabaseConnectionController = class DatabaseConnectionController {
     async test(request, connectionId) {
         const userId = request.user.userId;
         return this.testDatabaseConnectionUseCase.execute({ connectionId, userId });
+    }
+    async metrics(request, connectionId) {
+        const userId = request.user.userId;
+        return this.getDatabaseMetricsUseCase.execute({ connectionId, userId });
     }
 };
 exports.DatabaseConnectionController = DatabaseConnectionController;
@@ -126,6 +132,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DatabaseConnectionController.prototype, "test", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)(":id/metrics"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DatabaseConnectionController.prototype, "metrics", null);
 exports.DatabaseConnectionController = DatabaseConnectionController = __decorate([
     (0, common_1.Controller)("database-connections"),
     __metadata("design:paramtypes", [create_database_connection_use_case_1.CreateDatabaseConnectionUseCase,
@@ -133,6 +148,7 @@ exports.DatabaseConnectionController = DatabaseConnectionController = __decorate
         get_database_connections_by_id_use_case_1.GetDatabaseConnectionByIdUseCase,
         update_database_connection_use_case_1.UpdateDatabaseConnectionUseCase,
         delete_database_connection_use_case_1.DeleteDatabaseConnectionUseCase,
-        test_database_connection_use_case_1.TestDatabaseConnectionUseCase])
+        test_database_connection_use_case_1.TestDatabaseConnectionUseCase,
+        get_database_metrics_use_case_1.GetDatabaseMetricsUseCase])
 ], DatabaseConnectionController);
 //# sourceMappingURL=database-connection.controller.js.map

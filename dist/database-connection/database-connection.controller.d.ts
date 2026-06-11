@@ -6,6 +6,7 @@ import { UpdateDatabaseConnectionUseCase } from "./application/use-cases/update-
 import { UpdateDatabaseConnectionHttpDTO } from "./presentation/dto/update-database-connection-http.dto";
 import { DeleteDatabaseConnectionUseCase } from "./application/use-cases/delete-database-connection/delete-database-connection.use-case";
 import { TestDatabaseConnectionUseCase } from "./application/use-cases/test-database-connection/test-database-connection.use-case";
+import { GetDatabaseMetricsUseCase } from "./application/use-cases/get-database-metrics/get-database-metrics.use-case";
 export declare class DatabaseConnectionController {
     private readonly createDatabaseConnectionUseCase;
     private readonly listDatabaseConnectionsUseCase;
@@ -13,11 +14,13 @@ export declare class DatabaseConnectionController {
     private readonly updateDatabaseConnectionUseCase;
     private readonly deleteDatabaseConnectionUseCase;
     private readonly testDatabaseConnectionUseCase;
-    constructor(createDatabaseConnectionUseCase: CreateDatabaseConnectionUseCase, listDatabaseConnectionsUseCase: ListDatabaseConnectionsUseCase, getDatabaseConnectionByIdUseCase: GetDatabaseConnectionByIdUseCase, updateDatabaseConnectionUseCase: UpdateDatabaseConnectionUseCase, deleteDatabaseConnectionUseCase: DeleteDatabaseConnectionUseCase, testDatabaseConnectionUseCase: TestDatabaseConnectionUseCase);
+    private readonly getDatabaseMetricsUseCase;
+    constructor(createDatabaseConnectionUseCase: CreateDatabaseConnectionUseCase, listDatabaseConnectionsUseCase: ListDatabaseConnectionsUseCase, getDatabaseConnectionByIdUseCase: GetDatabaseConnectionByIdUseCase, updateDatabaseConnectionUseCase: UpdateDatabaseConnectionUseCase, deleteDatabaseConnectionUseCase: DeleteDatabaseConnectionUseCase, testDatabaseConnectionUseCase: TestDatabaseConnectionUseCase, getDatabaseMetricsUseCase: GetDatabaseMetricsUseCase);
     create(body: CreateDatabaseConnectionHttpDTO): Promise<import("./application/use-cases/create-database-connection/dto/create-database-connection-response.dto").CreateDatabaseConnectionResponseDto>;
     list(request: any): Promise<import("./application/use-cases/list-database-connections/dto/list-database-connections-response.dto").ListDatabaseConnectionsResponseDTO[]>;
     findById(request: any, id: string): Promise<import("./application/use-cases/get-database-connection-by-id/dto/get-database-connection-by-id-response.dto").GetDatabaseConnectionByIdResponseDTO>;
     update(request: any, id: string, body: UpdateDatabaseConnectionHttpDTO): Promise<import("./application/use-cases/update-database-connection/dto/update-database-connection-response.dto").UpdateDatabaseConnectionResponseDTO>;
     delete(request: any, id: string): Promise<void>;
     test(request: any, connectionId: string): Promise<import("./application/use-cases/test-database-connection/dto/test-database-connection-response.dto").TestDatabaseConnectionResponseDTO>;
+    metrics(request: any, connectionId: string): Promise<import("./application/types/database-metrics.type").DatabaseMetrics>;
 }

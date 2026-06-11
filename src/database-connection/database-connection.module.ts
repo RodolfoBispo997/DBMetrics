@@ -11,6 +11,10 @@ import { TestDatabaseConnectionUseCase } from "./application/use-cases/test-data
 import { DatabaseConnectionTesterFactoryImpl } from "./infra/services/database-connection-tester-factory";
 import { PostgresConnectionTester } from "./infra/services/postgres-connection-tester";
 import { MysqlConnectionTester } from "./infra/services/mysql-connection-tester";
+import { DatabaseMetricCollectorFactoryImpl } from "./infra/services/database-metric/database-metric-collector-factory";
+import { GetDatabaseMetricsUseCase } from "./application/use-cases/get-database-metrics/get-database-metrics.use-case";
+import { PostgresMetricCollector } from "./infra/services/database-metric/postgres-metric-collector";
+import { MysqlMetricCollector } from "./infra/services/database-metric/mysql-metric-collector";
 
 @Module({
   controllers: [DatabaseConnectionController],
@@ -21,6 +25,10 @@ import { MysqlConnectionTester } from "./infra/services/mysql-connection-tester"
     UpdateDatabaseConnectionUseCase,
     DeleteDatabaseConnectionUseCase,
     TestDatabaseConnectionUseCase,
+    GetDatabaseMetricsUseCase,
+    DatabaseMetricCollectorFactoryImpl,
+    PostgresMetricCollector,
+    MysqlMetricCollector,
 
     PostgresConnectionTester,
     MysqlConnectionTester,
@@ -38,6 +46,11 @@ import { MysqlConnectionTester } from "./infra/services/mysql-connection-tester"
     {
       provide: "DatabaseConnectionTesterFactory",
       useClass: DatabaseConnectionTesterFactoryImpl,
+    },
+
+    {
+      provide: "DatabaseMetricCollectorFactory",
+      useClass: DatabaseMetricCollectorFactoryImpl,
     },
   ],
 })

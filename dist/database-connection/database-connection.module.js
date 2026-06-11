@@ -20,6 +20,10 @@ const test_database_connection_use_case_1 = require("./application/use-cases/tes
 const database_connection_tester_factory_1 = require("./infra/services/database-connection-tester-factory");
 const postgres_connection_tester_1 = require("./infra/services/postgres-connection-tester");
 const mysql_connection_tester_1 = require("./infra/services/mysql-connection-tester");
+const database_metric_collector_factory_1 = require("./infra/services/database-metric/database-metric-collector-factory");
+const get_database_metrics_use_case_1 = require("./application/use-cases/get-database-metrics/get-database-metrics.use-case");
+const postgres_metric_collector_1 = require("./infra/services/database-metric/postgres-metric-collector");
+const mysql_metric_collector_1 = require("./infra/services/database-metric/mysql-metric-collector");
 let DatabaseConnectionModule = class DatabaseConnectionModule {
 };
 exports.DatabaseConnectionModule = DatabaseConnectionModule;
@@ -33,6 +37,10 @@ exports.DatabaseConnectionModule = DatabaseConnectionModule = __decorate([
             update_database_connection_use_case_1.UpdateDatabaseConnectionUseCase,
             delete_database_connection_use_case_1.DeleteDatabaseConnectionUseCase,
             test_database_connection_use_case_1.TestDatabaseConnectionUseCase,
+            get_database_metrics_use_case_1.GetDatabaseMetricsUseCase,
+            database_metric_collector_factory_1.DatabaseMetricCollectorFactoryImpl,
+            postgres_metric_collector_1.PostgresMetricCollector,
+            mysql_metric_collector_1.MysqlMetricCollector,
             postgres_connection_tester_1.PostgresConnectionTester,
             mysql_connection_tester_1.MysqlConnectionTester,
             {
@@ -46,6 +54,10 @@ exports.DatabaseConnectionModule = DatabaseConnectionModule = __decorate([
             {
                 provide: "DatabaseConnectionTesterFactory",
                 useClass: database_connection_tester_factory_1.DatabaseConnectionTesterFactoryImpl,
+            },
+            {
+                provide: "DatabaseMetricCollectorFactory",
+                useClass: database_metric_collector_factory_1.DatabaseMetricCollectorFactoryImpl,
             },
         ],
     })
