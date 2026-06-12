@@ -1,10 +1,10 @@
 import { Client } from "pg";
 import { DatabaseMetricCollector } from "../../../application/services/database-metric/database-metric-collector";
-import { DatabaseMetrics } from "../../../application/types/database-metrics.type";
+import { DatabaseMetric } from "../../../application/types/database-metrics.type";
 import { DatabaseConnection } from "../../../domain/entities/database-connection";
 
 export class PostgresMetricCollector implements DatabaseMetricCollector {
-  async collect(connection: DatabaseConnection): Promise<DatabaseMetrics> {
+  async collect(connection: DatabaseConnection): Promise<DatabaseMetric> {
     const client = new Client({
       host: connection.host,
       port: connection.port,

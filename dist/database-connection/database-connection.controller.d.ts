@@ -22,5 +22,5 @@ export declare class DatabaseConnectionController {
     update(request: any, id: string, body: UpdateDatabaseConnectionHttpDTO): Promise<import("./application/use-cases/update-database-connection/dto/update-database-connection-response.dto").UpdateDatabaseConnectionResponseDTO>;
     delete(request: any, id: string): Promise<void>;
     test(request: any, connectionId: string): Promise<import("./application/use-cases/test-database-connection/dto/test-database-connection-response.dto").TestDatabaseConnectionResponseDTO>;
-    metrics(request: any, connectionId: string): Promise<import("./application/types/database-metrics.type").DatabaseMetrics>;
+    metrics(request: any, connectionId: string): Promise<import("./application/types/database-metrics.type").DatabaseMetric>;
 }

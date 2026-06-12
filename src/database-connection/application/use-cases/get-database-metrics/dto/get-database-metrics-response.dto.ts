@@ -1,3 +1,3 @@
-import { DatabaseMetrics } from "../../../types/database-metrics.type";
+import { DatabaseMetric } from "../../../types/database-metrics.type";
 
-export type GetDatabaseMetricsResponseDTO = DatabaseMetrics;
+export type GetDatabaseMetricsResponseDTO = DatabaseMetric;

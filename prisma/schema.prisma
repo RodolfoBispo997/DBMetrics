@@ -50,10 +50,31 @@ model DatabaseConnection {
   user User @relation(fields: [userId], references: [id])
   userId String
 
+  metrics DatabaseMetric[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  
+
   @@map("database_connections")
   @@index([userId])
+
+
+}
+
+model DatabaseMetric {
+  id                   String   @id @default(uuid())
+  databaseConnectionId String
+  databaseVersion      String
+  tablesCount          Int
+  databaseSize         BigInt
+  activeConnections    Int
+  createdAt            DateTime @default(now())
+
+  databaseConnection DatabaseConnection @relation(fields: [databaseConnectionId], references: [id], onDelete: Cascade)
+
+  @@index([databaseConnectionId, createdAt])
+  @@map("database_metrics")
 }
 
