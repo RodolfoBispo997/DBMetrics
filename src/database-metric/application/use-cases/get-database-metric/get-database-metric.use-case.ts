@@ -1,22 +1,22 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { DatabaseConnectionRepository } from "../../../../database-connection/application/repositories/database-connection-repository";
-import { DatabaseMetricCollectorFactory } from "../../../../database-connection/application/services/database-metric/database-metric-collector-factory";
 import { DatabaseConnectionNotFoundError } from "../../../../database-connection/domain/errors/database-connection-not-found-error";
-import { DatabaseMetrics } from "../../../domain/entities/database-metric";
 import { DatabaseMetricRepository } from "../../repositories/database-metric-repository";
+import { GetDatabaseMetricRequestDTO } from "./dto/get-database-metric-request.dto";
+import { GetDatabaseMetricResponseDTO } from "./dto/get-database-metric-response.dto";
 
 @Injectable()
-export class CollectDatabaseMetricUseCase {
+export class GetDatabaseMetricUseCase {
   constructor(
     @Inject("DatabaseMetricRepository")
     private readonly databaseMetricRepository: DatabaseMetricRepository,
     @Inject("DatabaseConnectionRepository")
     private readonly databaseConnectionRepository: DatabaseConnectionRepository,
-    @Inject("DatabaseMetricCollectorFactory")
-    private readonly databaseMetricCollectorFactory: DatabaseMetricCollectorFactory,
   ) {}
 
-  async execute(data: CollectDatabaseMetricRequestDTO): Promise<void> {
+  async execute(
+    data: GetDatabaseMetricRequestDTO,
+  ): Promise<GetDatabaseMetricResponseDTO[]> {
     const connection = await this.databaseConnectionRepository.findById(
       data.connectionId,
     );
@@ -27,24 +27,22 @@ export class CollectDatabaseMetricUseCase {
       );
     }
 
-    if (connection.userId !== data.userId) {
+    if (connection?.userId !== data.userId) {
       throw new DatabaseConnectionNotFoundError(
         "Database connection not found",
       );
     }
 
-    const collet = this.databaseMetricCollectorFactory.get(connection.provider);
+    const metric = await this.databaseMetricRepository.findByConnectionId(
+      data.connectionId,
+    );
 
-    const result = await collet.collect(connection);
-
-    const databaseMetrics = DatabaseMetrics.create({
-      databaseConnectionId: connection.id,
-      databaseVersion: result.databaseVersion,
-      tablesCount: result.tablesCount,
-      databaseSize: result.databaseSize,
-      activeConnections: result.activeConnections,
-    });
-
-    await this.databaseMetricRepository.save(databaseMetrics);
+    return metric.map((connection) => ({
+      id: connection.id,
+      databaseVersion: connection.databaseVersion,
+      tablesCount: connection.tablesCount,
+      databaseSize: connection.databaseSize,
+      activeConnections: connection.activeConnections,
+    }));
   }
 }

@@ -68,7 +68,7 @@ model DatabaseMetric {
   databaseConnectionId String
   databaseVersion      String
   tablesCount          Int
-  databaseSize         BigInt
+  databaseSize         Int
   activeConnections    Int
   createdAt            DateTime @default(now())
 

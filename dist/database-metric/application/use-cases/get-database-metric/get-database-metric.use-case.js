@@ -12,42 +12,37 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CollectDatabaseMetricUseCase = void 0;
+exports.GetDatabaseMetricUseCase = void 0;
 const common_1 = require("@nestjs/common");
 const database_connection_not_found_error_1 = require("../../../../database-connection/domain/errors/database-connection-not-found-error");
-const database_metric_1 = require("../../../domain/entities/database-metric");
-let CollectDatabaseMetricUseCase = class CollectDatabaseMetricUseCase {
-    constructor(databaseMetricRepository, databaseConnectionRepository, databaseMetricCollectorFactory) {
+let GetDatabaseMetricUseCase = class GetDatabaseMetricUseCase {
+    constructor(databaseMetricRepository, databaseConnectionRepository) {
         this.databaseMetricRepository = databaseMetricRepository;
         this.databaseConnectionRepository = databaseConnectionRepository;
-        this.databaseMetricCollectorFactory = databaseMetricCollectorFactory;
     }
     async execute(data) {
         const connection = await this.databaseConnectionRepository.findById(data.connectionId);
         if (!connection) {
             throw new database_connection_not_found_error_1.DatabaseConnectionNotFoundError("Database connection not found");
         }
-        if (connection.userId !== data.userId) {
+        if (connection?.userId !== data.userId) {
             throw new database_connection_not_found_error_1.DatabaseConnectionNotFoundError("Database connection not found");
         }
-        const collet = this.databaseMetricCollectorFactory.get(connection.provider);
-        const result = await collet.collect(connection);
-        const databaseMetrics = database_metric_1.DatabaseMetrics.create({
-            databaseConnectionId: connection.id,
-            databaseVersion: result.databaseVersion,
-            tablesCount: result.tablesCount,
-            databaseSize: result.databaseSize,
-            activeConnections: result.activeConnections,
-        });
-        await this.databaseMetricRepository.save(databaseMetrics);
+        const metric = await this.databaseMetricRepository.findByConnectionId(data.connectionId);
+        return metric.map((connection) => ({
+            id: connection.id,
+            databaseVersion: connection.databaseVersion,
+            tablesCount: connection.tablesCount,
+            databaseSize: connection.databaseSize,
+            activeConnections: connection.activeConnections,
+        }));
     }
 };
-exports.CollectDatabaseMetricUseCase = CollectDatabaseMetricUseCase;
-exports.CollectDatabaseMetricUseCase = CollectDatabaseMetricUseCase = __decorate([
+exports.GetDatabaseMetricUseCase = GetDatabaseMetricUseCase;
+exports.GetDatabaseMetricUseCase = GetDatabaseMetricUseCase = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)("DatabaseMetricRepository")),
     __param(1, (0, common_1.Inject)("DatabaseConnectionRepository")),
-    __param(2, (0, common_1.Inject)("DatabaseMetricCollectorFactory")),
-    __metadata("design:paramtypes", [Object, Object, Object])
-], CollectDatabaseMetricUseCase);
-//# sourceMappingURL=collect-database-metric.use-case.js.map
+    __metadata("design:paramtypes", [Object, Object])
+], GetDatabaseMetricUseCase);
+//# sourceMappingURL=get-database-metric.use-case.js.map
