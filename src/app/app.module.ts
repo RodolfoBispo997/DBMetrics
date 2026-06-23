@@ -5,6 +5,7 @@ import { UserModule } from "../user/user.module";
 import { AuthModule } from "../auth/auth.module";
 import { DatabaseConnectionModule } from "../database-connection/database-connection.module";
 import { DatabaseMetricModule } from "../database-metric/database-metric.module";
+import { DashboardModule } from "../dashboard/dashboard.module";
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { DatabaseMetricModule } from "../database-metric/database-metric.module"
     AuthModule,
     DatabaseConnectionModule,
     DatabaseMetricModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
