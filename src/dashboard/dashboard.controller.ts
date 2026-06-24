@@ -1,11 +1,15 @@
-import { Controller, Get, Req, UseGuards } from "@nestjs/common";
+import { Controller, Get, Param, Query, Req, UseGuards } from "@nestjs/common";
 import { GetDashboardOverviewUseCase } from "./application/use-cases/get-dashboard-overview/get-dashboard-overview.use-case";
+import { GetDashboardConnectionMetricsHistoryUseCase } from "./application/use-cases/get-dashboard-connection-metrics-history/get-dashboard-connection-metrics-history.use-case";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { GetDashboardConnectionMetricsChartUseCase } from "./application/use-cases/get-dashboard-connection-metrics-chart/get-dashboard-connection-metrics-chart.use-case";
 
 @Controller("dashboard")
 export class DashboardController {
   constructor(
     private readonly getDashboardOverviewUseCase: GetDashboardOverviewUseCase,
+    private readonly getDashboardConnectionMetricsHistoryUseCase: GetDashboardConnectionMetricsHistoryUseCase,
+    private readonly getDashboardConnectionMetricsChartUseCase: GetDashboardConnectionMetricsChartUseCase,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -14,5 +18,41 @@ export class DashboardController {
     const userId = request.user.userId;
 
     return this.getDashboardOverviewUseCase.execute({ userId });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("connections/:connectionId/metrics-history")
+  async connectionMetricsHistory(
+    @Req() request: any,
+    @Param("connectionId") connectionId: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
+  ) {
+    const userId = request.user.userId;
+
+    return this.getDashboardConnectionMetricsHistoryUseCase.execute({
+      userId,
+      connectionId,
+      startDate,
+      endDate,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("connections/:connectionId/metrics-chart")
+  async connectionMetricsChart(
+    @Req() request: any,
+    @Param("connectionId") connectionId: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
+  ) {
+    const userId = request.user.userId;
+
+    return this.getDashboardConnectionMetricsChartUseCase.execute({
+      userId,
+      connectionId,
+      startDate,
+      endDate,
+    });
   }
 }

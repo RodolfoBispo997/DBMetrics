@@ -3,11 +3,15 @@ import { DashboardController } from "./dashboard.controller";
 import { GetDashboardOverviewUseCase } from "./application/use-cases/get-dashboard-overview/get-dashboard-overview.use-case";
 import { PrismaDatabaseConnectionRepository } from "../database-connection/infra/repositories/prisma-database-connection.repository";
 import { PrismaDatabaseMetricRepository } from "../database-metric/infra/repositories/prisma-database-metric.repository";
+import { GetDashboardConnectionMetricsHistoryUseCase } from "./application/use-cases/get-dashboard-connection-metrics-history/get-dashboard-connection-metrics-history.use-case";
+import { GetDashboardConnectionMetricsChartUseCase } from "./application/use-cases/get-dashboard-connection-metrics-chart/get-dashboard-connection-metrics-chart.use-case";
 
 @Module({
   controllers: [DashboardController],
   providers: [
     GetDashboardOverviewUseCase,
+    GetDashboardConnectionMetricsHistoryUseCase,
+    GetDashboardConnectionMetricsChartUseCase,
 
     {
       provide: "DatabaseConnectionRepository",

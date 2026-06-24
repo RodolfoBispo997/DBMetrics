@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-dashboard-date-range-error.js","sourceRoot":"","sources":["../../../../src/dashboard/application/errors/invalid-dashboard-date-range-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,8BAA+B,SAAQ,0BAAW;IAC7D,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,wEAIC"}

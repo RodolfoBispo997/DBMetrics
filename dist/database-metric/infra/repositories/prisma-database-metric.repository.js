@@ -5,7 +5,7 @@ const database_metric_1 = require("../../domain/entities/database-metric");
 const prisma_client_1 = require("../../../user/infra/database/prisma/prisma-client");
 class PrismaDatabaseMetricRepository {
     async findByConnectionId(connectionId) {
-        const connection = await prisma_client_1.prisma.databaseMetric.findMany({
+        const metrics = await prisma_client_1.prisma.databaseMetric.findMany({
             where: {
                 databaseConnectionId: connectionId,
             },
@@ -13,14 +13,37 @@ class PrismaDatabaseMetricRepository {
                 createdAt: "desc",
             },
         });
-        return connection.map((connection) => database_metric_1.DatabaseMetrics.restore({
-            id: connection.id,
-            databaseConnectionId: connection.databaseConnectionId,
-            databaseVersion: connection.databaseVersion,
-            tablesCount: connection.tablesCount,
-            databaseSize: connection.databaseSize,
-            activeConnections: connection.activeConnections,
-            createdAt: connection.createdAt,
+        return metrics.map((metric) => database_metric_1.DatabaseMetrics.restore({
+            id: metric.id,
+            databaseConnectionId: metric.databaseConnectionId,
+            databaseVersion: metric.databaseVersion,
+            tablesCount: metric.tablesCount,
+            databaseSize: metric.databaseSize,
+            activeConnections: metric.activeConnections,
+            createdAt: metric.createdAt,
+        }));
+    }
+    async findHistoryByConnectionId(data) {
+        const metrics = await prisma_client_1.prisma.databaseMetric.findMany({
+            where: {
+                databaseConnectionId: data.connectionId,
+                createdAt: {
+                    gte: data.startDate,
+                    lte: data.endDate,
+                },
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+        return metrics.map((metric) => database_metric_1.DatabaseMetrics.restore({
+            id: metric.id,
+            databaseConnectionId: metric.databaseConnectionId,
+            databaseVersion: metric.databaseVersion,
+            tablesCount: metric.tablesCount,
+            databaseSize: metric.databaseSize,
+            activeConnections: metric.activeConnections,
+            createdAt: metric.createdAt,
         }));
     }
     async save(metric) {

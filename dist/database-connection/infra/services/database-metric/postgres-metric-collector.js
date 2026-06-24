@@ -15,11 +15,10 @@ class PostgresMetricCollector {
         try {
             const versionResult = await client.query("SELECT version()");
             const tablesResult = await client.query(`
-  SELECT COUNT(*)
-  FROM information_schema.tables
-  WHERE table_type = 'BASE TABLE'
-    AND table_schema NOT IN ('pg_catalog', 'information_schema');
-`);
+        SELECT COUNT(*)
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        `);
             const sizeResult = await client.query(`
         SELECT pg_database_size(current_database())
         `);

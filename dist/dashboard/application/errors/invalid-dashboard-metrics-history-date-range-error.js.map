@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-dashboard-metrics-history-date-range-error.js","sourceRoot":"","sources":["../../../../src/dashboard/application/errors/invalid-dashboard-metrics-history-date-range-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,4CAA6C,SAAQ,0BAAW;IAC3E,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,oGAIC"}
