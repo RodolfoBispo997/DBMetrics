@@ -56,6 +56,33 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
     );
   }
 
+  async findLatestByConnectionId(
+    connectionId: string,
+  ): Promise<DatabaseMetrics | null> {
+    const metric = await prisma.databaseMetric.findFirst({
+      where: {
+        databaseConnectionId: connectionId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!metric) {
+      return null;
+    }
+
+    return DatabaseMetrics.restore({
+      id: metric.id,
+      databaseConnectionId: metric.databaseConnectionId,
+      databaseVersion: metric.databaseVersion,
+      tablesCount: metric.tablesCount,
+      databaseSize: metric.databaseSize,
+      activeConnections: metric.activeConnections,
+      createdAt: metric.createdAt,
+    });
+  }
+
   async save(metric: DatabaseMetrics): Promise<void> {
     await prisma.databaseMetric.create({
       data: {

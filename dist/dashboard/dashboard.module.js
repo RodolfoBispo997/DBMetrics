@@ -14,6 +14,7 @@ const prisma_database_connection_repository_1 = require("../database-connection/
 const prisma_database_metric_repository_1 = require("../database-metric/infra/repositories/prisma-database-metric.repository");
 const get_dashboard_connection_metrics_history_use_case_1 = require("./application/use-cases/get-dashboard-connection-metrics-history/get-dashboard-connection-metrics-history.use-case");
 const get_dashboard_connection_metrics_chart_use_case_1 = require("./application/use-cases/get-dashboard-connection-metrics-chart/get-dashboard-connection-metrics-chart.use-case");
+const get_dashboard_connection_metrics_summary_use_case_1 = require("./application/use-cases/get-dashboard-connection-metrics-summary/get-dashboard-connection-metrics-summary.use-case");
 let DashboardModule = class DashboardModule {
 };
 exports.DashboardModule = DashboardModule;
@@ -24,6 +25,7 @@ exports.DashboardModule = DashboardModule = __decorate([
             get_dashboard_overview_use_case_1.GetDashboardOverviewUseCase,
             get_dashboard_connection_metrics_history_use_case_1.GetDashboardConnectionMetricsHistoryUseCase,
             get_dashboard_connection_metrics_chart_use_case_1.GetDashboardConnectionMetricsChartUseCase,
+            get_dashboard_connection_metrics_summary_use_case_1.GetDashboardConnectionMetricsSummaryUseCase,
             {
                 provide: "DatabaseConnectionRepository",
                 useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,

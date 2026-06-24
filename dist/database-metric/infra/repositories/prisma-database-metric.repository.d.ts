@@ -7,5 +7,6 @@ export declare class PrismaDatabaseMetricRepository implements DatabaseMetricRep
         startDate?: Date;
         endDate?: Date;
     }): Promise<DatabaseMetrics[]>;
+    findLatestByConnectionId(connectionId: string): Promise<DatabaseMetrics | null>;
     save(metric: DatabaseMetrics): Promise<void>;
 }

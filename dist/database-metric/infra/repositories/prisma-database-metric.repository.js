@@ -46,6 +46,28 @@ class PrismaDatabaseMetricRepository {
             createdAt: metric.createdAt,
         }));
     }
+    async findLatestByConnectionId(connectionId) {
+        const metric = await prisma_client_1.prisma.databaseMetric.findFirst({
+            where: {
+                databaseConnectionId: connectionId,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+        if (!metric) {
+            return null;
+        }
+        return database_metric_1.DatabaseMetrics.restore({
+            id: metric.id,
+            databaseConnectionId: metric.databaseConnectionId,
+            databaseVersion: metric.databaseVersion,
+            tablesCount: metric.tablesCount,
+            databaseSize: metric.databaseSize,
+            activeConnections: metric.activeConnections,
+            createdAt: metric.createdAt,
+        });
+    }
     async save(metric) {
         await prisma_client_1.prisma.databaseMetric.create({
             data: {

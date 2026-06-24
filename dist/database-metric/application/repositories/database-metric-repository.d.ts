@@ -7,4 +7,5 @@ export interface DatabaseMetricRepository {
         startDate?: Date;
         endDate?: Date;
     }): Promise<DatabaseMetrics[]>;
+    findLatestByConnectionId(connectionId: string): Promise<DatabaseMetrics | null>;
 }

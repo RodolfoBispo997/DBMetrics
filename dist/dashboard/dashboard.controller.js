@@ -18,11 +18,13 @@ const get_dashboard_overview_use_case_1 = require("./application/use-cases/get-d
 const get_dashboard_connection_metrics_history_use_case_1 = require("./application/use-cases/get-dashboard-connection-metrics-history/get-dashboard-connection-metrics-history.use-case");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const get_dashboard_connection_metrics_chart_use_case_1 = require("./application/use-cases/get-dashboard-connection-metrics-chart/get-dashboard-connection-metrics-chart.use-case");
+const get_dashboard_connection_metrics_summary_use_case_1 = require("./application/use-cases/get-dashboard-connection-metrics-summary/get-dashboard-connection-metrics-summary.use-case");
 let DashboardController = class DashboardController {
-    constructor(getDashboardOverviewUseCase, getDashboardConnectionMetricsHistoryUseCase, getDashboardConnectionMetricsChartUseCase) {
+    constructor(getDashboardOverviewUseCase, getDashboardConnectionMetricsHistoryUseCase, getDashboardConnectionMetricsChartUseCase, getDashboardConnectionMetricsSummaryUseCase) {
         this.getDashboardOverviewUseCase = getDashboardOverviewUseCase;
         this.getDashboardConnectionMetricsHistoryUseCase = getDashboardConnectionMetricsHistoryUseCase;
         this.getDashboardConnectionMetricsChartUseCase = getDashboardConnectionMetricsChartUseCase;
+        this.getDashboardConnectionMetricsSummaryUseCase = getDashboardConnectionMetricsSummaryUseCase;
     }
     async overview(request) {
         const userId = request.user.userId;
@@ -44,6 +46,13 @@ let DashboardController = class DashboardController {
             connectionId,
             startDate,
             endDate,
+        });
+    }
+    async connectionMetricsSummary(request, connectionId) {
+        const userId = request.user.userId;
+        return this.getDashboardConnectionMetricsSummaryUseCase.execute({
+            userId,
+            connectionId,
         });
     }
 };
@@ -78,10 +87,20 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DashboardController.prototype, "connectionMetricsChart", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)("connections/:connectionId/metrics-summary"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("connectionId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DashboardController.prototype, "connectionMetricsSummary", null);
 exports.DashboardController = DashboardController = __decorate([
     (0, common_1.Controller)("dashboard"),
     __metadata("design:paramtypes", [get_dashboard_overview_use_case_1.GetDashboardOverviewUseCase,
         get_dashboard_connection_metrics_history_use_case_1.GetDashboardConnectionMetricsHistoryUseCase,
-        get_dashboard_connection_metrics_chart_use_case_1.GetDashboardConnectionMetricsChartUseCase])
+        get_dashboard_connection_metrics_chart_use_case_1.GetDashboardConnectionMetricsChartUseCase,
+        get_dashboard_connection_metrics_summary_use_case_1.GetDashboardConnectionMetricsSummaryUseCase])
 ], DashboardController);
 //# sourceMappingURL=dashboard.controller.js.map
