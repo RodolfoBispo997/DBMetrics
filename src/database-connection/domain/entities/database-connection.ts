@@ -67,7 +67,9 @@ export class DatabaseConnection {
 
     this.props.username = DatabaseConnection.validateUsername(props.username);
 
-    this.props.password = DatabaseConnection.validatePassword(props.password);
+    if (props.password) {
+      this.props.password = DatabaseConnection.validatePassword(props.password);
+    }
   }
 
   private static validateHost(host: string): string {

@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from "class-validator";
 import { Type } from "class-transformer";
 import { DatabaseProvider } from "../../domain/enums/database-provider.enum";
 
@@ -26,7 +32,7 @@ export class UpdateDatabaseConnectionHttpDTO {
   @IsNotEmpty()
   username!: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  password!: string;
+  password?: string;
 }

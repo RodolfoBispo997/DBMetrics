@@ -53,7 +53,9 @@ class DatabaseConnection {
         this.props.port = DatabaseConnection.validatePort(props.port);
         this.props.database = DatabaseConnection.validateDatabase(props.database);
         this.props.username = DatabaseConnection.validateUsername(props.username);
-        this.props.password = DatabaseConnection.validatePassword(props.password);
+        if (props.password) {
+            this.props.password = DatabaseConnection.validatePassword(props.password);
+        }
     }
     static validateHost(host) {
         const normalized = host.trim().replace(/\s+/g, " ");

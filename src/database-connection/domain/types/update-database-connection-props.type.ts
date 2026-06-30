@@ -7,5 +7,5 @@ export type UpdateDatabaseConnectionProps = {
   port: number;
   database: string;
   username: string;
-  password: string;
+  password?: string;
 };

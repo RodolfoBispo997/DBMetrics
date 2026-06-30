@@ -38,15 +38,21 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Post()
-  async create(@Body() body: CreateDatabaseConnectionHttpDTO) {
-    return this.createDatabaseConnectionUseCase.execute(body);
+  async create(
+    @Req() request: any,
+    @Body() body: CreateDatabaseConnectionHttpDTO,
+  ) {
+    return this.createDatabaseConnectionUseCase.execute({
+      ...body,
+      userId: request.user.userId,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
   async list(@Req() request: any) {
     return this.listDatabaseConnectionsUseCase.execute({
-      userId: request.user.sub,
+      userId: request.user.userId,
     });
   }
 

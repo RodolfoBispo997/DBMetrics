@@ -6,14 +6,18 @@ const common_1 = require("@nestjs/common");
 const domain_exception_filter_1 = require("./shared/filters/domain-exception.filter");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.enableCors({
+        origin: "http://localhost:3000",
+        credentials: true,
+    });
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
     }));
     app.useGlobalFilters(new domain_exception_filter_1.DomainExceptionFilter());
-    await app.listen(3000);
-    console.log("Server running on http://localhost:3000");
+    await app.listen(3333);
+    console.log("Server running on http://localhost:3333");
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

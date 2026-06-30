@@ -29,8 +29,4 @@ export class CreateDatabaseConnectionHttpDTO {
   @IsString()
   @IsNotEmpty()
   password!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  userId!: string;
 }

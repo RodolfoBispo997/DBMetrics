@@ -24,6 +24,10 @@ let ListDatabaseConnectionsUseCase = class ListDatabaseConnectionsUseCase {
             id: connection.id,
             name: connection.name,
             provider: connection.provider,
+            host: connection.host,
+            port: connection.port,
+            database: connection.database,
+            username: connection.username,
         }));
     }
 };

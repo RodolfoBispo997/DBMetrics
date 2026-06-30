@@ -6,6 +6,12 @@ import { DomainExceptionFilter } from "./shared/filters/domain-exception.filter"
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  //Cors para conectar com o front-end
+  app.enableCors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -16,9 +22,9 @@ async function bootstrap() {
 
   app.useGlobalFilters(new DomainExceptionFilter());
 
-  await app.listen(3000);
+  await app.listen(3333);
 
-  console.log("Server running on http://localhost:3000");
+  console.log("Server running on http://localhost:3333");
 }
 
 bootstrap();

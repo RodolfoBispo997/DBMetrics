@@ -9,5 +9,5 @@ export type UpdateDatabaseConnectionRequestDTO = {
   port: number;
   database: string;
   username: string;
-  password: string;
+  password?: string;
 };

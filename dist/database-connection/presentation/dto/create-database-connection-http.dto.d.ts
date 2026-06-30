@@ -7,5 +7,4 @@ export declare class CreateDatabaseConnectionHttpDTO {
     database: string;
     username: string;
     password: string;
-    userId: string;
 }

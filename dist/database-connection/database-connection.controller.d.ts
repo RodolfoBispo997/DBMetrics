@@ -16,7 +16,7 @@ export declare class DatabaseConnectionController {
     private readonly testDatabaseConnectionUseCase;
     private readonly getDatabaseMetricsUseCase;
     constructor(createDatabaseConnectionUseCase: CreateDatabaseConnectionUseCase, listDatabaseConnectionsUseCase: ListDatabaseConnectionsUseCase, getDatabaseConnectionByIdUseCase: GetDatabaseConnectionByIdUseCase, updateDatabaseConnectionUseCase: UpdateDatabaseConnectionUseCase, deleteDatabaseConnectionUseCase: DeleteDatabaseConnectionUseCase, testDatabaseConnectionUseCase: TestDatabaseConnectionUseCase, getDatabaseMetricsUseCase: GetDatabaseMetricsUseCase);
-    create(body: CreateDatabaseConnectionHttpDTO): Promise<import("./application/use-cases/create-database-connection/dto/create-database-connection-response.dto").CreateDatabaseConnectionResponseDto>;
+    create(request: any, body: CreateDatabaseConnectionHttpDTO): Promise<import("./application/use-cases/create-database-connection/dto/create-database-connection-response.dto").CreateDatabaseConnectionResponseDto>;
     list(request: any): Promise<import("./application/use-cases/list-database-connections/dto/list-database-connections-response.dto").ListDatabaseConnectionsResponseDTO[]>;
     findById(request: any, id: string): Promise<import("./application/use-cases/get-database-connection-by-id/dto/get-database-connection-by-id-response.dto").GetDatabaseConnectionByIdResponseDTO>;
     update(request: any, id: string, body: UpdateDatabaseConnectionHttpDTO): Promise<import("./application/use-cases/update-database-connection/dto/update-database-connection-response.dto").UpdateDatabaseConnectionResponseDTO>;
