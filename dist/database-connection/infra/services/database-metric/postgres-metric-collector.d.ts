@@ -1,6 +1,6 @@
 import { DatabaseMetricCollector } from "../../../application/services/database-metric/database-metric-collector";
-import { DatabaseMetric } from "../../../application/types/database-metrics.type";
 import { DatabaseConnection } from "../../../domain/entities/database-connection";
+import { DatabaseMetricData } from "../../../application/types/database-metric-data.type";
 export declare class PostgresMetricCollector implements DatabaseMetricCollector {
-    collect(connection: DatabaseConnection): Promise<DatabaseMetric>;
+    collect(connection: DatabaseConnection): Promise<DatabaseMetricData>;
 }

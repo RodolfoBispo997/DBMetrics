@@ -15,6 +15,7 @@ import { DatabaseMetricCollectorFactoryImpl } from "./infra/services/database-me
 import { GetDatabaseMetricsUseCase } from "./application/use-cases/get-database-metrics/get-database-metrics.use-case";
 import { PostgresMetricCollector } from "./infra/services/database-metric/postgres-metric-collector";
 import { MysqlMetricCollector } from "./infra/services/database-metric/mysql-metric-collector";
+import { DatabaseHealthServiceImpl } from "./infra/services/database-health/database-health.service";
 
 @Module({
   controllers: [DatabaseConnectionController],
@@ -51,6 +52,10 @@ import { MysqlMetricCollector } from "./infra/services/database-metric/mysql-met
     {
       provide: "DatabaseMetricCollectorFactory",
       useClass: DatabaseMetricCollectorFactoryImpl,
+    },
+    {
+      provide: "DatabaseHealthService",
+      useClass: DatabaseHealthServiceImpl,
     },
   ],
 })

@@ -24,6 +24,7 @@ const database_metric_collector_factory_1 = require("./infra/services/database-m
 const get_database_metrics_use_case_1 = require("./application/use-cases/get-database-metrics/get-database-metrics.use-case");
 const postgres_metric_collector_1 = require("./infra/services/database-metric/postgres-metric-collector");
 const mysql_metric_collector_1 = require("./infra/services/database-metric/mysql-metric-collector");
+const database_health_service_1 = require("./infra/services/database-health/database-health.service");
 let DatabaseConnectionModule = class DatabaseConnectionModule {
 };
 exports.DatabaseConnectionModule = DatabaseConnectionModule;
@@ -58,6 +59,10 @@ exports.DatabaseConnectionModule = DatabaseConnectionModule = __decorate([
             {
                 provide: "DatabaseMetricCollectorFactory",
                 useClass: database_metric_collector_factory_1.DatabaseMetricCollectorFactoryImpl,
+            },
+            {
+                provide: "DatabaseHealthService",
+                useClass: database_health_service_1.DatabaseHealthServiceImpl,
             },
         ],
     })

@@ -1,5 +1,5 @@
 import { DatabaseConnection } from "../../../domain/entities/database-connection";
-import { DatabaseMetric } from "../../types/database-metrics.type";
+import { DatabaseMetricData } from "../../types/database-metric-data.type";
 export interface DatabaseMetricCollector {
-    collect(connection: DatabaseConnection): Promise<DatabaseMetric>;
+    collect(connection: DatabaseConnection): Promise<DatabaseMetricData>;
 }

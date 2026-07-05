@@ -26,7 +26,6 @@ export class PostgresConnectionTester implements DatabaseConnectionTester {
         message: "Connection established successfully",
       };
     } catch (error) {
-      console.error("VERIFICAR ERROR ===>", error);
       await client.end().catch(() => undefined);
 
       return {

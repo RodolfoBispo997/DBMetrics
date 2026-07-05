@@ -21,7 +21,6 @@ class PostgresConnectionTester {
             };
         }
         catch (error) {
-            console.error("VERIFICAR ERROR ===>", error);
             await client.end().catch(() => undefined);
             return {
                 success: false,

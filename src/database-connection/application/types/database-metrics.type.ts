@@ -1,10 +1,6 @@
-export type DatabaseMetric = {
-  databaseVersion: string;
-  tablesCount: number;
-  viewsCount: number;
-  schemasCount: number;
-  indexesCount: number;
-  functionsCount: number;
-  databaseSize: number;
-  activeConnections: number;
+import { DatabaseHealth } from "./database-health.type";
+import { DatabaseMetricData } from "./database-metric-data.type";
+
+export type DatabaseMetric = DatabaseMetricData & {
+  health: DatabaseHealth;
 };

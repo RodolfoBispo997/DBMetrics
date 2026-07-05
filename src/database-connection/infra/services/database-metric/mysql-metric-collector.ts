@@ -1,11 +1,11 @@
 import mysql from "mysql2/promise";
 
 import { DatabaseMetricCollector } from "../../../application/services/database-metric/database-metric-collector";
-import { DatabaseMetric } from "../../../application/types/database-metrics.type";
 import { DatabaseConnection } from "../../../domain/entities/database-connection";
+import { DatabaseMetricData } from "../../../application/types/database-metric-data.type";
 
 export class MysqlMetricCollector implements DatabaseMetricCollector {
-  async collect(connection: DatabaseConnection): Promise<DatabaseMetric> {
+  async collect(connection: DatabaseConnection): Promise<DatabaseMetricData> {
     const client = await mysql.createConnection({
       host: connection.host,
       port: connection.port,
