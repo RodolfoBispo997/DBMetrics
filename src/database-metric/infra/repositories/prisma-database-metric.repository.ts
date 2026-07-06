@@ -16,10 +16,18 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
       DatabaseMetrics.restore({
         id: metric.id,
         databaseConnectionId: metric.databaseConnectionId,
+
         databaseVersion: metric.databaseVersion,
+
         tablesCount: metric.tablesCount,
+        viewsCount: metric.viewsCount,
+        schemasCount: metric.schemasCount,
+        indexesCount: metric.indexesCount,
+        functionsCount: metric.functionsCount,
+
         databaseSize: metric.databaseSize,
         activeConnections: metric.activeConnections,
+
         createdAt: metric.createdAt,
       }),
     );
@@ -47,10 +55,18 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
       DatabaseMetrics.restore({
         id: metric.id,
         databaseConnectionId: metric.databaseConnectionId,
+
         databaseVersion: metric.databaseVersion,
+
         tablesCount: metric.tablesCount,
+        viewsCount: metric.viewsCount,
+        schemasCount: metric.schemasCount,
+        indexesCount: metric.indexesCount,
+        functionsCount: metric.functionsCount,
+
         databaseSize: metric.databaseSize,
         activeConnections: metric.activeConnections,
+
         createdAt: metric.createdAt,
       }),
     );
@@ -75,10 +91,18 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
     return DatabaseMetrics.restore({
       id: metric.id,
       databaseConnectionId: metric.databaseConnectionId,
+
       databaseVersion: metric.databaseVersion,
+
       tablesCount: metric.tablesCount,
+      viewsCount: metric.viewsCount,
+      schemasCount: metric.schemasCount,
+      indexesCount: metric.indexesCount,
+      functionsCount: metric.functionsCount,
+
       databaseSize: metric.databaseSize,
       activeConnections: metric.activeConnections,
+
       createdAt: metric.createdAt,
     });
   }
@@ -87,11 +111,21 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
     await prisma.databaseMetric.create({
       data: {
         id: metric.id,
+
         databaseConnectionId: metric.databaseConnectionId,
+
         databaseVersion: metric.databaseVersion,
+
         tablesCount: metric.tablesCount,
+        viewsCount: metric.viewsCount,
+        schemasCount: metric.schemasCount,
+        indexesCount: metric.indexesCount,
+        functionsCount: metric.functionsCount,
+
         databaseSize: metric.databaseSize,
+
         activeConnections: metric.activeConnections,
+
         createdAt: metric.createdAt,
       },
     });

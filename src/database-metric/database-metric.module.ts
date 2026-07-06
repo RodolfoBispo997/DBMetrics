@@ -7,12 +7,18 @@ import { DatabaseMetricCollectorFactoryImpl } from "../database-connection/infra
 import { MysqlMetricCollector } from "../database-connection/infra/services/database-metric/mysql-metric-collector";
 import { PostgresMetricCollector } from "../database-connection/infra/services/database-metric/postgres-metric-collector";
 import { GetDatabaseMetricUseCase } from "./application/use-cases/get-database-metric/get-database-metric.use-case";
+import { RecordDatabaseMetricUseCase } from "./application/use-cases/record-database-metric/record-database-metric.use-case";
+import { DatabaseMetricScheduler } from "./infra/scheduler/database-metric.scheduler";
+import { CollectDatabaseMetricsUseCase } from "./application/use-cases/collect-database-metrics/collect-database-metrics.use-case";
 
 @Module({
   controllers: [DatabaseMetricController],
   providers: [
     CollectDatabaseMetricUseCase,
     GetDatabaseMetricUseCase,
+    RecordDatabaseMetricUseCase,
+    DatabaseMetricScheduler,
+    CollectDatabaseMetricsUseCase,
 
     MysqlMetricCollector,
     PostgresMetricCollector,

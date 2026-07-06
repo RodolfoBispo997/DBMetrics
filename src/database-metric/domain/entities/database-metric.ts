@@ -1,37 +1,39 @@
 import { randomUUID } from "node:crypto";
-import { CreateDatabaseMetricProps } from "../types/create-database-metric-props.type";
-import { DatabaseMetricProps } from "../types/database-metric-props.type";
+import { DomainError } from "../../../user/domain/errors/domain-error";
+import { InvalidActiveConnectionsError } from "../errors/invalid-active-connections-error";
 import { InvalidDatabaseConnectionIdError } from "../errors/invalid-database-connection-id-error";
 import { InvalidDatabaseSizeError } from "../errors/invalid-database-size-error";
-import { InvalidActiveConnectionsError } from "../errors/invalid-active-connections-error";
 import { InvalidDatabaseVersionError } from "../errors/invalid-database-version-error";
+import { InvalidFunctionsCountError } from "../errors/invalid-functions-count-error";
+import { InvalidIndexesCountError } from "../errors/invalid-indexes-count-error";
+import { InvalidSchemasCountError } from "../errors/invalid-schemas-count-error";
 import { InvalidTablesCountError } from "../errors/invalid-tables-count-error";
+import { InvalidViewsCountError } from "../errors/invalid-views-count-error";
+import { CreateDatabaseMetricProps } from "../types/create-database-metric-props.type";
+import { DatabaseMetricProps } from "../types/database-metric-props.type";
 
 export class DatabaseMetrics {
+  private static readonly UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
   private constructor(private readonly props: DatabaseMetricProps) {}
 
   public static create(props: CreateDatabaseMetricProps): DatabaseMetrics {
-    const databaseConnectionId = this.validateDatabaseConnectionId(
-      props.databaseConnectionId,
-    );
-
-    const databaseVersion = this.validateDatabaseVersion(props.databaseVersion);
-
-    const tablesCount = this.validateTablesCount(props.tablesCount);
-
-    const databaseSize = this.validateDatabaseSize(props.databaseSize);
-
-    const activeConnections = this.validateActiveConnections(
-      props.activeConnections,
-    );
-
     return new DatabaseMetrics({
       id: randomUUID(),
-      databaseConnectionId: databaseConnectionId,
-      databaseVersion: databaseVersion,
-      tablesCount: tablesCount,
-      databaseSize: databaseSize,
-      activeConnections: activeConnections,
+      databaseConnectionId: this.validateDatabaseConnectionId(
+        props.databaseConnectionId,
+      ),
+      databaseVersion: this.validateDatabaseVersion(props.databaseVersion),
+      tablesCount: this.validateTablesCount(props.tablesCount),
+      viewsCount: this.validateViewsCount(props.viewsCount),
+      schemasCount: this.validateSchemasCount(props.schemasCount),
+      indexesCount: this.validateIndexesCount(props.indexesCount),
+      functionsCount: this.validateFunctionsCount(props.functionsCount),
+      databaseSize: this.validateDatabaseSize(props.databaseSize),
+      activeConnections: this.validateActiveConnections(
+        props.activeConnections,
+      ),
       createdAt: new Date(),
     });
   }
@@ -45,16 +47,13 @@ export class DatabaseMetrics {
   ): string {
     const normalized = databaseConnectionId.trim();
 
-    const UUID_REGEX =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
     if (!normalized) {
       throw new InvalidDatabaseConnectionIdError(
         "Database connection id cannot be empty",
       );
     }
 
-    if (!UUID_REGEX.test(normalized)) {
+    if (!this.UUID_REGEX.test(normalized)) {
       throw new InvalidDatabaseConnectionIdError(
         "Invalid database connection id",
       );
@@ -73,16 +72,52 @@ export class DatabaseMetrics {
     return normalized;
   }
 
-  private static validateTablesCount(tablesCount: number): number {
-    if (!Number.isInteger(tablesCount)) {
-      throw new InvalidTablesCountError("Tables count must be an integer");
-    }
+  private static validateTablesCount(value: number): number {
+    return this.validateMetricCount(
+      value,
+      InvalidTablesCountError,
+      "Tables count",
+    );
+  }
 
-    if (tablesCount < 0) {
-      throw new InvalidTablesCountError("Tables count cannot be negative");
-    }
+  private static validateViewsCount(value: number): number {
+    return this.validateMetricCount(
+      value,
+      InvalidViewsCountError,
+      "Views count",
+    );
+  }
 
-    return tablesCount;
+  private static validateSchemasCount(value: number): number {
+    return this.validateMetricCount(
+      value,
+      InvalidSchemasCountError,
+      "Schemas count",
+    );
+  }
+
+  private static validateIndexesCount(value: number): number {
+    return this.validateMetricCount(
+      value,
+      InvalidIndexesCountError,
+      "Indexes count",
+    );
+  }
+
+  private static validateFunctionsCount(value: number): number {
+    return this.validateMetricCount(
+      value,
+      InvalidFunctionsCountError,
+      "Functions count",
+    );
+  }
+
+  private static validateActiveConnections(value: number): number {
+    return this.validateMetricCount(
+      value,
+      InvalidActiveConnectionsError,
+      "Active connections",
+    );
   }
 
   private static validateDatabaseSize(databaseSize: number): number {
@@ -99,20 +134,20 @@ export class DatabaseMetrics {
     return databaseSize;
   }
 
-  private static validateActiveConnections(activeConnections: number): number {
-    if (!Number.isInteger(activeConnections)) {
-      throw new InvalidActiveConnectionsError(
-        "Active connections must be an integer",
-      );
+  private static validateMetricCount<T extends DomainError>(
+    value: number,
+    ErrorType: new (reason: string) => T,
+    field: string,
+  ): number {
+    if (!Number.isInteger(value)) {
+      throw new ErrorType(`${field} must be an integer`);
     }
 
-    if (activeConnections < 0) {
-      throw new InvalidActiveConnectionsError(
-        "Active connections cannot be negative",
-      );
+    if (value < 0) {
+      throw new ErrorType(`${field} cannot be negative`);
     }
 
-    return activeConnections;
+    return value;
   }
 
   get id() {
@@ -129,6 +164,22 @@ export class DatabaseMetrics {
 
   get tablesCount() {
     return this.props.tablesCount;
+  }
+
+  get viewsCount() {
+    return this.props.viewsCount;
+  }
+
+  get schemasCount() {
+    return this.props.schemasCount;
+  }
+
+  get indexesCount() {
+    return this.props.indexesCount;
+  }
+
+  get functionsCount() {
+    return this.props.functionsCount;
   }
 
   get databaseSize() {

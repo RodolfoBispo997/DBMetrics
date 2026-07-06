@@ -15,12 +15,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CollectDatabaseMetricUseCase = void 0;
 const common_1 = require("@nestjs/common");
 const database_connection_not_found_error_1 = require("../../../../database-connection/domain/errors/database-connection-not-found-error");
-const database_metric_1 = require("../../../domain/entities/database-metric");
+const record_database_metric_use_case_1 = require("../record-database-metric/record-database-metric.use-case");
 let CollectDatabaseMetricUseCase = class CollectDatabaseMetricUseCase {
-    constructor(databaseMetricRepository, databaseConnectionRepository, databaseMetricCollectorFactory) {
-        this.databaseMetricRepository = databaseMetricRepository;
+    constructor(databaseConnectionRepository, recordDatabaseMetricUseCase) {
         this.databaseConnectionRepository = databaseConnectionRepository;
-        this.databaseMetricCollectorFactory = databaseMetricCollectorFactory;
+        this.recordDatabaseMetricUseCase = recordDatabaseMetricUseCase;
     }
     async execute(data) {
         const connection = await this.databaseConnectionRepository.findById(data.connectionId);
@@ -30,24 +29,13 @@ let CollectDatabaseMetricUseCase = class CollectDatabaseMetricUseCase {
         if (connection.userId !== data.userId) {
             throw new database_connection_not_found_error_1.DatabaseConnectionNotFoundError("Database connection not found");
         }
-        const collet = this.databaseMetricCollectorFactory.get(connection.provider);
-        const result = await collet.collect(connection);
-        const databaseMetrics = database_metric_1.DatabaseMetrics.create({
-            databaseConnectionId: connection.id,
-            databaseVersion: result.databaseVersion,
-            tablesCount: result.tablesCount,
-            databaseSize: result.databaseSize,
-            activeConnections: result.activeConnections,
-        });
-        await this.databaseMetricRepository.save(databaseMetrics);
+        await this.recordDatabaseMetricUseCase.execute(connection);
     }
 };
 exports.CollectDatabaseMetricUseCase = CollectDatabaseMetricUseCase;
 exports.CollectDatabaseMetricUseCase = CollectDatabaseMetricUseCase = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)("DatabaseMetricRepository")),
-    __param(1, (0, common_1.Inject)("DatabaseConnectionRepository")),
-    __param(2, (0, common_1.Inject)("DatabaseMetricCollectorFactory")),
-    __metadata("design:paramtypes", [Object, Object, Object])
+    __param(0, (0, common_1.Inject)("DatabaseConnectionRepository")),
+    __metadata("design:paramtypes", [Object, record_database_metric_use_case_1.RecordDatabaseMetricUseCase])
 ], CollectDatabaseMetricUseCase);
 //# sourceMappingURL=collect-database-metric.use-case.js.map

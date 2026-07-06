@@ -16,6 +16,9 @@ const database_metric_collector_factory_1 = require("../database-connection/infr
 const mysql_metric_collector_1 = require("../database-connection/infra/services/database-metric/mysql-metric-collector");
 const postgres_metric_collector_1 = require("../database-connection/infra/services/database-metric/postgres-metric-collector");
 const get_database_metric_use_case_1 = require("./application/use-cases/get-database-metric/get-database-metric.use-case");
+const record_database_metric_use_case_1 = require("./application/use-cases/record-database-metric/record-database-metric.use-case");
+const database_metric_scheduler_1 = require("./infra/scheduler/database-metric.scheduler");
+const collect_database_metrics_use_case_1 = require("./application/use-cases/collect-database-metrics/collect-database-metrics.use-case");
 let DatabaseMetricModule = class DatabaseMetricModule {
 };
 exports.DatabaseMetricModule = DatabaseMetricModule;
@@ -25,6 +28,9 @@ exports.DatabaseMetricModule = DatabaseMetricModule = __decorate([
         providers: [
             collect_database_metric_use_case_1.CollectDatabaseMetricUseCase,
             get_database_metric_use_case_1.GetDatabaseMetricUseCase,
+            record_database_metric_use_case_1.RecordDatabaseMetricUseCase,
+            database_metric_scheduler_1.DatabaseMetricScheduler,
+            collect_database_metrics_use_case_1.CollectDatabaseMetricsUseCase,
             mysql_metric_collector_1.MysqlMetricCollector,
             postgres_metric_collector_1.PostgresMetricCollector,
             {

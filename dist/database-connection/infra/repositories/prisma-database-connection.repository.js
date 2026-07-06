@@ -58,6 +58,20 @@ class PrismaDatabaseConnectionRepository {
             userId: databaseConnection.userId,
         });
     }
+    async findAll() {
+        const databaseConnections = await prisma_client_1.prisma.databaseConnection.findMany();
+        return databaseConnections.map((connection) => database_connection_1.DatabaseConnection.restore({
+            id: connection.id,
+            name: connection.name,
+            provider: connection.provider,
+            host: connection.host,
+            port: connection.port,
+            database: connection.database,
+            username: connection.username,
+            password: connection.password,
+            userId: connection.userId,
+        }));
+    }
     async update(connection) {
         await prisma_client_1.prisma.databaseConnection.update({
             where: {

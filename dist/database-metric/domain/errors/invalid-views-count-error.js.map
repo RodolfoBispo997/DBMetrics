@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-views-count-error.js","sourceRoot":"","sources":["../../../../src/database-metric/domain/errors/invalid-views-count-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,sBAAuB,SAAQ,0BAAW;IACrD,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,wDAIC"}

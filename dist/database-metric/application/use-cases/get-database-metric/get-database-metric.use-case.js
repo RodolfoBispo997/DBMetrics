@@ -29,12 +29,17 @@ let GetDatabaseMetricUseCase = class GetDatabaseMetricUseCase {
             throw new database_connection_not_found_error_1.DatabaseConnectionNotFoundError("Database connection not found");
         }
         const metric = await this.databaseMetricRepository.findByConnectionId(data.connectionId);
-        return metric.map((connection) => ({
-            id: connection.id,
-            databaseVersion: connection.databaseVersion,
-            tablesCount: connection.tablesCount,
-            databaseSize: connection.databaseSize,
-            activeConnections: connection.activeConnections,
+        return metric.map((metric) => ({
+            id: metric.id,
+            databaseVersion: metric.databaseVersion,
+            tablesCount: metric.tablesCount,
+            viewsCount: metric.viewsCount,
+            schemasCount: metric.schemasCount,
+            indexesCount: metric.indexesCount,
+            functionsCount: metric.functionsCount,
+            databaseSize: metric.databaseSize,
+            activeConnections: metric.activeConnections,
+            createdAt: metric.createdAt,
         }));
     }
 };

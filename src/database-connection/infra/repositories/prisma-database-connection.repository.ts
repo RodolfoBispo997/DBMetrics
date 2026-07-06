@@ -66,6 +66,24 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
     });
   }
 
+  async findAll(): Promise<DatabaseConnection[]> {
+    const databaseConnections = await prisma.databaseConnection.findMany();
+
+    return databaseConnections.map((connection) =>
+      DatabaseConnection.restore({
+        id: connection.id,
+        name: connection.name,
+        provider: connection.provider as DatabaseProvider,
+        host: connection.host,
+        port: connection.port,
+        database: connection.database,
+        username: connection.username,
+        password: connection.password,
+        userId: connection.userId,
+      }),
+    );
+  }
+
   async update(connection: DatabaseConnection): Promise<void> {
     await prisma.databaseConnection.update({
       where: {

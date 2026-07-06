@@ -1,10 +1,8 @@
 import { DatabaseConnectionRepository } from "../../../../database-connection/application/repositories/database-connection-repository";
-import { DatabaseMetricCollectorFactory } from "../../../../database-connection/application/services/database-metric/database-metric-collector-factory";
-import { DatabaseMetricRepository } from "../../repositories/database-metric-repository";
+import { RecordDatabaseMetricUseCase } from "../record-database-metric/record-database-metric.use-case";
 export declare class CollectDatabaseMetricUseCase {
-    private readonly databaseMetricRepository;
     private readonly databaseConnectionRepository;
-    private readonly databaseMetricCollectorFactory;
-    constructor(databaseMetricRepository: DatabaseMetricRepository, databaseConnectionRepository: DatabaseConnectionRepository, databaseMetricCollectorFactory: DatabaseMetricCollectorFactory);
+    private readonly recordDatabaseMetricUseCase;
+    constructor(databaseConnectionRepository: DatabaseConnectionRepository, recordDatabaseMetricUseCase: RecordDatabaseMetricUseCase);
     execute(data: CollectDatabaseMetricRequestDTO): Promise<void>;
 }
