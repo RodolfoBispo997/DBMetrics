@@ -32,7 +32,7 @@ export class GetDashboardConnectionMetricsHistoryUseCase {
       endDate: data.endDate,
     });
 
-    const metrics =
+    const snapshots =
       await this.databaseMetricRepository.findHistoryByConnectionId({
         connectionId: connection.id,
         startDate,
@@ -41,12 +41,21 @@ export class GetDashboardConnectionMetricsHistoryUseCase {
 
     return {
       connectionId: connection.id,
-      metrics: metrics.map((metric) => ({
+
+      history: snapshots.map((metric) => ({
         id: metric.id,
+
         databaseVersion: metric.databaseVersion,
+
         tablesCount: metric.tablesCount,
+        viewsCount: metric.viewsCount,
+        schemasCount: metric.schemasCount,
+        indexesCount: metric.indexesCount,
+        functionsCount: metric.functionsCount,
+
         databaseSize: metric.databaseSize,
         activeConnections: metric.activeConnections,
+
         collectedAt: metric.createdAt,
       })),
     };

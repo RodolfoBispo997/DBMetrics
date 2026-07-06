@@ -3,7 +3,10 @@ import { DatabaseConnectionRepository } from "../../../../database-connection/ap
 import { DatabaseMetricRepository } from "../../../../database-metric/application/repositories/database-metric-repository";
 import { GetDashboardOverviewRequestDTO } from "./dto/get-dashboard-overview-request.dto";
 import { GetDashboardOverviewResponseDTO } from "./dto/get-dashboard-overview-response.dto";
-import { DashboardConnectionOverview } from "../../types/dashboard-overview.type";
+import {
+  DashboardConnectionOverview,
+  DashboardSummary,
+} from "../../types/dashboard-overview.type";
 
 @Injectable()
 export class GetDashboardOverviewUseCase {
@@ -24,12 +27,10 @@ export class GetDashboardOverviewUseCase {
     const connectionOverviews: DashboardConnectionOverview[] =
       await Promise.all(
         connections.map(async (connection) => {
-          const metrics =
-            await this.databaseMetricRepository.findByConnectionId(
+          const lastMetric =
+            await this.databaseMetricRepository.findLatestByConnectionId(
               connection.id,
             );
-
-          const lastMetric = metrics[0] ?? null;
 
           return {
             connectionId: connection.id,
@@ -39,9 +40,16 @@ export class GetDashboardOverviewUseCase {
             lastMetric: lastMetric
               ? {
                   databaseVersion: lastMetric.databaseVersion,
+
                   tablesCount: lastMetric.tablesCount,
+                  viewsCount: lastMetric.viewsCount,
+                  schemasCount: lastMetric.schemasCount,
+                  indexesCount: lastMetric.indexesCount,
+                  functionsCount: lastMetric.functionsCount,
+
                   databaseSize: lastMetric.databaseSize,
                   activeConnections: lastMetric.activeConnections,
+
                   collectedAt: lastMetric.createdAt,
                 }
               : null,
@@ -49,21 +57,36 @@ export class GetDashboardOverviewUseCase {
         }),
       );
 
-    const summary = connectionOverviews.reduce(
+    const summary = connectionOverviews.reduce<DashboardSummary>(
       (acc, connection) => {
-        if (!connection.lastMetric) {
+        const metric = connection.lastMetric;
+
+        if (!metric) {
           return acc;
         }
 
-        acc.totalDatabaseSize += connection.lastMetric.databaseSize;
-        acc.totalActiveConnections += connection.lastMetric.activeConnections;
+        acc.totalDatabaseSize += metric.databaseSize;
+        acc.totalActiveConnections += metric.activeConnections;
+
+        acc.totalTables += metric.tablesCount;
+        acc.totalViews += metric.viewsCount;
+        acc.totalSchemas += metric.schemasCount;
+        acc.totalIndexes += metric.indexesCount;
+        acc.totalFunctions += metric.functionsCount;
 
         return acc;
       },
       {
         totalConnections: connections.length,
+
         totalDatabaseSize: 0,
         totalActiveConnections: 0,
+
+        totalTables: 0,
+        totalViews: 0,
+        totalSchemas: 0,
+        totalIndexes: 0,
+        totalFunctions: 0,
       },
     );
 

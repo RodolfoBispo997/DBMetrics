@@ -35,8 +35,8 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
 
   async findHistoryByConnectionId(data: {
     connectionId: string;
-    startDate?: Date;
-    endDate?: Date;
+    startDate: Date;
+    endDate: Date;
   }): Promise<DatabaseMetrics[]> {
     const metrics = await prisma.databaseMetric.findMany({
       where: {

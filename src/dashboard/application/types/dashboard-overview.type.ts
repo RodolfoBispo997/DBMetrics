@@ -4,6 +4,12 @@ export type DashboardSummary = {
   totalConnections: number;
   totalDatabaseSize: number;
   totalActiveConnections: number;
+
+  totalTables: number;
+  totalViews: number;
+  totalSchemas: number;
+  totalIndexes: number;
+  totalFunctions: number;
 };
 
 export type DashboardConnectionOverview = {
@@ -11,11 +17,19 @@ export type DashboardConnectionOverview = {
   name: string;
   provider: DatabaseProvider;
   database: string;
+
   lastMetric: {
     databaseVersion: string;
+
     tablesCount: number;
+    viewsCount: number;
+    schemasCount: number;
+    indexesCount: number;
+    functionsCount: number;
+
     databaseSize: number;
     activeConnections: number;
+
     collectedAt: Date;
   } | null;
 };

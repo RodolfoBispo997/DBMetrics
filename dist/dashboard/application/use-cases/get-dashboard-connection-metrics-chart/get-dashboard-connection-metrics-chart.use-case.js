@@ -21,6 +21,12 @@ let GetDashboardConnectionMetricsChartUseCase = class GetDashboardConnectionMetr
         this.databaseConnectionRepository = databaseConnectionRepository;
         this.databaseMetricRepository = databaseMetricRepository;
     }
+    buildMetricSeries(snapshots, selector) {
+        return snapshots.map((snapshot) => ({
+            collectedAt: snapshot.createdAt,
+            value: selector(snapshot),
+        }));
+    }
     async execute(data) {
         const connection = await this.databaseConnectionRepository.findById(data.connectionId);
         if (!connection || connection.userId !== data.userId) {
@@ -30,27 +36,22 @@ let GetDashboardConnectionMetricsChartUseCase = class GetDashboardConnectionMetr
             startDate: data.startDate,
             endDate: data.endDate,
         });
-        const metrics = await this.databaseMetricRepository.findHistoryByConnectionId({
+        const snapshots = await this.databaseMetricRepository.findHistoryByConnectionId({
             connectionId: connection.id,
             startDate,
             endDate,
         });
-        const sortedMetrics = [...metrics].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        const sortedSnapshots = [...snapshots].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
         return {
             connectionId: connection.id,
-            charts: {
-                databaseSize: sortedMetrics.map((metric) => ({
-                    collectedAt: metric.createdAt,
-                    value: metric.databaseSize,
-                })),
-                activeConnections: sortedMetrics.map((metric) => ({
-                    collectedAt: metric.createdAt,
-                    value: metric.activeConnections,
-                })),
-                tablesCount: sortedMetrics.map((metric) => ({
-                    collectedAt: metric.createdAt,
-                    value: metric.tablesCount,
-                })),
+            series: {
+                databaseSize: this.buildMetricSeries(sortedSnapshots, (snapshot) => snapshot.databaseSize),
+                activeConnections: this.buildMetricSeries(sortedSnapshots, (snapshot) => snapshot.activeConnections),
+                tablesCount: this.buildMetricSeries(sortedSnapshots, (snapshot) => snapshot.tablesCount),
+                viewsCount: this.buildMetricSeries(sortedSnapshots, (snapshot) => snapshot.viewsCount),
+                schemasCount: this.buildMetricSeries(sortedSnapshots, (snapshot) => snapshot.schemasCount),
+                indexesCount: this.buildMetricSeries(sortedSnapshots, (snapshot) => snapshot.indexesCount),
+                functionsCount: this.buildMetricSeries(sortedSnapshots, (snapshot) => snapshot.functionsCount),
             },
         };
     }

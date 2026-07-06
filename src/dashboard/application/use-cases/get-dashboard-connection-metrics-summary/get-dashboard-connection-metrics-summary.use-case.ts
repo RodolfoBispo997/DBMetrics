@@ -1,9 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
+
 import { DatabaseConnectionRepository } from "../../../../database-connection/application/repositories/database-connection-repository";
 import { DatabaseMetricRepository } from "../../../../database-metric/application/repositories/database-metric-repository";
+
 import { DatabaseConnectionNotFoundError } from "../../../../database-connection/domain/errors/database-connection-not-found-error";
+
 import { GetDashboardConnectionMetricsSummaryRequestDTO } from "./dto/get-dashboard-connection-metrics-summary-request.dto";
 import { GetDashboardConnectionMetricsSummaryResponseDTO } from "./dto/get-dashboard-connection-metrics-summary-response.dto";
+
+const DASHBOARD_SUMMARY_PERIOD_HOURS = 24;
 
 @Injectable()
 export class GetDashboardConnectionMetricsSummaryUseCase {
@@ -26,26 +31,59 @@ export class GetDashboardConnectionMetricsSummaryUseCase {
       throw new DatabaseConnectionNotFoundError("Connection not found");
     }
 
-    const metric = await this.databaseMetricRepository.findLatestByConnectionId(
-      connection.id,
-    );
+    const endDate = new Date();
 
-    if (!metric) {
+    const startDate = new Date();
+
+    startDate.setHours(startDate.getHours() - DASHBOARD_SUMMARY_PERIOD_HOURS);
+
+    const history =
+      await this.databaseMetricRepository.findHistoryByConnectionId({
+        connectionId: connection.id,
+        startDate,
+        endDate,
+      });
+
+    if (history.length === 0) {
       return {
         connectionId: connection.id,
-        metric: null,
+        current: null,
+        growth: null,
       };
     }
 
+    // history is ordered by createdAt DESC
+    const latest = history[0];
+    const oldest = history[history.length - 1];
+
     return {
       connectionId: connection.id,
-      metric: {
-        id: metric.id,
-        databaseVersion: metric.databaseVersion,
-        tablesCount: metric.tablesCount,
-        databaseSize: metric.databaseSize,
-        activeConnections: metric.activeConnections,
-        collectedAt: metric.createdAt,
+
+      current: {
+        databaseVersion: latest.databaseVersion,
+
+        tablesCount: latest.tablesCount,
+        viewsCount: latest.viewsCount,
+        schemasCount: latest.schemasCount,
+        indexesCount: latest.indexesCount,
+        functionsCount: latest.functionsCount,
+
+        databaseSize: latest.databaseSize,
+        activeConnections: latest.activeConnections,
+
+        collectedAt: latest.createdAt,
+      },
+
+      growth: {
+        databaseSize: latest.databaseSize - oldest.databaseSize,
+
+        tablesCount: latest.tablesCount - oldest.tablesCount,
+        viewsCount: latest.viewsCount - oldest.viewsCount,
+        schemasCount: latest.schemasCount - oldest.schemasCount,
+        indexesCount: latest.indexesCount - oldest.indexesCount,
+        functionsCount: latest.functionsCount - oldest.functionsCount,
+
+        activeConnections: latest.activeConnections - oldest.activeConnections,
       },
     };
   }

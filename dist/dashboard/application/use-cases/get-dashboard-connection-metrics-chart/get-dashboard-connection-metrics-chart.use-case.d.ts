@@ -6,5 +6,6 @@ export declare class GetDashboardConnectionMetricsChartUseCase {
     private readonly databaseConnectionRepository;
     private readonly databaseMetricRepository;
     constructor(databaseConnectionRepository: DatabaseConnectionRepository, databaseMetricRepository: DatabaseMetricRepository);
+    private buildMetricSeries;
     execute(data: GetDashboardConnectionMetricsChartRequestDTO): Promise<GetDashboardConnectionMetricsChartResponseDTO>;
 }

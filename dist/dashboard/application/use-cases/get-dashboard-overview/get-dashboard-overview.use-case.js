@@ -22,8 +22,7 @@ let GetDashboardOverviewUseCase = class GetDashboardOverviewUseCase {
     async execute(data) {
         const connections = await this.databaseConnectionRepository.findManyByUserId(data.userId);
         const connectionOverviews = await Promise.all(connections.map(async (connection) => {
-            const metrics = await this.databaseMetricRepository.findByConnectionId(connection.id);
-            const lastMetric = metrics[0] ?? null;
+            const lastMetric = await this.databaseMetricRepository.findLatestByConnectionId(connection.id);
             return {
                 connectionId: connection.id,
                 name: connection.name,
@@ -33,6 +32,10 @@ let GetDashboardOverviewUseCase = class GetDashboardOverviewUseCase {
                     ? {
                         databaseVersion: lastMetric.databaseVersion,
                         tablesCount: lastMetric.tablesCount,
+                        viewsCount: lastMetric.viewsCount,
+                        schemasCount: lastMetric.schemasCount,
+                        indexesCount: lastMetric.indexesCount,
+                        functionsCount: lastMetric.functionsCount,
                         databaseSize: lastMetric.databaseSize,
                         activeConnections: lastMetric.activeConnections,
                         collectedAt: lastMetric.createdAt,
@@ -41,16 +44,27 @@ let GetDashboardOverviewUseCase = class GetDashboardOverviewUseCase {
             };
         }));
         const summary = connectionOverviews.reduce((acc, connection) => {
-            if (!connection.lastMetric) {
+            const metric = connection.lastMetric;
+            if (!metric) {
                 return acc;
             }
-            acc.totalDatabaseSize += connection.lastMetric.databaseSize;
-            acc.totalActiveConnections += connection.lastMetric.activeConnections;
+            acc.totalDatabaseSize += metric.databaseSize;
+            acc.totalActiveConnections += metric.activeConnections;
+            acc.totalTables += metric.tablesCount;
+            acc.totalViews += metric.viewsCount;
+            acc.totalSchemas += metric.schemasCount;
+            acc.totalIndexes += metric.indexesCount;
+            acc.totalFunctions += metric.functionsCount;
             return acc;
         }, {
             totalConnections: connections.length,
             totalDatabaseSize: 0,
             totalActiveConnections: 0,
+            totalTables: 0,
+            totalViews: 0,
+            totalSchemas: 0,
+            totalIndexes: 0,
+            totalFunctions: 0,
         });
         return {
             summary,

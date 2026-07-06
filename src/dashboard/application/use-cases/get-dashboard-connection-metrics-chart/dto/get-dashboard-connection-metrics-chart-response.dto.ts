@@ -5,9 +5,14 @@ export type DashboardMetricChartPointDTO = {
 
 export type GetDashboardConnectionMetricsChartResponseDTO = {
   connectionId: string;
-  charts: {
+
+  series: {
     databaseSize: DashboardMetricChartPointDTO[];
     activeConnections: DashboardMetricChartPointDTO[];
     tablesCount: DashboardMetricChartPointDTO[];
+    viewsCount: DashboardMetricChartPointDTO[];
+    schemasCount: DashboardMetricChartPointDTO[];
+    indexesCount: DashboardMetricChartPointDTO[];
+    functionsCount: DashboardMetricChartPointDTO[];
   };
 };

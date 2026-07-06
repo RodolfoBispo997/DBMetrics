@@ -5,8 +5,8 @@ export interface DatabaseMetricRepository {
   findByConnectionId(connectionId: string): Promise<DatabaseMetrics[]>;
   findHistoryByConnectionId(data: {
     connectionId: string;
-    startDate?: Date;
-    endDate?: Date;
+    startDate: Date;
+    endDate: Date;
   }): Promise<DatabaseMetrics[]>;
   findLatestByConnectionId(
     connectionId: string,
