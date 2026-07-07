@@ -21,6 +21,32 @@ enum DatabaseProvider {
   POSTGRESQL
 }
 
+enum AlertMetric {
+  DATABASE_SIZE
+  ACTIVE_CONNECTIONS
+  TABLES_COUNT
+  VIEWS_COUNT
+  SCHEMAS_COUNT
+  INDEXES_COUNT
+  FUNCTIONS_COUNT
+}
+
+enum AlertOperator {
+  GREATER_THAN
+  GREATER_THAN_OR_EQUAL
+  LESS_THAN
+  LESS_THAN_OR_EQUAL
+  EQUAL
+  NOT_EQUAL
+}
+
+enum NotificationChannel {
+  WHATSAPP
+  EMAIL
+  DISCORD
+  WEBHOOK
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -52,6 +78,8 @@ model DatabaseConnection {
 
   metrics DatabaseMetric[]
 
+  alertRules AlertRule[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -82,3 +110,24 @@ model DatabaseMetric {
   @@map("database_metrics")
 }
 
+
+model AlertRule {
+  id String @id @default(uuid())
+  metric AlertMetric
+  operator AlertOperator
+  threshold Float
+  channel NotificationChannel
+  enabled Boolean @default(true)
+  
+
+  databaseConnectionId String
+  databaseConnection   DatabaseConnection @relation(fields: [databaseConnectionId], references: [id], onDelete: Cascade)
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+
+  @@index([databaseConnectionId])
+  @@map("alert_rules")
+}

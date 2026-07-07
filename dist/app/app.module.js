@@ -16,6 +16,7 @@ const database_connection_module_1 = require("../database-connection/database-co
 const database_metric_module_1 = require("../database-metric/database-metric.module");
 const dashboard_module_1 = require("../dashboard/dashboard.module");
 const schedule_1 = require("@nestjs/schedule");
+const alerts_module_1 = require("../alerts/alerts.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -23,6 +24,7 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             schedule_1.ScheduleModule.forRoot(),
+            alerts_module_1.AlertsModule,
             user_module_1.UserModule,
             auth_module_1.AuthModule,
             database_connection_module_1.DatabaseConnectionModule,
