@@ -11,6 +11,10 @@ import { DisableAlertRuleUseCase } from "./application/use-cases/disable-alert-r
 import { DeleteAlertRuleUseCase } from "./application/use-cases/delete-alert-rule/delete-alert-rule.use-case";
 import { AlertEvaluatorService } from "./application/services/alert-evaluator.service";
 import { AlertProcessorService } from "./application/services/alert-processor.service";
+import { PrismaAlertExecutionRepository } from "./infra/repositories/prisma-alert-execution.repository";
+import { CreateAlertExecutionUseCase } from "./application/use-cases/create-alert-execution/create-alert-execution.use-case";
+import { GetAlertExecutionUseCase } from "./application/use-cases/get-alert-execution/get-alert-execution.use-case";
+import { ListAlertExecutionsUseCase } from "./application/use-cases/list-alert-executions/list-alert-executions.use-case";
 
 @Module({
   controllers: [AlertsController],
@@ -22,6 +26,11 @@ import { AlertProcessorService } from "./application/services/alert-processor.se
     EnableAlertRuleUseCase,
     DisableAlertRuleUseCase,
     DeleteAlertRuleUseCase,
+
+    CreateAlertExecutionUseCase,
+    GetAlertExecutionUseCase,
+    ListAlertExecutionsUseCase,
+
     AlertEvaluatorService,
     AlertProcessorService,
     {
@@ -31,6 +40,10 @@ import { AlertProcessorService } from "./application/services/alert-processor.se
     {
       provide: "DatabaseConnectionRepository",
       useClass: PrismaDatabaseConnectionRepository,
+    },
+    {
+      provide: "AlertExecutionRepository",
+      useClass: PrismaAlertExecutionRepository,
     },
   ],
   exports: [AlertProcessorService],

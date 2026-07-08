@@ -20,6 +20,10 @@ const disable_alert_rule_use_case_1 = require("./application/use-cases/disable-a
 const delete_alert_rule_use_case_1 = require("./application/use-cases/delete-alert-rule/delete-alert-rule.use-case");
 const alert_evaluator_service_1 = require("./application/services/alert-evaluator.service");
 const alert_processor_service_1 = require("./application/services/alert-processor.service");
+const prisma_alert_execution_repository_1 = require("./infra/repositories/prisma-alert-execution.repository");
+const create_alert_execution_use_case_1 = require("./application/use-cases/create-alert-execution/create-alert-execution.use-case");
+const get_alert_execution_use_case_1 = require("./application/use-cases/get-alert-execution/get-alert-execution.use-case");
+const list_alert_executions_use_case_1 = require("./application/use-cases/list-alert-executions/list-alert-executions.use-case");
 let AlertsModule = class AlertsModule {
 };
 exports.AlertsModule = AlertsModule;
@@ -34,6 +38,9 @@ exports.AlertsModule = AlertsModule = __decorate([
             enable_alert_rule_use_case_1.EnableAlertRuleUseCase,
             disable_alert_rule_use_case_1.DisableAlertRuleUseCase,
             delete_alert_rule_use_case_1.DeleteAlertRuleUseCase,
+            create_alert_execution_use_case_1.CreateAlertExecutionUseCase,
+            get_alert_execution_use_case_1.GetAlertExecutionUseCase,
+            list_alert_executions_use_case_1.ListAlertExecutionsUseCase,
             alert_evaluator_service_1.AlertEvaluatorService,
             alert_processor_service_1.AlertProcessorService,
             {
@@ -43,6 +50,10 @@ exports.AlertsModule = AlertsModule = __decorate([
             {
                 provide: "DatabaseConnectionRepository",
                 useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,
+            },
+            {
+                provide: "AlertExecutionRepository",
+                useClass: prisma_alert_execution_repository_1.PrismaAlertExecutionRepository,
             },
         ],
         exports: [alert_processor_service_1.AlertProcessorService],

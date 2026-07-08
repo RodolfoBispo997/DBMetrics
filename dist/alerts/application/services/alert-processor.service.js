@@ -11,14 +11,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var AlertProcessorService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AlertProcessorService = void 0;
 const common_1 = require("@nestjs/common");
 const alert_evaluator_service_1 = require("./alert-evaluator.service");
-let AlertProcessorService = class AlertProcessorService {
-    constructor(alertRuleRepository, alertEvaluator) {
+const create_alert_execution_use_case_1 = require("../use-cases/create-alert-execution/create-alert-execution.use-case");
+let AlertProcessorService = AlertProcessorService_1 = class AlertProcessorService {
+    constructor(alertRuleRepository, alertEvaluator, createAlertExecutionUseCase) {
         this.alertRuleRepository = alertRuleRepository;
         this.alertEvaluator = alertEvaluator;
+        this.createAlertExecutionUseCase = createAlertExecutionUseCase;
+        this.logger = new common_1.Logger(AlertProcessorService_1.name);
     }
     async process(metrics) {
         const rules = await this.alertRuleRepository.findManyByConnectionId(metrics.databaseConnectionId);
@@ -28,14 +32,16 @@ let AlertProcessorService = class AlertProcessorService {
             if (!matched) {
                 continue;
             }
-            console.log(`[ALERT] ${rule.metric} excedeu o limite (${rule.threshold})`);
+            const execution = await this.createAlertExecutionUseCase.execute(rule, metrics);
+            this.logger.warn(`[${execution.status}] ${rule.metric} excedeu o limite (${rule.threshold})`);
         }
     }
 };
 exports.AlertProcessorService = AlertProcessorService;
-exports.AlertProcessorService = AlertProcessorService = __decorate([
+exports.AlertProcessorService = AlertProcessorService = AlertProcessorService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)("AlertRuleRepository")),
-    __metadata("design:paramtypes", [Object, alert_evaluator_service_1.AlertEvaluatorService])
+    __metadata("design:paramtypes", [Object, alert_evaluator_service_1.AlertEvaluatorService,
+        create_alert_execution_use_case_1.CreateAlertExecutionUseCase])
 ], AlertProcessorService);
 //# sourceMappingURL=alert-processor.service.js.map

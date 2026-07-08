@@ -48,4 +48,8 @@ export class AlertEvaluatorService {
         return value !== rule.threshold;
     }
   }
+
+  public getMetricValue(metric: AlertMetric, metrics: DatabaseMetrics): number {
+    return this.metricMap[metric](metrics);
+  }
 }

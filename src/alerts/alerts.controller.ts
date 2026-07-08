@@ -21,6 +21,9 @@ import { UpdateAlertRuleUseCase } from "./application/use-cases/update-alert-rul
 import { EnableAlertRuleUseCase } from "./application/use-cases/enable-alert-rule/enable-alert-rule.use-case";
 import { DisableAlertRuleUseCase } from "./application/use-cases/disable-alert-rule/disable-alert-rule.use-case";
 import { DeleteAlertRuleUseCase } from "./application/use-cases/delete-alert-rule/delete-alert-rule.use-case";
+import { GetAlertExecutionUseCase } from "./application/use-cases/get-alert-execution/get-alert-execution.use-case";
+import { ListAlertExecutionsUseCase } from "./application/use-cases/list-alert-executions/list-alert-executions.use-case";
+import { AlertExecutionPresenter } from "./presentation/presenters/alert-execution.presenter";
 
 @Controller("alerts")
 export class AlertsController {
@@ -32,6 +35,8 @@ export class AlertsController {
     private readonly enableAlertRuleUseCase: EnableAlertRuleUseCase,
     private readonly disableAlertRuleUseCase: DisableAlertRuleUseCase,
     private readonly deleteAlertRuleUseCase: DeleteAlertRuleUseCase,
+    private readonly getAlertExecutionUseCase: GetAlertExecutionUseCase,
+    private readonly listAlertExecutionsUseCase: ListAlertExecutionsUseCase,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -121,5 +126,27 @@ export class AlertsController {
       userId: request.user.userId,
       alertRuleId,
     });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("/executions/:id")
+  async getExecution(@Param("id") executionId: string, @Req() request: any) {
+    return this.getAlertExecutionUseCase.execute({
+      executionId,
+      userId: request.user.userId,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("/connection/:connectionId/executions")
+  async listExecutions(
+    @Param("connectionId") connectionId: string,
+    @Req() request: any,
+  ) {
+    const rules = await this.listAlertExecutionsUseCase.execute({
+      connectionId,
+      userId: request.user.userId,
+    });
+    return rules.map(AlertExecutionPresenter.toHTTP);
   }
 }

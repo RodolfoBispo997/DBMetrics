@@ -47,6 +47,12 @@ enum NotificationChannel {
   WEBHOOK
 }
 
+enum AlertExecutionStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -80,6 +86,8 @@ model DatabaseConnection {
 
   alertRules AlertRule[]
 
+  alertExecutions AlertExecution[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -104,6 +112,8 @@ model DatabaseMetric {
   activeConnections    Int
   createdAt            DateTime @default(now())
 
+  alertExecutions AlertExecution[]
+
   databaseConnection DatabaseConnection @relation(fields: [databaseConnectionId], references: [id], onDelete: Cascade)
 
   @@index([databaseConnectionId, createdAt])
@@ -126,8 +136,45 @@ model AlertRule {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  alertExecutions AlertExecution[]
   
 
   @@index([databaseConnectionId])
   @@map("alert_rules")
+}
+
+model AlertExecution {
+  id String @id @default(uuid())
+
+  alertRuleId String
+  alertRule AlertRule @relation(fields: [alertRuleId], references: [id], onDelete: Cascade)
+
+  databaseMetricId String
+  databaseMetric DatabaseMetric @relation(fields: [databaseMetricId], references: [id], onDelete: Cascade)
+
+  databaseConnectionId String
+
+  databaseConnection DatabaseConnection @relation(fields: [databaseConnectionId], references: [id], onDelete: Cascade)
+
+  metric AlertMetric
+  operator AlertOperator
+
+  metricValue Float
+  threshold Float
+
+  channel NotificationChannel
+
+  status AlertExecutionStatus @default(PENDING)
+
+  errorMessage String?
+
+  triggeredAt DateTime @default(now())
+  sentAt DateTime?
+
+  
+  @@index([databaseConnectionId])
+  @@index([alertRuleId])
+  @@index([status])
+  @@map("alert_executions")
 }

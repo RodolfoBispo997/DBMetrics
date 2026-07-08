@@ -39,6 +39,9 @@ let AlertEvaluatorService = class AlertEvaluatorService {
                 return value !== rule.threshold;
         }
     }
+    getMetricValue(metric, metrics) {
+        return this.metricMap[metric](metrics);
+    }
 };
 exports.AlertEvaluatorService = AlertEvaluatorService;
 exports.AlertEvaluatorService = AlertEvaluatorService = __decorate([

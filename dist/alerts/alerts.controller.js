@@ -24,8 +24,11 @@ const update_alert_rule_use_case_1 = require("./application/use-cases/update-ale
 const enable_alert_rule_use_case_1 = require("./application/use-cases/enable-alert-rule/enable-alert-rule.use-case");
 const disable_alert_rule_use_case_1 = require("./application/use-cases/disable-alert-rule/disable-alert-rule.use-case");
 const delete_alert_rule_use_case_1 = require("./application/use-cases/delete-alert-rule/delete-alert-rule.use-case");
+const get_alert_execution_use_case_1 = require("./application/use-cases/get-alert-execution/get-alert-execution.use-case");
+const list_alert_executions_use_case_1 = require("./application/use-cases/list-alert-executions/list-alert-executions.use-case");
+const alert_execution_presenter_1 = require("./presentation/presenters/alert-execution.presenter");
 let AlertsController = class AlertsController {
-    constructor(createAlertRuleUseCase, getAlertRuleUseCase, listAlertRulesUseCase, updateAlertRuleUseCase, enableAlertRuleUseCase, disableAlertRuleUseCase, deleteAlertRuleUseCase) {
+    constructor(createAlertRuleUseCase, getAlertRuleUseCase, listAlertRulesUseCase, updateAlertRuleUseCase, enableAlertRuleUseCase, disableAlertRuleUseCase, deleteAlertRuleUseCase, getAlertExecutionUseCase, listAlertExecutionsUseCase) {
         this.createAlertRuleUseCase = createAlertRuleUseCase;
         this.getAlertRuleUseCase = getAlertRuleUseCase;
         this.listAlertRulesUseCase = listAlertRulesUseCase;
@@ -33,6 +36,8 @@ let AlertsController = class AlertsController {
         this.enableAlertRuleUseCase = enableAlertRuleUseCase;
         this.disableAlertRuleUseCase = disableAlertRuleUseCase;
         this.deleteAlertRuleUseCase = deleteAlertRuleUseCase;
+        this.getAlertExecutionUseCase = getAlertExecutionUseCase;
+        this.listAlertExecutionsUseCase = listAlertExecutionsUseCase;
     }
     async create(body, request) {
         return this.createAlertRuleUseCase.execute({
@@ -83,6 +88,19 @@ let AlertsController = class AlertsController {
             userId: request.user.userId,
             alertRuleId,
         });
+    }
+    async getExecution(executionId, request) {
+        return this.getAlertExecutionUseCase.execute({
+            executionId,
+            userId: request.user.userId,
+        });
+    }
+    async listExecutions(connectionId, request) {
+        const rules = await this.listAlertExecutionsUseCase.execute({
+            connectionId,
+            userId: request.user.userId,
+        });
+        return rules.map(alert_execution_presenter_1.AlertExecutionPresenter.toHTTP);
     }
 };
 exports.AlertsController = AlertsController;
@@ -153,6 +171,24 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AlertsController.prototype, "delete", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)("/executions/:id"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AlertsController.prototype, "getExecution", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)("/connection/:connectionId/executions"),
+    __param(0, (0, common_1.Param)("connectionId")),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AlertsController.prototype, "listExecutions", null);
 exports.AlertsController = AlertsController = __decorate([
     (0, common_1.Controller)("alerts"),
     __metadata("design:paramtypes", [create_alert_rule_use_case_1.CreateAlertRuleUseCase,
@@ -161,6 +197,8 @@ exports.AlertsController = AlertsController = __decorate([
         update_alert_rule_use_case_1.UpdateAlertRuleUseCase,
         enable_alert_rule_use_case_1.EnableAlertRuleUseCase,
         disable_alert_rule_use_case_1.DisableAlertRuleUseCase,
-        delete_alert_rule_use_case_1.DeleteAlertRuleUseCase])
+        delete_alert_rule_use_case_1.DeleteAlertRuleUseCase,
+        get_alert_execution_use_case_1.GetAlertExecutionUseCase,
+        list_alert_executions_use_case_1.ListAlertExecutionsUseCase])
 ], AlertsController);
 //# sourceMappingURL=alerts.controller.js.map

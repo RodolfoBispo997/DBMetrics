@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-notification-channel-error.js","sourceRoot":"","sources":["../../../../src/alerts/domain/errors/invalid-notification-channel-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,+BAAgC,SAAQ,0BAAW;IAC9D,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,0EAIC"}

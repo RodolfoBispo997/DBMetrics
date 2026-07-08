@@ -1,0 +1,1 @@
+{"version":3,"file":"invalid-database-connections-id-error.js","sourceRoot":"","sources":["../../../../src/alerts/domain/errors/invalid-database-connections-id-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,iCAAkC,SAAQ,0BAAW;IAChE,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,8EAIC"}

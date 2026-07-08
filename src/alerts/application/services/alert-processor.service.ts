@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { AlertRuleRepository } from "../repositories/alert-rule-repository";
 import { AlertEvaluatorService } from "./alert-evaluator.service";
 import { DatabaseMetrics } from "../../../database-metric/domain/entities/database-metric";
+import { CreateAlertExecutionUseCase } from "../use-cases/create-alert-execution/create-alert-execution.use-case";
 
 @Injectable()
 export class AlertProcessorService {
@@ -11,6 +12,8 @@ export class AlertProcessorService {
     private readonly alertRuleRepository: AlertRuleRepository,
 
     private readonly alertEvaluator: AlertEvaluatorService,
+
+    private readonly createAlertExecutionUseCase: CreateAlertExecutionUseCase,
   ) {}
 
   async process(metrics: DatabaseMetrics): Promise<void> {
@@ -27,8 +30,13 @@ export class AlertProcessorService {
         continue;
       }
 
+      const execution = await this.createAlertExecutionUseCase.execute(
+        rule,
+        metrics,
+      );
+
       this.logger.warn(
-        `[ALERT] ${rule.metric} excedeu o limite (${rule.threshold})`,
+        `[${execution.status}] ${rule.metric} excedeu o limite (${rule.threshold})`,
       );
     }
   }

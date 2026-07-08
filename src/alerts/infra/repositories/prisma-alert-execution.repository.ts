@@ -1,0 +1,162 @@
+import { prisma } from "../../../user/infra/database/prisma/prisma-client";
+
+import { AlertExecutionRepository } from "../../application/repositories/alert-execution-repository";
+
+import { AlertExecution } from "../../domain/entities/alert-execution";
+
+import { AlertExecutionStatus } from "../../domain/enums/alert-execution-status.enum";
+import { AlertMetric } from "../../domain/enums/alert-metric.enum";
+import { AlertOperator } from "../../domain/enums/alert-operator.enum";
+import { NotificationChannel } from "../../domain/enums/notification-channel.enum";
+
+export class PrismaAlertExecutionRepository implements AlertExecutionRepository {
+  async save(alertExecution: AlertExecution): Promise<void> {
+    await prisma.alertExecution.create({
+      data: {
+        id: alertExecution.id,
+
+        alertRuleId: alertExecution.alertRuleId,
+        databaseMetricId: alertExecution.databaseMetricId,
+        databaseConnectionId: alertExecution.databaseConnectionId,
+
+        metric: alertExecution.metric,
+        operator: alertExecution.operator,
+
+        metricValue: alertExecution.metricValue,
+        threshold: alertExecution.threshold,
+
+        channel: alertExecution.channel,
+
+        status: alertExecution.status,
+
+        errorMessage: alertExecution.errorMessage,
+
+        triggeredAt: alertExecution.triggeredAt,
+        sentAt: alertExecution.sentAt,
+      },
+    });
+  }
+
+  async update(alertExecution: AlertExecution): Promise<void> {
+    await prisma.alertExecution.update({
+      where: {
+        id: alertExecution.id,
+      },
+
+      data: {
+        status: alertExecution.status,
+        errorMessage: alertExecution.errorMessage,
+        sentAt: alertExecution.sentAt,
+      },
+    });
+  }
+
+  async findById(id: string): Promise<AlertExecution | null> {
+    const execution = await prisma.alertExecution.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!execution) {
+      return null;
+    }
+
+    return AlertExecution.restore({
+      id: execution.id,
+
+      alertRuleId: execution.alertRuleId,
+      databaseMetricId: execution.databaseMetricId,
+      databaseConnectionId: execution.databaseConnectionId,
+
+      metric: execution.metric as AlertMetric,
+      operator: execution.operator as AlertOperator,
+
+      metricValue: execution.metricValue,
+      threshold: execution.threshold,
+
+      channel: execution.channel as NotificationChannel,
+
+      status: execution.status as AlertExecutionStatus,
+
+      errorMessage: execution.errorMessage ?? undefined,
+
+      triggeredAt: execution.triggeredAt,
+      sentAt: execution.sentAt ?? undefined,
+    });
+  }
+
+  async findManyByConnectionId(
+    connectionId: string,
+  ): Promise<AlertExecution[]> {
+    const executions = await prisma.alertExecution.findMany({
+      where: {
+        databaseConnectionId: connectionId,
+      },
+
+      orderBy: {
+        triggeredAt: "desc",
+      },
+    });
+
+    return executions.map((execution) =>
+      AlertExecution.restore({
+        id: execution.id,
+
+        alertRuleId: execution.alertRuleId,
+        databaseMetricId: execution.databaseMetricId,
+        databaseConnectionId: execution.databaseConnectionId,
+
+        metric: execution.metric as AlertMetric,
+        operator: execution.operator as AlertOperator,
+
+        metricValue: execution.metricValue,
+        threshold: execution.threshold,
+
+        channel: execution.channel as NotificationChannel,
+
+        status: execution.status as AlertExecutionStatus,
+
+        errorMessage: execution.errorMessage ?? undefined,
+
+        triggeredAt: execution.triggeredAt,
+        sentAt: execution.sentAt ?? undefined,
+      }),
+    );
+  }
+
+  async findRecent(limit: number): Promise<AlertExecution[]> {
+    const executions = await prisma.alertExecution.findMany({
+      take: limit,
+
+      orderBy: {
+        triggeredAt: "desc",
+      },
+    });
+
+    return executions.map((execution) =>
+      AlertExecution.restore({
+        id: execution.id,
+
+        alertRuleId: execution.alertRuleId,
+        databaseMetricId: execution.databaseMetricId,
+        databaseConnectionId: execution.databaseConnectionId,
+
+        metric: execution.metric as AlertMetric,
+        operator: execution.operator as AlertOperator,
+
+        metricValue: execution.metricValue,
+        threshold: execution.threshold,
+
+        channel: execution.channel as NotificationChannel,
+
+        status: execution.status as AlertExecutionStatus,
+
+        errorMessage: execution.errorMessage ?? undefined,
+
+        triggeredAt: execution.triggeredAt,
+        sentAt: execution.sentAt ?? undefined,
+      }),
+    );
+  }
+}

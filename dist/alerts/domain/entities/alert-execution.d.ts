@@ -1,0 +1,38 @@
+import { AlertExecutionStatus } from "../enums/alert-execution-status.enum";
+import { AlertMetric } from "../enums/alert-metric.enum";
+import { AlertOperator } from "../enums/alert-operator.enum";
+import { NotificationChannel } from "../enums/notification-channel.enum";
+import { AlertExecutionProps } from "../types/alert-execution-props.type";
+import { CreateAlertExecutionProps } from "../types/create-alert-execution-props.type";
+export declare class AlertExecution {
+    private readonly props;
+    private static readonly UUID_REGEX;
+    private constructor();
+    static create(props: CreateAlertExecutionProps): AlertExecution;
+    static restore(props: AlertExecutionProps): AlertExecution;
+    private static validateUuid;
+    private static readonly ALERT_METRICS;
+    private static validateMetric;
+    private static validateOperator;
+    private static validateNotificationChannel;
+    private static validateStatus;
+    private static validateMetricValue;
+    private static validateThreshold;
+    private static validateErrorMessage;
+    markAsSent(): void;
+    markAsFailed(errorMessage: string): void;
+    markAsPending(): void;
+    get id(): string;
+    get alertRuleId(): string;
+    get databaseMetricId(): string;
+    get databaseConnectionId(): string;
+    get metric(): AlertMetric;
+    get operator(): AlertOperator;
+    get metricValue(): number;
+    get threshold(): number;
+    get channel(): NotificationChannel;
+    get status(): AlertExecutionStatus;
+    get errorMessage(): string | undefined;
+    get triggeredAt(): Date;
+    get sentAt(): Date | undefined;
+}
