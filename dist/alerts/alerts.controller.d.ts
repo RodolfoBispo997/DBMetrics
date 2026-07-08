@@ -20,7 +20,7 @@ export declare class AlertsController {
     get(alertRuleId: string, request: any): Promise<import("./application/use-cases/get-alert-rule/dto/get-alert-rule-response.dto").GetAlertRuleResponseDTO>;
     list(connectionId: string, request: any): Promise<import("./application/use-cases/list-alert-rules/dto/list-alert-rules-response.dto").ListAlertRulesResponseDTO>;
     update(alertRuleId: string, body: UpdateAlertRuleBodyHttpDTO, request: any): Promise<import("./application/use-cases/update-alert-rule/dto/update-alert-rule-response.dto").UpdateAlertRuleResponseDTO>;
-    enable(alertRuleId: string, request: any): Promise<import("./application/use-cases/enable-alert-rule/dto/enable-alert-rule-response.dto").EnableAlertRuleResponseDTO>;
-    disable(alertRuleId: string, request: any): Promise<import("./application/use-cases/disable-alert-rule/dto/disable-alert-rule-response.dto").DisableAlertRuleResponseDTO>;
+    enable(alertRuleId: string, request: any): Promise<void>;
+    disable(alertRuleId: string, request: any): Promise<void>;
     delete(alertRuleId: string, request: any): Promise<void>;
 }

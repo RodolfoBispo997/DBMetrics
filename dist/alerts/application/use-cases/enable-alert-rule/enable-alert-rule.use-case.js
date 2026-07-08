@@ -32,9 +32,6 @@ let EnableAlertRuleUseCase = class EnableAlertRuleUseCase {
         }
         alertRule.enable();
         await this.alertRuleRepository.update(alertRule);
-        return {
-            id: alertRule.id,
-        };
     }
 };
 exports.EnableAlertRuleUseCase = EnableAlertRuleUseCase;

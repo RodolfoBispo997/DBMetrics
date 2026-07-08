@@ -7,6 +7,7 @@ import { DatabaseMetricCollectorFactory } from "../../../../database-connection/
 import { DatabaseMetricRepository } from "../../repositories/database-metric-repository";
 
 import { DatabaseMetrics } from "../../../domain/entities/database-metric";
+import { AlertProcessorService } from "../../../../alerts/application/services/alert-processor.service";
 
 @Injectable()
 export class RecordDatabaseMetricUseCase {
@@ -16,6 +17,8 @@ export class RecordDatabaseMetricUseCase {
 
     @Inject("DatabaseMetricCollectorFactory")
     private readonly databaseMetricCollectorFactory: DatabaseMetricCollectorFactory,
+
+    private readonly alertProcessor: AlertProcessorService,
   ) {}
 
   async execute(connection: DatabaseConnection): Promise<DatabaseMetrics> {
@@ -41,6 +44,8 @@ export class RecordDatabaseMetricUseCase {
     });
 
     await this.databaseMetricRepository.save(databaseMetric);
+
+    await this.alertProcessor.process(databaseMetric);
 
     return databaseMetric;
   }

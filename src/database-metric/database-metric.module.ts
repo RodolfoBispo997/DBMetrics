@@ -10,8 +10,10 @@ import { GetDatabaseMetricUseCase } from "./application/use-cases/get-database-m
 import { RecordDatabaseMetricUseCase } from "./application/use-cases/record-database-metric/record-database-metric.use-case";
 import { DatabaseMetricScheduler } from "./infra/scheduler/database-metric.scheduler";
 import { CollectDatabaseMetricsUseCase } from "./application/use-cases/collect-database-metrics/collect-database-metrics.use-case";
+import { AlertsModule } from "../alerts/alerts.module";
 
 @Module({
+  imports: [AlertsModule],
   controllers: [DatabaseMetricController],
   providers: [
     CollectDatabaseMetricUseCase,

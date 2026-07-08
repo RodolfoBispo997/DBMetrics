@@ -15,10 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RecordDatabaseMetricUseCase = void 0;
 const common_1 = require("@nestjs/common");
 const database_metric_1 = require("../../../domain/entities/database-metric");
+const alert_processor_service_1 = require("../../../../alerts/application/services/alert-processor.service");
 let RecordDatabaseMetricUseCase = class RecordDatabaseMetricUseCase {
-    constructor(databaseMetricRepository, databaseMetricCollectorFactory) {
+    constructor(databaseMetricRepository, databaseMetricCollectorFactory, alertProcessor) {
         this.databaseMetricRepository = databaseMetricRepository;
         this.databaseMetricCollectorFactory = databaseMetricCollectorFactory;
+        this.alertProcessor = alertProcessor;
     }
     async execute(connection) {
         const collector = this.databaseMetricCollectorFactory.get(connection.provider);
@@ -35,6 +37,7 @@ let RecordDatabaseMetricUseCase = class RecordDatabaseMetricUseCase {
             activeConnections: result.activeConnections,
         });
         await this.databaseMetricRepository.save(databaseMetric);
+        await this.alertProcessor.process(databaseMetric);
         return databaseMetric;
     }
 };
@@ -43,6 +46,6 @@ exports.RecordDatabaseMetricUseCase = RecordDatabaseMetricUseCase = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)("DatabaseMetricRepository")),
     __param(1, (0, common_1.Inject)("DatabaseMetricCollectorFactory")),
-    __metadata("design:paramtypes", [Object, Object])
+    __metadata("design:paramtypes", [Object, Object, alert_processor_service_1.AlertProcessorService])
 ], RecordDatabaseMetricUseCase);
 //# sourceMappingURL=record-database-metric.use-case.js.map

@@ -18,6 +18,8 @@ const update_alert_rule_use_case_1 = require("./application/use-cases/update-ale
 const enable_alert_rule_use_case_1 = require("./application/use-cases/enable-alert-rule/enable-alert-rule.use-case");
 const disable_alert_rule_use_case_1 = require("./application/use-cases/disable-alert-rule/disable-alert-rule.use-case");
 const delete_alert_rule_use_case_1 = require("./application/use-cases/delete-alert-rule/delete-alert-rule.use-case");
+const alert_evaluator_service_1 = require("./application/services/alert-evaluator.service");
+const alert_processor_service_1 = require("./application/services/alert-processor.service");
 let AlertsModule = class AlertsModule {
 };
 exports.AlertsModule = AlertsModule;
@@ -32,6 +34,8 @@ exports.AlertsModule = AlertsModule = __decorate([
             enable_alert_rule_use_case_1.EnableAlertRuleUseCase,
             disable_alert_rule_use_case_1.DisableAlertRuleUseCase,
             delete_alert_rule_use_case_1.DeleteAlertRuleUseCase,
+            alert_evaluator_service_1.AlertEvaluatorService,
+            alert_processor_service_1.AlertProcessorService,
             {
                 provide: "AlertRuleRepository",
                 useClass: prisma_alert_rule_repository_1.PrismaAlertRuleRepository,
@@ -41,6 +45,7 @@ exports.AlertsModule = AlertsModule = __decorate([
                 useClass: prisma_database_connection_repository_1.PrismaDatabaseConnectionRepository,
             },
         ],
+        exports: [alert_processor_service_1.AlertProcessorService],
     })
 ], AlertsModule);
 //# sourceMappingURL=alerts.module.js.map

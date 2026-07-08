@@ -9,6 +9,8 @@ import { UpdateAlertRuleUseCase } from "./application/use-cases/update-alert-rul
 import { EnableAlertRuleUseCase } from "./application/use-cases/enable-alert-rule/enable-alert-rule.use-case";
 import { DisableAlertRuleUseCase } from "./application/use-cases/disable-alert-rule/disable-alert-rule.use-case";
 import { DeleteAlertRuleUseCase } from "./application/use-cases/delete-alert-rule/delete-alert-rule.use-case";
+import { AlertEvaluatorService } from "./application/services/alert-evaluator.service";
+import { AlertProcessorService } from "./application/services/alert-processor.service";
 
 @Module({
   controllers: [AlertsController],
@@ -20,6 +22,8 @@ import { DeleteAlertRuleUseCase } from "./application/use-cases/delete-alert-rul
     EnableAlertRuleUseCase,
     DisableAlertRuleUseCase,
     DeleteAlertRuleUseCase,
+    AlertEvaluatorService,
+    AlertProcessorService,
     {
       provide: "AlertRuleRepository",
       useClass: PrismaAlertRuleRepository,
@@ -29,5 +33,6 @@ import { DeleteAlertRuleUseCase } from "./application/use-cases/delete-alert-rul
       useClass: PrismaDatabaseConnectionRepository,
     },
   ],
+  exports: [AlertProcessorService],
 })
 export class AlertsModule {}

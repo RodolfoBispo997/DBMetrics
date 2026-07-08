@@ -126,6 +126,7 @@ __decorate([
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Patch)(":id/enable"),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
     __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -135,6 +136,7 @@ __decorate([
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Patch)(":id/disable"),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
     __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),

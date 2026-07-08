@@ -19,11 +19,13 @@ const get_database_metric_use_case_1 = require("./application/use-cases/get-data
 const record_database_metric_use_case_1 = require("./application/use-cases/record-database-metric/record-database-metric.use-case");
 const database_metric_scheduler_1 = require("./infra/scheduler/database-metric.scheduler");
 const collect_database_metrics_use_case_1 = require("./application/use-cases/collect-database-metrics/collect-database-metrics.use-case");
+const alerts_module_1 = require("../alerts/alerts.module");
 let DatabaseMetricModule = class DatabaseMetricModule {
 };
 exports.DatabaseMetricModule = DatabaseMetricModule;
 exports.DatabaseMetricModule = DatabaseMetricModule = __decorate([
     (0, common_1.Module)({
+        imports: [alerts_module_1.AlertsModule],
         controllers: [database_metric_controller_1.DatabaseMetricController],
         providers: [
             collect_database_metric_use_case_1.CollectDatabaseMetricUseCase,
