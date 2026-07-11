@@ -8,4 +8,5 @@ export type CreateAlertRuleRequestDTO = {
     operator: AlertOperator;
     threshold: number;
     channel: NotificationChannel;
+    destination: string;
 };

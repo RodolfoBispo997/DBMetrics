@@ -7,6 +7,6 @@ export type CreateAlertRuleProps = {
   operator: AlertOperator;
   threshold: number;
   channel: NotificationChannel;
-
+  destination: string;
   databaseConnectionId: string;
 };

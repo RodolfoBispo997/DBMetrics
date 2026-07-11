@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AlertRule = void 0;
 const crypto_1 = require("crypto");
+const invalid_destination_error_1 = require("../errors/invalid-destination-error");
 class AlertRule {
     constructor(props) {
         this.props = props;
@@ -13,6 +14,7 @@ class AlertRule {
             operator: data.operator,
             threshold: data.threshold,
             channel: data.channel,
+            destination: AlertRule.validateDestination(data.destination),
             enabled: true,
             databaseConnectionId: data.databaseConnectionId,
             createdAt: new Date(),
@@ -27,6 +29,7 @@ class AlertRule {
         this.props.operator = data.operator;
         this.props.threshold = data.threshold;
         this.props.channel = data.channel;
+        this.props.destination = AlertRule.validateDestination(data.destination);
         this.props.updatedAt = new Date();
     }
     enable() {
@@ -36,6 +39,16 @@ class AlertRule {
     disable() {
         this.props.enabled = false;
         this.props.updatedAt = new Date();
+    }
+    static validateDestination(destination) {
+        const normalized = destination.trim();
+        if (!normalized) {
+            throw new invalid_destination_error_1.InvalidDestinationError("Destination cannot be empty");
+        }
+        if (!this.PHONE_REGEX.test(normalized)) {
+            throw new invalid_destination_error_1.InvalidDestinationError("Destination must be in E.164 format without '+' (e.g. 5511999999999)");
+        }
+        return normalized;
     }
     get id() {
         return this.props.id;
@@ -64,6 +77,10 @@ class AlertRule {
     get updatedAt() {
         return this.props.updatedAt;
     }
+    get destination() {
+        return this.props.destination;
+    }
 }
 exports.AlertRule = AlertRule;
+AlertRule.PHONE_REGEX = /^55\d{10,13}$/;
 //# sourceMappingURL=alert-rule.js.map

@@ -132,7 +132,7 @@ model AlertRule {
 
   databaseConnectionId String
   databaseConnection   DatabaseConnection @relation(fields: [databaseConnectionId], references: [id], onDelete: Cascade)
-
+  destination String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -157,18 +157,19 @@ model AlertExecution {
 
   databaseConnection DatabaseConnection @relation(fields: [databaseConnectionId], references: [id], onDelete: Cascade)
 
+  connectionName String
+  databaseProvider DatabaseProvider
+  host String
+  databaseName String
+  port Int
   metric AlertMetric
   operator AlertOperator
-
   metricValue Float
   threshold Float
-
   channel NotificationChannel
-
+  destination String
   status AlertExecutionStatus @default(PENDING)
-
   errorMessage String?
-
   triggeredAt DateTime @default(now())
   sentAt DateTime?
 

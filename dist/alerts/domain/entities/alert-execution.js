@@ -16,6 +16,10 @@ const invalid_error_message_error_1 = require("../errors/invalid-error-message-e
 const invalid_metric_value_error_1 = require("../errors/invalid-metric-value-error");
 const invalid_notification_channel_error_1 = require("../errors/invalid-notification-channel-error");
 const invalid_threshold_error_1 = require("../errors/invalid-threshold-error");
+const invalid_connection_name_error_1 = require("../errors/invalid-connection-name-error");
+const invalid_host_error_1 = require("../errors/invalid-host-error");
+const invalid_database_name_error_1 = require("../errors/invalid-database-name-error");
+const invalid_port_error_1 = require("../errors/invalid-port-error");
 class AlertExecution {
     constructor(props) {
         this.props = props;
@@ -26,11 +30,17 @@ class AlertExecution {
             alertRuleId: this.validateUuid(props.alertRuleId, invalid_alert_rule_id_error_1.InvalidAlertRuleIdError, "Alert rule id"),
             databaseMetricId: this.validateUuid(props.databaseMetricId, invalid_database_metric_id_error_1.InvalidDatabaseMetricIdError, "Database metric id"),
             databaseConnectionId: this.validateUuid(props.databaseConnectionId, invalid_database_connections_id_error_1.InvalidDatabaseConnectionsIdError, "Database connection id"),
+            connectionName: this.validateConnectionName(props.connectionName),
+            databaseProvider: props.databaseProvider,
+            host: this.validateHost(props.host),
+            databaseName: this.validateDatabaseName(props.databaseName),
+            port: this.validatePort(props.port),
             metric: this.validateMetric(props.metric),
             operator: this.validateOperator(props.operator),
             metricValue: this.validateMetricValue(props.metricValue),
             threshold: this.validateThreshold(props.threshold),
             channel: this.validateNotificationChannel(props.channel),
+            destination: props.destination,
             status: this.validateStatus(props.status ?? alert_execution_status_enum_1.AlertExecutionStatus.PENDING),
             errorMessage: this.validateErrorMessage(props.errorMessage),
             triggeredAt: new Date(),
@@ -96,7 +106,7 @@ class AlertExecution {
         if (message == null) {
             return undefined;
         }
-        const normalized = message.trim();
+        const normalized = message.trim().replace(/\s+/g, " ");
         if (!normalized) {
             throw new invalid_error_message_error_1.InvalidErrorMessageError("Error message cannot be empty");
         }
@@ -104,6 +114,36 @@ class AlertExecution {
             throw new invalid_error_message_error_1.InvalidErrorMessageError("Error message is too long");
         }
         return normalized;
+    }
+    static validateConnectionName(name) {
+        const normalized = name.trim().replace(/\s+/g, " ");
+        if (!normalized) {
+            throw new invalid_connection_name_error_1.InvalidConnectionNameError("Connection name cannot be empty");
+        }
+        return normalized;
+    }
+    static validateHost(host) {
+        const normalized = host.trim().replace(/\s+/g, " ");
+        if (!normalized) {
+            throw new invalid_host_error_1.InvalidHostError("Host cannot be empty");
+        }
+        return normalized;
+    }
+    static validateDatabaseName(name) {
+        const normalized = name.trim().replace(/\s+/g, " ");
+        if (!normalized) {
+            throw new invalid_database_name_error_1.InvalidDatabaseNameError("Database name cannot be empty");
+        }
+        return normalized;
+    }
+    static validatePort(port) {
+        if (!Number.isInteger(port)) {
+            throw new invalid_port_error_1.InvalidPortError("Port must be an integer");
+        }
+        if (port <= 0 || port > 65535) {
+            throw new invalid_port_error_1.InvalidPortError("Invalid port");
+        }
+        return port;
     }
     markAsSent() {
         if (this.props.status === alert_execution_status_enum_1.AlertExecutionStatus.SENT) {
@@ -163,6 +203,24 @@ class AlertExecution {
     }
     get sentAt() {
         return this.props.sentAt;
+    }
+    get connectionName() {
+        return this.props.connectionName;
+    }
+    get databaseProvider() {
+        return this.props.databaseProvider;
+    }
+    get host() {
+        return this.props.host;
+    }
+    get databaseName() {
+        return this.props.databaseName;
+    }
+    get port() {
+        return this.props.port;
+    }
+    get destination() {
+        return this.props.destination;
     }
 }
 exports.AlertExecution = AlertExecution;

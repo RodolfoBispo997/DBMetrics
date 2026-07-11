@@ -36,7 +36,7 @@ export class CreateAlertRuleUseCase {
       operator: data.operator,
       threshold: data.threshold,
       channel: data.channel,
-
+      destination: data.destination,
       databaseConnectionId: connection.id,
     });
 

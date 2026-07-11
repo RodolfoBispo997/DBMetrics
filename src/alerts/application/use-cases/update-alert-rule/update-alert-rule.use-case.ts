@@ -41,6 +41,7 @@ export class UpdateAlertRuleUseCase {
       operator: data.operator,
       threshold: data.threshold,
       channel: data.channel,
+      destination: data.destination,
     });
 
     await this.alertRuleRepository.update(alertRule);

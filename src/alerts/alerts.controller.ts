@@ -49,6 +49,7 @@ export class AlertsController {
       operator: body.operator,
       threshold: body.threshold,
       channel: body.channel,
+      destination: body.destination,
     });
   }
 
@@ -79,13 +80,12 @@ export class AlertsController {
   ) {
     return this.updateAlertRuleUseCase.execute({
       userId: request.user.userId,
-
       alertRuleId,
-
       metric: body.metric,
       operator: body.operator,
       threshold: body.threshold,
       channel: body.channel,
+      destination: body.destination,
     });
   }
 

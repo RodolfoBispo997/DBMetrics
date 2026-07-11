@@ -4,11 +4,10 @@ import { NotificationChannel } from "../../../../domain/enums/notification-chann
 
 export type CreateAlertRuleRequestDTO = {
   userId: string;
-
   connectionId: string;
-
   metric: AlertMetric;
   operator: AlertOperator;
   threshold: number;
   channel: NotificationChannel;
+  destination: string;
 };

@@ -1,3 +1,4 @@
+import { DatabaseProvider } from "../../../database-connection/domain/enums/database-provider.enum";
 import { prisma } from "../../../user/infra/database/prisma/prisma-client";
 
 import { AlertExecutionRepository } from "../../application/repositories/alert-execution-repository";
@@ -18,13 +19,17 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
         alertRuleId: alertExecution.alertRuleId,
         databaseMetricId: alertExecution.databaseMetricId,
         databaseConnectionId: alertExecution.databaseConnectionId,
-
+        connectionName: alertExecution.connectionName,
+        databaseProvider: alertExecution.databaseProvider,
+        host: alertExecution.host,
+        databaseName: alertExecution.databaseName,
+        port: alertExecution.port,
         metric: alertExecution.metric,
         operator: alertExecution.operator,
 
         metricValue: alertExecution.metricValue,
         threshold: alertExecution.threshold,
-
+        destination: alertExecution.destination,
         channel: alertExecution.channel,
 
         status: alertExecution.status,
@@ -68,7 +73,11 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
       alertRuleId: execution.alertRuleId,
       databaseMetricId: execution.databaseMetricId,
       databaseConnectionId: execution.databaseConnectionId,
-
+      connectionName: execution.connectionName,
+      databaseProvider: execution.databaseProvider as DatabaseProvider,
+      host: execution.host,
+      databaseName: execution.databaseName,
+      port: execution.port,
       metric: execution.metric as AlertMetric,
       operator: execution.operator as AlertOperator,
 
@@ -76,7 +85,7 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
       threshold: execution.threshold,
 
       channel: execution.channel as NotificationChannel,
-
+      destination: execution.destination,
       status: execution.status as AlertExecutionStatus,
 
       errorMessage: execution.errorMessage ?? undefined,
@@ -106,7 +115,11 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
         alertRuleId: execution.alertRuleId,
         databaseMetricId: execution.databaseMetricId,
         databaseConnectionId: execution.databaseConnectionId,
-
+        connectionName: execution.connectionName,
+        databaseProvider: execution.databaseProvider as DatabaseProvider,
+        host: execution.host,
+        databaseName: execution.databaseName,
+        port: execution.port,
         metric: execution.metric as AlertMetric,
         operator: execution.operator as AlertOperator,
 
@@ -114,7 +127,7 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
         threshold: execution.threshold,
 
         channel: execution.channel as NotificationChannel,
-
+        destination: execution.destination,
         status: execution.status as AlertExecutionStatus,
 
         errorMessage: execution.errorMessage ?? undefined,
@@ -141,19 +154,19 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
         alertRuleId: execution.alertRuleId,
         databaseMetricId: execution.databaseMetricId,
         databaseConnectionId: execution.databaseConnectionId,
-
+        connectionName: execution.connectionName,
+        databaseProvider: execution.databaseProvider as DatabaseProvider,
+        host: execution.host,
+        databaseName: execution.databaseName,
+        port: execution.port,
         metric: execution.metric as AlertMetric,
         operator: execution.operator as AlertOperator,
-
         metricValue: execution.metricValue,
         threshold: execution.threshold,
-
         channel: execution.channel as NotificationChannel,
-
+        destination: execution.destination,
         status: execution.status as AlertExecutionStatus,
-
         errorMessage: execution.errorMessage ?? undefined,
-
         triggeredAt: execution.triggeredAt,
         sentAt: execution.sentAt ?? undefined,
       }),

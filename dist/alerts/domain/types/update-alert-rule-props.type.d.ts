@@ -6,4 +6,5 @@ export type UpdateAlertRuleProps = {
     operator: AlertOperator;
     threshold: number;
     channel: NotificationChannel;
+    destination: string;
 };

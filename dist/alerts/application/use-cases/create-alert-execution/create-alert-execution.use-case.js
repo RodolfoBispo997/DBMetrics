@@ -21,16 +21,22 @@ let CreateAlertExecutionUseCase = class CreateAlertExecutionUseCase {
         this.alertExecutionRepository = alertExecutionRepository;
         this.alertEvaluator = alertEvaluator;
     }
-    async execute(rule, metrics) {
+    async execute(rule, metrics, connection) {
         const execution = alert_execution_1.AlertExecution.create({
             alertRuleId: rule.id,
             databaseMetricId: metrics.id,
             databaseConnectionId: metrics.databaseConnectionId,
+            connectionName: connection.name,
+            databaseProvider: connection.provider,
+            host: connection.host,
+            databaseName: connection.database,
+            port: connection.port,
             metric: rule.metric,
             operator: rule.operator,
             metricValue: this.alertEvaluator.getMetricValue(rule.metric, metrics),
             threshold: rule.threshold,
             channel: rule.channel,
+            destination: rule.destination,
         });
         await this.alertExecutionRepository.save(execution);
         return execution;

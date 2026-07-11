@@ -33,4 +33,8 @@ __decorate([
     (0, class_validator_1.IsEnum)(notification_channel_enum_1.NotificationChannel),
     __metadata("design:type", String)
 ], UpdateAlertRuleBodyHttpDTO.prototype, "channel", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateAlertRuleBodyHttpDTO.prototype, "destination", void 0);
 //# sourceMappingURL=update-alert-rule-body-http.dto.js.map

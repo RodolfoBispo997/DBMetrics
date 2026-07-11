@@ -8,6 +8,7 @@ import { AlertRule } from "../../../domain/entities/alert-rule";
 import { DatabaseMetrics } from "../../../../database-metric/domain/entities/database-metric";
 
 import { AlertEvaluatorService } from "../../services/alert-evaluator.service";
+import { DatabaseConnection } from "../../../../database-connection/domain/entities/database-connection";
 
 @Injectable()
 export class CreateAlertExecutionUseCase {
@@ -21,21 +22,24 @@ export class CreateAlertExecutionUseCase {
   async execute(
     rule: AlertRule,
     metrics: DatabaseMetrics,
+    connection: DatabaseConnection,
   ): Promise<AlertExecution> {
     const execution = AlertExecution.create({
       alertRuleId: rule.id,
 
       databaseMetricId: metrics.id,
       databaseConnectionId: metrics.databaseConnectionId,
-
+      connectionName: connection.name,
+      databaseProvider: connection.provider,
+      host: connection.host,
+      databaseName: connection.database,
+      port: connection.port,
       metric: rule.metric,
       operator: rule.operator,
-
       metricValue: this.alertEvaluator.getMetricValue(rule.metric, metrics),
-
       threshold: rule.threshold,
-
       channel: rule.channel,
+      destination: rule.destination,
     });
 
     await this.alertExecutionRepository.save(execution);

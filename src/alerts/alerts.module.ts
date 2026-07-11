@@ -15,8 +15,12 @@ import { PrismaAlertExecutionRepository } from "./infra/repositories/prisma-aler
 import { CreateAlertExecutionUseCase } from "./application/use-cases/create-alert-execution/create-alert-execution.use-case";
 import { GetAlertExecutionUseCase } from "./application/use-cases/get-alert-execution/get-alert-execution.use-case";
 import { ListAlertExecutionsUseCase } from "./application/use-cases/list-alert-executions/list-alert-executions.use-case";
+import { EvolutionNotificationService } from "./infra/notifications/evolution/evolution-notification.service";
+import { NotificationFactoryImpl } from "./infra/notifications/notification.factory";
+import { EvolutionModule } from "../shared/integrations/evolution/evolution.module";
 
 @Module({
+  imports: [EvolutionModule],
   controllers: [AlertsController],
   providers: [
     CreateAlertRuleUseCase,
@@ -30,6 +34,7 @@ import { ListAlertExecutionsUseCase } from "./application/use-cases/list-alert-e
     CreateAlertExecutionUseCase,
     GetAlertExecutionUseCase,
     ListAlertExecutionsUseCase,
+    EvolutionNotificationService,
 
     AlertEvaluatorService,
     AlertProcessorService,
@@ -44,6 +49,10 @@ import { ListAlertExecutionsUseCase } from "./application/use-cases/list-alert-e
     {
       provide: "AlertExecutionRepository",
       useClass: PrismaAlertExecutionRepository,
+    },
+    {
+      provide: "NotificationFactory",
+      useClass: NotificationFactoryImpl,
     },
   ],
   exports: [AlertProcessorService],

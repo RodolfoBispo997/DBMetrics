@@ -12,7 +12,7 @@ export class DatabaseMetricScheduler {
   ) {}
 
   // @Cron(CronExpression.EVERY_5_MINUTES)
-  // @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_30_SECONDS)
   async handleDatabaseMetricsCollection(): Promise<void> {
     this.logger.log("Starting metrics collection...");
 

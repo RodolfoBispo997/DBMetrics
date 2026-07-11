@@ -12,6 +12,8 @@ export declare class AlertRule {
     update(data: UpdateAlertRuleProps): void;
     enable(): void;
     disable(): void;
+    private static readonly PHONE_REGEX;
+    private static validateDestination;
     get id(): string;
     get metric(): AlertMetric;
     get operator(): AlertOperator;
@@ -21,4 +23,5 @@ export declare class AlertRule {
     get databaseConnectionId(): string;
     get createdAt(): Date;
     get updatedAt(): Date;
+    get destination(): string;
 }

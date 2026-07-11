@@ -34,6 +34,10 @@ __decorate([
     __metadata("design:type", String)
 ], CreateAlertRuleBodyHttpDTO.prototype, "channel", void 0);
 __decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateAlertRuleBodyHttpDTO.prototype, "destination", void 0);
+__decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateAlertRuleBodyHttpDTO.prototype, "connectionId", void 0);

@@ -47,6 +47,7 @@ let AlertsController = class AlertsController {
             operator: body.operator,
             threshold: body.threshold,
             channel: body.channel,
+            destination: body.destination,
         });
     }
     async get(alertRuleId, request) {
@@ -69,6 +70,7 @@ let AlertsController = class AlertsController {
             operator: body.operator,
             threshold: body.threshold,
             channel: body.channel,
+            destination: body.destination,
         });
     }
     async enable(alertRuleId, request) {

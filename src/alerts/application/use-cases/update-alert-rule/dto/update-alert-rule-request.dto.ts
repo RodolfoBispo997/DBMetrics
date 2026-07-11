@@ -11,4 +11,5 @@ export type UpdateAlertRuleRequestDTO = {
   operator: AlertOperator;
   threshold: number;
   channel: NotificationChannel;
+  destination: string;
 };

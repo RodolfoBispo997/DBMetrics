@@ -7,6 +7,7 @@ import { NotificationChannel } from "../enums/notification-channel.enum";
 import { AlertRuleProps } from "../types/alert-rule-props.type";
 import { CreateAlertRuleProps } from "../types/create-alert-rule-props.type";
 import { UpdateAlertRuleProps } from "../types/update-alert-rule-props.type";
+import { InvalidDestinationError } from "../errors/invalid-destination-error";
 
 export class AlertRule {
   private props: AlertRuleProps;
@@ -23,7 +24,7 @@ export class AlertRule {
       operator: data.operator,
       threshold: data.threshold,
       channel: data.channel,
-
+      destination: AlertRule.validateDestination(data.destination),
       enabled: true,
 
       databaseConnectionId: data.databaseConnectionId,
@@ -42,7 +43,7 @@ export class AlertRule {
     this.props.operator = data.operator;
     this.props.threshold = data.threshold;
     this.props.channel = data.channel;
-
+    this.props.destination = AlertRule.validateDestination(data.destination);
     this.props.updatedAt = new Date();
   }
 
@@ -54,6 +55,24 @@ export class AlertRule {
   disable(): void {
     this.props.enabled = false;
     this.props.updatedAt = new Date();
+  }
+
+  private static readonly PHONE_REGEX = /^55\d{10,13}$/;
+
+  private static validateDestination(destination: string): string {
+    const normalized = destination.trim();
+
+    if (!normalized) {
+      throw new InvalidDestinationError("Destination cannot be empty");
+    }
+
+    if (!this.PHONE_REGEX.test(normalized)) {
+      throw new InvalidDestinationError(
+        "Destination must be in E.164 format without '+' (e.g. 5511999999999)",
+      );
+    }
+
+    return normalized;
   }
 
   get id(): string {
@@ -90,5 +109,9 @@ export class AlertRule {
 
   get updatedAt(): Date {
     return this.props.updatedAt;
+  }
+
+  get destination(): string {
+    return this.props.destination;
   }
 }

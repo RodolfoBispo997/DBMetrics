@@ -9,11 +9,9 @@ export type AlertRuleProps = {
   operator: AlertOperator;
   threshold: number;
   channel: NotificationChannel;
-
+  destination: string;
   enabled: boolean;
-
   databaseConnectionId: string;
-
   createdAt: Date;
   updatedAt: Date;
 };

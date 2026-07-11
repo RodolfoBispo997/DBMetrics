@@ -20,6 +20,10 @@ import { InvalidNotificationChannelError } from "../errors/invalid-notification-
 import { AlertExecutionProps } from "../types/alert-execution-props.type";
 import { CreateAlertExecutionProps } from "../types/create-alert-execution-props.type";
 import { InvalidThresholdError } from "../errors/invalid-threshold-error";
+import { InvalidConnectionNameError } from "../errors/invalid-connection-name-error";
+import { InvalidHostError } from "../errors/invalid-host-error";
+import { InvalidDatabaseNameError } from "../errors/invalid-database-name-error";
+import { InvalidPortError } from "../errors/invalid-port-error";
 
 export class AlertExecution {
   private static readonly UUID_REGEX =
@@ -48,19 +52,19 @@ export class AlertExecution {
         InvalidDatabaseConnectionsIdError,
         "Database connection id",
       ),
-
+      connectionName: this.validateConnectionName(props.connectionName),
+      databaseProvider: props.databaseProvider,
+      host: this.validateHost(props.host),
+      databaseName: this.validateDatabaseName(props.databaseName),
+      port: this.validatePort(props.port),
       metric: this.validateMetric(props.metric),
       operator: this.validateOperator(props.operator),
-
       metricValue: this.validateMetricValue(props.metricValue),
       threshold: this.validateThreshold(props.threshold),
-
       channel: this.validateNotificationChannel(props.channel),
-
+      destination: props.destination,
       status: this.validateStatus(props.status ?? AlertExecutionStatus.PENDING),
-
       errorMessage: this.validateErrorMessage(props.errorMessage),
-
       triggeredAt: new Date(),
       sentAt: undefined,
     });
@@ -159,7 +163,7 @@ export class AlertExecution {
       return undefined;
     }
 
-    const normalized = message.trim();
+    const normalized = message.trim().replace(/\s+/g, " ");
 
     if (!normalized) {
       throw new InvalidErrorMessageError("Error message cannot be empty");
@@ -170,6 +174,48 @@ export class AlertExecution {
     }
 
     return normalized;
+  }
+
+  private static validateConnectionName(name: string): string {
+    const normalized = name.trim().replace(/\s+/g, " ");
+
+    if (!normalized) {
+      throw new InvalidConnectionNameError("Connection name cannot be empty");
+    }
+
+    return normalized;
+  }
+
+  private static validateHost(host: string): string {
+    const normalized = host.trim().replace(/\s+/g, " ");
+
+    if (!normalized) {
+      throw new InvalidHostError("Host cannot be empty");
+    }
+
+    return normalized;
+  }
+
+  private static validateDatabaseName(name: string): string {
+    const normalized = name.trim().replace(/\s+/g, " ");
+
+    if (!normalized) {
+      throw new InvalidDatabaseNameError("Database name cannot be empty");
+    }
+
+    return normalized;
+  }
+
+  private static validatePort(port: number): number {
+    if (!Number.isInteger(port)) {
+      throw new InvalidPortError("Port must be an integer");
+    }
+
+    if (port <= 0 || port > 65535) {
+      throw new InvalidPortError("Invalid port");
+    }
+
+    return port;
   }
 
   public markAsSent(): void {
@@ -247,5 +293,29 @@ export class AlertExecution {
 
   get sentAt() {
     return this.props.sentAt;
+  }
+
+  get connectionName() {
+    return this.props.connectionName;
+  }
+
+  get databaseProvider() {
+    return this.props.databaseProvider;
+  }
+
+  get host() {
+    return this.props.host;
+  }
+
+  get databaseName() {
+    return this.props.databaseName;
+  }
+
+  get port() {
+    return this.props.port;
+  }
+
+  get destination(): string {
+    return this.props.destination;
   }
 }

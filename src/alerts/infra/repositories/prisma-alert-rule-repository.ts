@@ -12,16 +12,13 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
     await prisma.alertRule.create({
       data: {
         id: alertRule.id,
-
         metric: alertRule.metric,
         operator: alertRule.operator,
         threshold: alertRule.threshold,
         channel: alertRule.channel,
-
+        destination: alertRule.destination,
         enabled: alertRule.enabled,
-
         databaseConnectionId: alertRule.databaseConnectionId,
-
         createdAt: alertRule.createdAt,
         updatedAt: alertRule.updatedAt,
       },
@@ -46,11 +43,9 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
       operator: alertRule.operator as AlertOperator,
       threshold: alertRule.threshold,
       channel: alertRule.channel as NotificationChannel,
-
+      destination: alertRule.destination,
       enabled: alertRule.enabled,
-
       databaseConnectionId: alertRule.databaseConnectionId,
-
       createdAt: alertRule.createdAt,
       updatedAt: alertRule.updatedAt,
     });
@@ -75,11 +70,9 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
         operator: alertRule.operator as AlertOperator,
         threshold: alertRule.threshold,
         channel: alertRule.channel as NotificationChannel,
-
+        destination: alertRule.destination,
         enabled: alertRule.enabled,
-
         databaseConnectionId: alertRule.databaseConnectionId,
-
         createdAt: alertRule.createdAt,
         updatedAt: alertRule.updatedAt,
       }),
@@ -97,9 +90,8 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
         operator: alertRule.operator,
         threshold: alertRule.threshold,
         channel: alertRule.channel,
-
+        destination: alertRule.destination,
         enabled: alertRule.enabled,
-
         updatedAt: alertRule.updatedAt,
       },
     });

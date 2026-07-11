@@ -6,4 +6,5 @@ export declare class UpdateAlertRuleBodyHttpDTO {
     operator: AlertOperator;
     threshold: number;
     channel: NotificationChannel;
+    destination: string;
 }

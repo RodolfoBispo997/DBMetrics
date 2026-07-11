@@ -19,6 +19,10 @@ export declare class AlertExecution {
     private static validateMetricValue;
     private static validateThreshold;
     private static validateErrorMessage;
+    private static validateConnectionName;
+    private static validateHost;
+    private static validateDatabaseName;
+    private static validatePort;
     markAsSent(): void;
     markAsFailed(errorMessage: string): void;
     markAsPending(): void;
@@ -35,4 +39,10 @@ export declare class AlertExecution {
     get errorMessage(): string | undefined;
     get triggeredAt(): Date;
     get sentAt(): Date | undefined;
+    get connectionName(): string;
+    get databaseProvider(): import("../../../database-connection/domain/enums/database-provider.enum").DatabaseProvider;
+    get host(): string;
+    get databaseName(): string;
+    get port(): number;
+    get destination(): string;
 }
