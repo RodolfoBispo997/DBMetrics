@@ -1,4 +1,4 @@
-import { DomainError } from "../../../user/domain/errors/domain-error";
+import { DomainError } from "@/shared/errors/domain-error";
 
 export class InvalidUsernameError extends DomainError {
   constructor(reason: string) {

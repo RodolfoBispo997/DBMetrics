@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { DomainError } from "../../../user/domain/errors/domain-error";
+import { DomainError } from "@/shared/errors/domain-error";
 import { InvalidActiveConnectionsError } from "../errors/invalid-active-connections-error";
 import { InvalidDatabaseConnectionIdError } from "../errors/invalid-database-connection-id-error";
 import { InvalidDatabaseSizeError } from "../errors/invalid-database-size-error";

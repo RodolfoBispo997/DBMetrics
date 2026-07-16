@@ -1,1 +1,0 @@
-{"version":3,"file":"database-connection-not-found-error.js","sourceRoot":"","sources":["../../../../src/database-connection/domain/errors/database-connection-not-found-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,+BAAgC,SAAQ,0BAAW;IAC9D,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,0EAIC"}

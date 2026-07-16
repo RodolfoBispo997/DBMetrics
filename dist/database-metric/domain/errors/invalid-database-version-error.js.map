@@ -1,1 +1,0 @@
-{"version":3,"file":"invalid-database-version-error.js","sourceRoot":"","sources":["../../../../src/database-metric/domain/errors/invalid-database-version-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,2BAA4B,SAAQ,0BAAW;IAC1D,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,kEAIC"}

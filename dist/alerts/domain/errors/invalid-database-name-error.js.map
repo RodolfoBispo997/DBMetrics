@@ -1,1 +1,0 @@
-{"version":3,"file":"invalid-database-name-error.js","sourceRoot":"","sources":["../../../../src/alerts/domain/errors/invalid-database-name-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,wBAAyB,SAAQ,0BAAW;IACvD,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,4DAIC"}

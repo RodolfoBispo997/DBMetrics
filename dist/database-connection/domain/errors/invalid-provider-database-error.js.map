@@ -1,1 +1,0 @@
-{"version":3,"file":"invalid-provider-database-error.js","sourceRoot":"","sources":["../../../../src/database-connection/domain/errors/invalid-provider-database-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,4BAA6B,SAAQ,0BAAW;IAC3D,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,oEAIC"}

@@ -1,1 +1,0 @@
-{"version":3,"file":"invalid-active-connections-error.js","sourceRoot":"","sources":["../../../../src/database-metric/domain/errors/invalid-active-connections-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,6BAA8B,SAAQ,0BAAW;IAC5D,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,sEAIC"}

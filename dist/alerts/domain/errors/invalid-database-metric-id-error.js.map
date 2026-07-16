@@ -1,1 +1,0 @@
-{"version":3,"file":"invalid-database-metric-id-error.js","sourceRoot":"","sources":["../../../../src/alerts/domain/errors/invalid-database-metric-id-error.ts"],"names":[],"mappings":";;;AAAA,2EAAuE;AAEvE,MAAa,4BAA6B,SAAQ,0BAAW;IAC3D,YAAY,MAAc;QACxB,KAAK,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;IACrB,CAAC;CACF;AAJD,oEAIC"}

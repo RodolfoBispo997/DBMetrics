@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { DomainError } from "../../../user/domain/errors/domain-error";
+import { DomainError } from "@/shared/errors/domain-error";
 
 import { AlertExecutionStatus } from "../enums/alert-execution-status.enum";
 import { AlertMetric } from "../enums/alert-metric.enum";

@@ -1,5 +1,5 @@
 import { UnauthorizedException } from "@nestjs/common";
-import { DomainError } from "./domain-error";
+import { DomainError } from "@/shared/errors/domain-error";
 
 export class InvalidCredentialsError extends UnauthorizedException {
   constructor(message: string) {
