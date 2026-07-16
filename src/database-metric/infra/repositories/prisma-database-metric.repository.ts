@@ -54,6 +54,7 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
     endDate: Date;
     order?: "asc" | "desc";
     limit?: number;
+    skip?: number;
   }): Promise<DatabaseMetrics[]> {
     const order = data.order ?? "desc";
     const metrics = await prisma.databaseMetric.findMany({
@@ -65,6 +66,7 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
         },
       },
       orderBy: [{ createdAt: order }, { id: order }],
+      skip: data.skip,
       take: data.limit,
     });
 
@@ -87,6 +89,22 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
         createdAt: metric.createdAt,
       }),
     );
+  }
+
+  async findHistoryCountByConnectionId(data: {
+    connectionId: string;
+    startDate: Date;
+    endDate: Date;
+  }): Promise<number> {
+    return prisma.databaseMetric.count({
+      where: {
+        databaseConnectionId: data.connectionId,
+        createdAt: {
+          gte: data.startDate,
+          lte: data.endDate,
+        },
+      },
+    });
   }
 
   async findLatestByConnectionIds(

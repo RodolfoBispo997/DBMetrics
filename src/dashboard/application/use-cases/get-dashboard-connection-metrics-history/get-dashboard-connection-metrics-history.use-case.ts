@@ -6,12 +6,12 @@ import { GetDashboardConnectionMetricsHistoryResponseDTO } from "./dto/get-dashb
 import { DatabaseConnectionNotFoundError } from "../../../../database-connection/domain/errors/database-connection-not-found-error";
 import { resolveDashboardDateRange } from "../../utils/resolve-dashboard-date-range";
 import { InvalidDashboardHistoryLimitError } from "../../errors/invalid-dashboard-history-limit-error";
+import { InvalidDashboardHistoryPageError } from "../../errors/invalid-dashboard-history-page-error";
 
-// Seven days of snapshots at the intended five-minute collection frequency.
-export const DASHBOARD_HISTORY_DEFAULT_LIMIT = 2_016;
+// Pagination defaults for metrics history endpoint.
+export const DASHBOARD_HISTORY_DEFAULT_LIMIT = 20;
 export const DASHBOARD_HISTORY_MIN_LIMIT = 1;
-// Covers seven days at the former 30-second development frequency.
-export const DASHBOARD_HISTORY_MAX_LIMIT = 20_160;
+export const DASHBOARD_HISTORY_MAX_LIMIT = 100;
 
 @Injectable()
 export class GetDashboardConnectionMetricsHistoryUseCase {
@@ -38,37 +38,55 @@ export class GetDashboardConnectionMetricsHistoryUseCase {
       startDate: data.startDate,
       endDate: data.endDate,
     });
-    const limit = resolveHistoryLimit(data.limit);
+      const limit = resolveHistoryLimit(data.limit);
+      const page = resolveHistoryPage(data.page);
 
-    const snapshots =
-      await this.databaseMetricRepository.findHistoryByConnectionId({
+      const skip = (page - 1) * limit;
+
+      const snapshots = await this.databaseMetricRepository.findHistoryByConnectionId({
         connectionId: connection.id,
         startDate,
         endDate,
         order: "desc",
         limit,
+        skip,
       });
 
-    return {
-      connectionId: connection.id,
+      const total = await this.databaseMetricRepository.findHistoryCountByConnectionId({
+        connectionId: connection.id,
+        startDate,
+        endDate,
+      });
 
-      history: snapshots.map((metric) => ({
-        id: metric.id,
+      const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
 
-        databaseVersion: metric.databaseVersion,
+      return {
+        connectionId: connection.id,
 
-        tablesCount: metric.tablesCount,
-        viewsCount: metric.viewsCount,
-        schemasCount: metric.schemasCount,
-        indexesCount: metric.indexesCount,
-        functionsCount: metric.functionsCount,
+        history: snapshots.map((metric) => ({
+          id: metric.id,
 
-        databaseSize: metric.databaseSize,
-        activeConnections: metric.activeConnections,
+          databaseVersion: metric.databaseVersion,
 
-        collectedAt: metric.createdAt,
-      })),
-    };
+          tablesCount: metric.tablesCount,
+          viewsCount: metric.viewsCount,
+          schemasCount: metric.schemasCount,
+          indexesCount: metric.indexesCount,
+          functionsCount: metric.functionsCount,
+
+          databaseSize: metric.databaseSize,
+          activeConnections: metric.activeConnections,
+
+          collectedAt: metric.createdAt,
+        })),
+
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+        },
+      };
   }
 }
 
@@ -90,4 +108,18 @@ function resolveHistoryLimit(value?: string): number {
   }
 
   return limit;
+}
+
+function resolveHistoryPage(value?: string): number {
+  if (value === undefined) {
+    return 1;
+  }
+
+  const page = Number(value);
+
+  if (!Number.isInteger(page) || page < 1) {
+    throw new InvalidDashboardHistoryPageError(`page must be an integer greater than or equal to 1`);
+  }
+
+  return page;
 }

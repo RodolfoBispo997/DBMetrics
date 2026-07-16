@@ -15,4 +15,10 @@ export type DashboardConnectionMetricHistoryItem = {
 export type GetDashboardConnectionMetricsHistoryResponseDTO = {
   connectionId: string;
   history: DashboardConnectionMetricHistoryItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 };

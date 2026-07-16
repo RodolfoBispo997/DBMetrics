@@ -29,6 +29,7 @@ export class DashboardController {
     @Param("connectionId") connectionId: string,
     @Query("startDate") startDate?: string,
     @Query("endDate") endDate?: string,
+    @Query("page") page?: string,
     @Query("limit") limit?: string,
   ) {
     const userId = request.user.userId;
@@ -38,6 +39,7 @@ export class DashboardController {
       connectionId,
       startDate,
       endDate,
+      page,
       limit,
     });
   }

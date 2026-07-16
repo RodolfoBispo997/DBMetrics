@@ -3,5 +3,6 @@ export type GetDashboardConnectionMetricsHistoryRequestDTO = {
   connectionId: string;
   startDate?: string;
   endDate?: string;
+  page?: string;
   limit?: string;
 };

@@ -9,7 +9,13 @@ export interface DatabaseMetricRepository {
     endDate: Date;
     order?: "asc" | "desc";
     limit?: number;
+    skip?: number;
   }): Promise<DatabaseMetrics[]>;
+  findHistoryCountByConnectionId(data: {
+    connectionId: string;
+    startDate: Date;
+    endDate: Date;
+  }): Promise<number>;
   findLatestByConnectionIds(
     connectionIds: string[],
   ): Promise<Map<string, DatabaseMetrics>>;
