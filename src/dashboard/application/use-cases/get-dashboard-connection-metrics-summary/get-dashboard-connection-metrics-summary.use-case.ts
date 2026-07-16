@@ -42,6 +42,7 @@ export class GetDashboardConnectionMetricsSummaryUseCase {
         connectionId: connection.id,
         startDate,
         endDate,
+        order: "desc",
       });
 
     if (history.length === 0) {

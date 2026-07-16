@@ -51,6 +51,7 @@ export class GetDashboardConnectionMetricsChartUseCase {
         connectionId: connection.id,
         startDate,
         endDate,
+        order: "desc",
       });
 
     const sortedSnapshots = [...snapshots].sort(

@@ -5,6 +5,13 @@ import { GetDashboardConnectionMetricsHistoryRequestDTO } from "./dto/get-dashbo
 import { GetDashboardConnectionMetricsHistoryResponseDTO } from "./dto/get-dashboard-connection-metrics-history-response.dto";
 import { DatabaseConnectionNotFoundError } from "../../../../database-connection/domain/errors/database-connection-not-found-error";
 import { resolveDashboardDateRange } from "../../utils/resolve-dashboard-date-range";
+import { InvalidDashboardHistoryLimitError } from "../../errors/invalid-dashboard-history-limit-error";
+
+// Seven days of snapshots at the intended five-minute collection frequency.
+export const DASHBOARD_HISTORY_DEFAULT_LIMIT = 2_016;
+export const DASHBOARD_HISTORY_MIN_LIMIT = 1;
+// Covers seven days at the former 30-second development frequency.
+export const DASHBOARD_HISTORY_MAX_LIMIT = 20_160;
 
 @Injectable()
 export class GetDashboardConnectionMetricsHistoryUseCase {
@@ -31,12 +38,15 @@ export class GetDashboardConnectionMetricsHistoryUseCase {
       startDate: data.startDate,
       endDate: data.endDate,
     });
+    const limit = resolveHistoryLimit(data.limit);
 
     const snapshots =
       await this.databaseMetricRepository.findHistoryByConnectionId({
         connectionId: connection.id,
         startDate,
         endDate,
+        order: "desc",
+        limit,
       });
 
     return {
@@ -60,4 +70,24 @@ export class GetDashboardConnectionMetricsHistoryUseCase {
       })),
     };
   }
+}
+
+function resolveHistoryLimit(value?: string): number {
+  if (value === undefined) {
+    return DASHBOARD_HISTORY_DEFAULT_LIMIT;
+  }
+
+  const limit = Number(value);
+
+  if (
+    !Number.isInteger(limit) ||
+    limit < DASHBOARD_HISTORY_MIN_LIMIT ||
+    limit > DASHBOARD_HISTORY_MAX_LIMIT
+  ) {
+    throw new InvalidDashboardHistoryLimitError(
+      `limit must be an integer between ${DASHBOARD_HISTORY_MIN_LIMIT} and ${DASHBOARD_HISTORY_MAX_LIMIT}`,
+    );
+  }
+
+  return limit;
 }

@@ -24,38 +24,39 @@ export class GetDashboardOverviewUseCase {
     const connections =
       await this.databaseConnectionRepository.findManyByUserId(data.userId);
 
-    const connectionOverviews: DashboardConnectionOverview[] =
-      await Promise.all(
-        connections.map(async (connection) => {
-          const lastMetric =
-            await this.databaseMetricRepository.findLatestByConnectionId(
-              connection.id,
-            );
-
-          return {
-            connectionId: connection.id,
-            name: connection.name,
-            provider: connection.provider,
-            database: connection.database,
-            lastMetric: lastMetric
-              ? {
-                  databaseVersion: lastMetric.databaseVersion,
-
-                  tablesCount: lastMetric.tablesCount,
-                  viewsCount: lastMetric.viewsCount,
-                  schemasCount: lastMetric.schemasCount,
-                  indexesCount: lastMetric.indexesCount,
-                  functionsCount: lastMetric.functionsCount,
-
-                  databaseSize: lastMetric.databaseSize,
-                  activeConnections: lastMetric.activeConnections,
-
-                  collectedAt: lastMetric.createdAt,
-                }
-              : null,
-          };
-        }),
+    const latestMetrics =
+      await this.databaseMetricRepository.findLatestByConnectionIds(
+        connections.map((connection) => connection.id),
       );
+
+    const connectionOverviews: DashboardConnectionOverview[] = connections.map(
+      (connection) => {
+        const lastMetric = latestMetrics.get(connection.id) ?? null;
+
+        return {
+          connectionId: connection.id,
+          name: connection.name,
+          provider: connection.provider,
+          database: connection.database,
+          lastMetric: lastMetric
+            ? {
+                databaseVersion: lastMetric.databaseVersion,
+
+                tablesCount: lastMetric.tablesCount,
+                viewsCount: lastMetric.viewsCount,
+                schemasCount: lastMetric.schemasCount,
+                indexesCount: lastMetric.indexesCount,
+                functionsCount: lastMetric.functionsCount,
+
+                databaseSize: lastMetric.databaseSize,
+                activeConnections: lastMetric.activeConnections,
+
+                collectedAt: lastMetric.createdAt,
+              }
+            : null,
+        };
+      },
+    );
 
     const summary = connectionOverviews.reduce<DashboardSummary>(
       (acc, connection) => {

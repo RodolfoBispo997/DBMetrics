@@ -3,6 +3,7 @@ import { InvalidDashboardDateRangeError } from "../errors/invalid-dashboard-date
 type ResolveDashboardDateRangeInput = {
   startDate?: string;
   endDate?: string;
+  now?: Date;
 };
 
 type ResolveDashboardDateRangeOutput = {
@@ -13,12 +14,19 @@ type ResolveDashboardDateRangeOutput = {
 export function resolveDashboardDateRange({
   startDate,
   endDate,
+  now = new Date(),
 }: ResolveDashboardDateRangeInput): ResolveDashboardDateRangeOutput {
-  const now = new Date();
+  const resolvedNow = new Date(now);
+
+  if (Number.isNaN(resolvedNow.getTime())) {
+    throw new InvalidDashboardDateRangeError("Invalid current date");
+  }
 
   if (startDate && endDate) {
     const resolvedStartDate = parseDate(startDate);
     const resolvedEndDate = parseDate(endDate);
+
+    validateEndDate(resolvedEndDate, resolvedNow);
 
     if (resolvedStartDate > resolvedEndDate) {
       throw new InvalidDashboardDateRangeError(
@@ -35,7 +43,7 @@ export function resolveDashboardDateRange({
   if (startDate && !endDate) {
     const resolvedStartDate = parseDate(startDate);
 
-    if (resolvedStartDate > now) {
+    if (resolvedStartDate > resolvedNow) {
       throw new InvalidDashboardDateRangeError(
         "startDate cannot be greater than endDate",
       );
@@ -43,12 +51,13 @@ export function resolveDashboardDateRange({
 
     return {
       startDate: resolvedStartDate,
-      endDate: now,
+      endDate: resolvedNow,
     };
   }
 
   if (!startDate && endDate) {
     const resolvedEndDate = parseDate(endDate);
+    validateEndDate(resolvedEndDate, resolvedNow);
     const resolvedStartDate = new Date(resolvedEndDate);
     resolvedStartDate.setDate(resolvedStartDate.getDate() - 7);
 
@@ -58,7 +67,7 @@ export function resolveDashboardDateRange({
     };
   }
 
-  const defaultEndDate = now;
+  const defaultEndDate = resolvedNow;
   const defaultStartDate = new Date(defaultEndDate);
   defaultStartDate.setDate(defaultStartDate.getDate() - 7);
 
@@ -66,6 +75,12 @@ export function resolveDashboardDateRange({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   };
+}
+
+function validateEndDate(endDate: Date, now: Date): void {
+  if (endDate > now) {
+    throw new InvalidDashboardDateRangeError("endDate cannot be in the future");
+  }
 }
 
 function parseDate(value: string): Date {
