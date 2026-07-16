@@ -12,7 +12,6 @@ var DatabaseMetricScheduler_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseMetricScheduler = void 0;
 const common_1 = require("@nestjs/common");
-const schedule_1 = require("@nestjs/schedule");
 const collect_database_metrics_use_case_1 = require("../../application/use-cases/collect-database-metrics/collect-database-metrics.use-case");
 let DatabaseMetricScheduler = DatabaseMetricScheduler_1 = class DatabaseMetricScheduler {
     constructor(collectDatabaseMetricsUseCase) {
@@ -26,12 +25,6 @@ let DatabaseMetricScheduler = DatabaseMetricScheduler_1 = class DatabaseMetricSc
     }
 };
 exports.DatabaseMetricScheduler = DatabaseMetricScheduler;
-__decorate([
-    (0, schedule_1.Cron)(schedule_1.CronExpression.EVERY_30_SECONDS),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], DatabaseMetricScheduler.prototype, "handleDatabaseMetricsCollection", null);
 exports.DatabaseMetricScheduler = DatabaseMetricScheduler = DatabaseMetricScheduler_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [collect_database_metrics_use_case_1.CollectDatabaseMetricsUseCase])
