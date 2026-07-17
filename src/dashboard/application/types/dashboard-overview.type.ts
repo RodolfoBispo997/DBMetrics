@@ -1,4 +1,5 @@
 import { DatabaseProvider } from "../../../database-connection/domain/enums/database-provider.enum";
+import { DatabaseHealth } from "../../../database-connection/application/types/database-health.type";
 
 export type DashboardSummary = {
   totalConnections: number;
@@ -17,6 +18,10 @@ export type DashboardConnectionOverview = {
   name: string;
   provider: DatabaseProvider;
   database: string;
+
+  health: (Omit<DatabaseHealth, "status"> & {
+    status: "ONLINE" | "WARNING" | "CRITICAL";
+  }) | null;
 
   lastMetric: {
     databaseVersion: string;

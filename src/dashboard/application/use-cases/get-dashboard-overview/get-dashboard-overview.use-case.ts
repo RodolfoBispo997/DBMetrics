@@ -7,6 +7,7 @@ import {
   DashboardConnectionOverview,
   DashboardSummary,
 } from "../../types/dashboard-overview.type";
+import { DatabaseHealthService } from "../../../../database-connection/application/services/database-health/database-health-service";
 
 @Injectable()
 export class GetDashboardOverviewUseCase {
@@ -16,6 +17,9 @@ export class GetDashboardOverviewUseCase {
 
     @Inject("DatabaseMetricRepository")
     private readonly databaseMetricRepository: DatabaseMetricRepository,
+
+    @Inject("DatabaseHealthService")
+    private readonly databaseHealthService: DatabaseHealthService,
   ) {}
 
   async execute(
@@ -32,12 +36,26 @@ export class GetDashboardOverviewUseCase {
     const connectionOverviews: DashboardConnectionOverview[] = connections.map(
       (connection) => {
         const lastMetric = latestMetrics.get(connection.id) ?? null;
+        let health: DashboardConnectionOverview["health"] = null;
+
+        if (lastMetric) {
+          const evaluatedHealth = this.databaseHealthService.evaluate(lastMetric);
+
+          if (evaluatedHealth.status !== "OFFLINE") {
+            health = {
+              status: evaluatedHealth.status,
+              message: evaluatedHealth.message,
+              checkedAt: lastMetric.createdAt,
+            };
+          }
+        }
 
         return {
           connectionId: connection.id,
           name: connection.name,
           provider: connection.provider,
           database: connection.database,
+          health,
           lastMetric: lastMetric
             ? {
                 databaseVersion: lastMetric.databaseVersion,

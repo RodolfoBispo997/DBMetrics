@@ -58,5 +58,6 @@ import { DatabaseHealthServiceImpl } from "./infra/services/database-health/data
       useClass: DatabaseHealthServiceImpl,
     },
   ],
+  exports: ["DatabaseHealthService"],
 })
 export class DatabaseConnectionModule {}

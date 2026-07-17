@@ -6,8 +6,10 @@ import { PrismaDatabaseMetricRepository } from "../database-metric/infra/reposit
 import { GetDashboardConnectionMetricsHistoryUseCase } from "./application/use-cases/get-dashboard-connection-metrics-history/get-dashboard-connection-metrics-history.use-case";
 import { GetDashboardConnectionMetricsChartUseCase } from "./application/use-cases/get-dashboard-connection-metrics-chart/get-dashboard-connection-metrics-chart.use-case";
 import { GetDashboardConnectionMetricsSummaryUseCase } from "./application/use-cases/get-dashboard-connection-metrics-summary/get-dashboard-connection-metrics-summary.use-case";
+import { DatabaseConnectionModule } from "../database-connection/database-connection.module";
 
 @Module({
+  imports: [DatabaseConnectionModule],
   controllers: [DashboardController],
   providers: [
     GetDashboardOverviewUseCase,
