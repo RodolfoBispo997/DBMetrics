@@ -8,6 +8,10 @@ import { AlertRuleProps } from "../types/alert-rule-props.type";
 import { CreateAlertRuleProps } from "../types/create-alert-rule-props.type";
 import { UpdateAlertRuleProps } from "../types/update-alert-rule-props.type";
 import { InvalidDestinationError } from "../errors/invalid-destination-error";
+import { InvalidAlertMetricError } from "../errors/invalid-alert-metric-error";
+import { InvalidAlertOperatorError } from "../errors/invalid-alert-operator-error";
+import { InvalidNotificationChannelError } from "../errors/invalid-notification-channel-error";
+import { InvalidThresholdError } from "../errors/invalid-threshold-error";
 
 export class AlertRule {
   private props: AlertRuleProps;
@@ -20,10 +24,10 @@ export class AlertRule {
     return new AlertRule({
       id: randomUUID(),
 
-      metric: data.metric,
-      operator: data.operator,
-      threshold: data.threshold,
-      channel: data.channel,
+      metric: AlertRule.validateMetric(data.metric),
+      operator: AlertRule.validateOperator(data.operator),
+      threshold: AlertRule.validateThreshold(data.threshold),
+      channel: AlertRule.validateChannel(data.channel),
       destination: AlertRule.validateDestination(data.destination),
       enabled: true,
 
@@ -39,10 +43,10 @@ export class AlertRule {
   }
 
   update(data: UpdateAlertRuleProps): void {
-    this.props.metric = data.metric;
-    this.props.operator = data.operator;
-    this.props.threshold = data.threshold;
-    this.props.channel = data.channel;
+    this.props.metric = AlertRule.validateMetric(data.metric);
+    this.props.operator = AlertRule.validateOperator(data.operator);
+    this.props.threshold = AlertRule.validateThreshold(data.threshold);
+    this.props.channel = AlertRule.validateChannel(data.channel);
     this.props.destination = AlertRule.validateDestination(data.destination);
     this.props.updatedAt = new Date();
   }
@@ -57,7 +61,47 @@ export class AlertRule {
     this.props.updatedAt = new Date();
   }
 
-  private static readonly PHONE_REGEX = /^55\d{10,13}$/;
+  private static readonly PHONE_REGEX = /^55\d{10,11}$/;
+
+  private static validateMetric(metric: AlertMetric): AlertMetric {
+    if (!Object.values(AlertMetric).includes(metric)) {
+      throw new InvalidAlertMetricError("Invalid alert metric");
+    }
+
+    return metric;
+  }
+
+  private static validateOperator(operator: AlertOperator): AlertOperator {
+    if (!Object.values(AlertOperator).includes(operator)) {
+      throw new InvalidAlertOperatorError("Invalid alert operator");
+    }
+
+    return operator;
+  }
+
+  private static validateChannel(
+    channel: NotificationChannel,
+  ): NotificationChannel {
+    if (channel !== NotificationChannel.WHATSAPP) {
+      throw new InvalidNotificationChannelError(
+        "Only WhatsApp notifications are supported",
+      );
+    }
+
+    return channel;
+  }
+
+  private static validateThreshold(threshold: number): number {
+    if (!Number.isFinite(threshold)) {
+      throw new InvalidThresholdError("Threshold must be a valid number");
+    }
+
+    if (threshold < 0) {
+      throw new InvalidThresholdError("Threshold cannot be negative");
+    }
+
+    return threshold;
+  }
 
   private static validateDestination(destination: string): string {
     const normalized = destination.trim();

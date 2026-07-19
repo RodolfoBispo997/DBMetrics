@@ -24,6 +24,7 @@ import { DeleteAlertRuleUseCase } from "./application/use-cases/delete-alert-rul
 import { GetAlertExecutionUseCase } from "./application/use-cases/get-alert-execution/get-alert-execution.use-case";
 import { ListAlertExecutionsUseCase } from "./application/use-cases/list-alert-executions/list-alert-executions.use-case";
 import { AlertExecutionPresenter } from "./presentation/presenters/alert-execution.presenter";
+import { AlertRulePresenter } from "./presentation/presenters/alert-rule.presenter";
 
 @Controller("alerts")
 export class AlertsController {
@@ -42,7 +43,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() body: CreateAlertRuleBodyHttpDTO, @Req() request: any) {
-    return this.createAlertRuleUseCase.execute({
+    const alertRule = await this.createAlertRuleUseCase.execute({
       userId: request.user.userId,
       connectionId: body.connectionId,
       metric: body.metric,
@@ -51,24 +52,27 @@ export class AlertsController {
       channel: body.channel,
       destination: body.destination,
     });
+    return AlertRulePresenter.toHTTP(alertRule);
   }
 
   @Get(":id")
   @UseGuards(JwtAuthGuard)
   async get(@Param("id") alertRuleId: string, @Req() request: any) {
-    return this.getAlertRuleUseCase.execute({
+    const alertRule = await this.getAlertRuleUseCase.execute({
       userId: request.user.userId,
       alertRuleId,
     });
+    return AlertRulePresenter.toHTTP(alertRule);
   }
 
   @Get("/connection/:connectionId")
   @UseGuards(JwtAuthGuard)
   async list(@Param("connectionId") connectionId: string, @Req() request: any) {
-    return this.listAlertRulesUseCase.execute({
+    const alertRules = await this.listAlertRulesUseCase.execute({
       userId: request.user.userId,
       connectionId,
     });
+    return alertRules.map(AlertRulePresenter.toHTTP);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -78,7 +82,7 @@ export class AlertsController {
     @Body() body: UpdateAlertRuleBodyHttpDTO,
     @Req() request: any,
   ) {
-    return this.updateAlertRuleUseCase.execute({
+    const alertRule = await this.updateAlertRuleUseCase.execute({
       userId: request.user.userId,
       alertRuleId,
       metric: body.metric,
@@ -87,32 +91,33 @@ export class AlertsController {
       channel: body.channel,
       destination: body.destination,
     });
+    return AlertRulePresenter.toHTTP(alertRule);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(":id/enable")
-  @HttpCode(HttpStatus.NO_CONTENT)
   async enable(
     @Param("id") alertRuleId: string,
     @Req() request: any,
-  ): Promise<void> {
-    return this.enableAlertRuleUseCase.execute({
+  ) {
+    const alertRule = await this.enableAlertRuleUseCase.execute({
       userId: request.user.userId,
       alertRuleId,
     });
+    return AlertRulePresenter.toHTTP(alertRule);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(":id/disable")
-  @HttpCode(HttpStatus.NO_CONTENT)
   async disable(
     @Param("id") alertRuleId: string,
     @Req() request: any,
-  ): Promise<void> {
-    return this.disableAlertRuleUseCase.execute({
+  ) {
+    const alertRule = await this.disableAlertRuleUseCase.execute({
       userId: request.user.userId,
       alertRuleId,
     });
+    return AlertRulePresenter.toHTTP(alertRule);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -131,10 +136,11 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Get("/executions/:id")
   async getExecution(@Param("id") executionId: string, @Req() request: any) {
-    return this.getAlertExecutionUseCase.execute({
+    const execution = await this.getAlertExecutionUseCase.execute({
       executionId,
       userId: request.user.userId,
     });
+    return AlertExecutionPresenter.toHTTP(execution);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -143,10 +149,10 @@ export class AlertsController {
     @Param("connectionId") connectionId: string,
     @Req() request: any,
   ) {
-    const rules = await this.listAlertExecutionsUseCase.execute({
+    const executions = await this.listAlertExecutionsUseCase.execute({
       connectionId,
       userId: request.user.userId,
     });
-    return rules.map(AlertExecutionPresenter.toHTTP);
+    return executions.map(AlertExecutionPresenter.toHTTP);
   }
 }

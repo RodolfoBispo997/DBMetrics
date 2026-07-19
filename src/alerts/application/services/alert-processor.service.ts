@@ -7,6 +7,8 @@ import { AlertEvaluatorService } from "./alert-evaluator.service";
 import { NotificationFactory } from "./notification-factory.service";
 
 import { DatabaseMetrics } from "../../../database-metric/domain/entities/database-metric";
+import { DatabaseConnection } from "../../../database-connection/domain/entities/database-connection";
+import { AlertRule } from "../../domain/entities/alert-rule";
 
 import { CreateAlertExecutionUseCase } from "../use-cases/create-alert-execution/create-alert-execution.use-case";
 
@@ -35,29 +37,40 @@ export class AlertProcessorService {
   ) {}
 
   async process(metrics: DatabaseMetrics): Promise<void> {
-    const rules = await this.alertRuleRepository.findManyByConnectionId(
-      metrics.databaseConnectionId,
-    );
-
-    const connection = await this.databaseConnectionRepository.findById(
-      metrics.databaseConnectionId,
-    );
-
-    if (!connection) {
-      this.logger.error(
-        `Database connection ${metrics.databaseConnectionId} not found.`,
+    try {
+      const rules = await this.alertRuleRepository.findManyByConnectionId(
+        metrics.databaseConnectionId,
+      );
+      const connection = await this.databaseConnectionRepository.findById(
+        metrics.databaseConnectionId,
       );
 
-      return;
+      if (!connection) {
+        this.logger.error(
+          `Database connection ${metrics.databaseConnectionId} not found.`,
+        );
+        return;
+      }
+
+      for (const rule of rules.filter((candidate) => candidate.enabled)) {
+        await this.processRule(rule, metrics, connection);
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to process alerts for metric ${metrics.id}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
+  }
 
-    const enabledRules = rules.filter((rule) => rule.enabled);
-
-    for (const rule of enabledRules) {
-      const matched = this.alertEvaluator.evaluate(rule, metrics);
-
-      if (!matched) {
-        continue;
+  private async processRule(
+    rule: AlertRule,
+    metrics: DatabaseMetrics,
+    connection: DatabaseConnection,
+  ): Promise<void> {
+    try {
+      if (!this.alertEvaluator.evaluate(rule, metrics)) {
+        return;
       }
 
       const execution = await this.createAlertExecutionUseCase.execute(
@@ -67,37 +80,38 @@ export class AlertProcessorService {
       );
 
       this.logger.warn(
-        `[${execution.status}] ${rule.metric} exceeded the threshold (${rule.threshold})`,
+        `[${execution.status}] ${rule.metric} matched its threshold (${rule.threshold})`,
       );
 
-      const notification = this.notificationFactory.get(execution.channel);
-
       try {
-        this.logger.log(
-          `Sending WhatsApp notification to ${execution.destination}`,
-        );
-
+        const notification = this.notificationFactory.get(execution.channel);
+        this.logger.log(`Sending notification to ${execution.destination}`);
         await notification.send(execution);
-
-        this.logger.log(
-          `WhatsApp notification sent to ${execution.destination}`,
-        );
-
         execution.markAsSent();
-
-        await this.alertExecutionRepository.update(execution);
+        this.logger.log(`Notification sent to ${execution.destination}`);
       } catch (error) {
         execution.markAsFailed(
           error instanceof Error ? error.message : "Unknown error",
         );
-
-        await this.alertExecutionRepository.update(execution);
-
         this.logger.error(
           `Failed to send notification for execution ${execution.id}`,
           error instanceof Error ? error.stack : undefined,
         );
       }
+
+      try {
+        await this.alertExecutionRepository.update(execution);
+      } catch (error) {
+        this.logger.error(
+          `Failed to persist execution ${execution.id}`,
+          error instanceof Error ? error.stack : undefined,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to process alert rule ${rule.id}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 }

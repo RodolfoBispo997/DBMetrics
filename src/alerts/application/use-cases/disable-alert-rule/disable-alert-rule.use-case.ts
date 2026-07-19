@@ -7,6 +7,7 @@ import { AlertRuleNotFoundError } from "../../../domain/errors/alert-rule-not-fo
 import { DatabaseConnectionNotFoundError } from "../../../../database-connection/domain/errors/database-connection-not-found-error";
 
 import { DisableAlertRuleRequestDTO } from "./dto/disable-alert-rule-request.dto";
+import { AlertRule } from "../../../domain/entities/alert-rule";
 
 @Injectable()
 export class DisableAlertRuleUseCase {
@@ -18,7 +19,7 @@ export class DisableAlertRuleUseCase {
     private readonly databaseConnectionRepository: DatabaseConnectionRepository,
   ) {}
 
-  async execute(data: DisableAlertRuleRequestDTO): Promise<void> {
+  async execute(data: DisableAlertRuleRequestDTO): Promise<AlertRule> {
     const alertRule = await this.alertRuleRepository.findById(data.alertRuleId);
 
     if (!alertRule) {
@@ -36,5 +37,7 @@ export class DisableAlertRuleUseCase {
     alertRule.disable();
 
     await this.alertRuleRepository.update(alertRule);
+
+    return alertRule;
   }
 }

@@ -6,7 +6,7 @@ import { DatabaseConnectionRepository } from "../../../../database-connection/ap
 import { DatabaseConnectionNotFoundError } from "../../../../database-connection/domain/errors/database-connection-not-found-error";
 
 import { ListAlertRulesRequestDTO } from "./dto/list-alert-rules-request.dto";
-import { ListAlertRulesResponseDTO } from "./dto/list-alert-rules-response.dto";
+import { AlertRule } from "../../../domain/entities/alert-rule";
 
 @Injectable()
 export class ListAlertRulesUseCase {
@@ -20,7 +20,7 @@ export class ListAlertRulesUseCase {
 
   async execute(
     data: ListAlertRulesRequestDTO,
-  ): Promise<ListAlertRulesResponseDTO> {
+  ): Promise<AlertRule[]> {
     const connection = await this.databaseConnectionRepository.findById(
       data.connectionId,
     );
@@ -33,21 +33,6 @@ export class ListAlertRulesUseCase {
       connection.id,
     );
 
-    return {
-      alerts: alertRules.map((alertRule) => ({
-        id: alertRule.id,
-
-        metric: alertRule.metric,
-        operator: alertRule.operator,
-        threshold: alertRule.threshold,
-
-        channel: alertRule.channel,
-
-        enabled: alertRule.enabled,
-
-        createdAt: alertRule.createdAt,
-        updatedAt: alertRule.updatedAt,
-      })),
-    };
+    return alertRules;
   }
 }

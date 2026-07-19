@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsString } from "class-validator";
+import { IsEnum, IsIn, IsNumber, IsString } from "class-validator";
 
 import { AlertMetric } from "../../domain/enums/alert-metric.enum";
 import { AlertOperator } from "../../domain/enums/alert-operator.enum";
@@ -14,7 +14,7 @@ export class UpdateAlertRuleBodyHttpDTO {
   @IsNumber()
   threshold!: number;
 
-  @IsEnum(NotificationChannel)
+  @IsIn([NotificationChannel.WHATSAPP])
   channel!: NotificationChannel;
 
   @IsString()
