@@ -2,10 +2,10 @@ import { Inject, Injectable } from "@nestjs/common";
 
 import { AlertExecutionRepository } from "../../repositories/alert-execution-repository";
 
-import { AlertExecution } from "../../../domain/entities/alert-execution";
 import { DatabaseConnectionRepository } from "../../../../database-connection/application/repositories/database-connection-repository";
 import { InvalidDatabaseConnectionIdError } from "../../../../database-metric/domain/errors/invalid-database-connection-id-error";
 import { ListAlertExecutionsRequestDTO } from "./dto/list-alert-executions-request.dto";
+import { ListAlertExecutionsResponseDTO } from "./dto/list-alert-executions-response.dto";
 
 @Injectable()
 export class ListAlertExecutionsUseCase {
@@ -18,9 +18,8 @@ export class ListAlertExecutionsUseCase {
   ) {}
 
   async execute({
-    connectionId,
-    userId,
-  }: ListAlertExecutionsRequestDTO): Promise<AlertExecution[]> {
+    connectionId, userId, page, pageSize,
+  }: ListAlertExecutionsRequestDTO): Promise<ListAlertExecutionsResponseDTO> {
     const connection =
       await this.databaseConnectionRepository.findById(connectionId);
 
@@ -30,6 +29,19 @@ export class ListAlertExecutionsUseCase {
       );
     }
 
-    return this.alertExecutionRepository.findManyByConnectionId(connectionId);
+    const { executions, total } =
+      await this.alertExecutionRepository.findManyByConnectionId({
+        connectionId,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      });
+
+    return {
+      executions,
+      page,
+      pageSize,
+      total,
+      totalPages: total === 0 ? 0 : Math.ceil(total / pageSize),
+    };
   }
 }

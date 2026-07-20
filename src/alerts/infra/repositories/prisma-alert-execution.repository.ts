@@ -95,47 +95,58 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
     });
   }
 
-  async findManyByConnectionId(
-    connectionId: string,
-  ): Promise<AlertExecution[]> {
-    const executions = await prisma.alertExecution.findMany({
-      where: {
-        databaseConnectionId: connectionId,
-      },
+  async findManyByConnectionId(data: {
+    connectionId: string;
+    skip: number;
+    take: number;
+  }): Promise<{ executions: AlertExecution[]; total: number }> {
+    const where = {
+      databaseConnectionId: data.connectionId,
+    };
 
-      orderBy: {
-        triggeredAt: "desc",
-      },
-    });
-
-    return executions.map((execution) =>
-      AlertExecution.restore({
-        id: execution.id,
-
-        alertRuleId: execution.alertRuleId,
-        databaseMetricId: execution.databaseMetricId,
-        databaseConnectionId: execution.databaseConnectionId,
-        connectionName: execution.connectionName,
-        databaseProvider: execution.databaseProvider as DatabaseProvider,
-        host: execution.host,
-        databaseName: execution.databaseName,
-        port: execution.port,
-        metric: execution.metric as AlertMetric,
-        operator: execution.operator as AlertOperator,
-
-        metricValue: execution.metricValue,
-        threshold: execution.threshold,
-
-        channel: execution.channel as NotificationChannel,
-        destination: execution.destination,
-        status: execution.status as AlertExecutionStatus,
-
-        errorMessage: execution.errorMessage ?? undefined,
-
-        triggeredAt: execution.triggeredAt,
-        sentAt: execution.sentAt ?? undefined,
+    const [executions, total] = await Promise.all([
+      prisma.alertExecution.findMany({
+        where,
+        orderBy: {
+          triggeredAt: "desc",
+        },
+        skip: data.skip,
+        take: data.take,
       }),
-    );
+      prisma.alertExecution.count({ where }),
+    ]);
+
+    return {
+      total,
+      executions: executions.map((execution) =>
+        AlertExecution.restore({
+          id: execution.id,
+
+          alertRuleId: execution.alertRuleId,
+          databaseMetricId: execution.databaseMetricId,
+          databaseConnectionId: execution.databaseConnectionId,
+          connectionName: execution.connectionName,
+          databaseProvider: execution.databaseProvider as DatabaseProvider,
+          host: execution.host,
+          databaseName: execution.databaseName,
+          port: execution.port,
+          metric: execution.metric as AlertMetric,
+          operator: execution.operator as AlertOperator,
+
+          metricValue: execution.metricValue,
+          threshold: execution.threshold,
+
+          channel: execution.channel as NotificationChannel,
+          destination: execution.destination,
+          status: execution.status as AlertExecutionStatus,
+
+          errorMessage: execution.errorMessage ?? undefined,
+
+          triggeredAt: execution.triggeredAt,
+          sentAt: execution.sentAt ?? undefined,
+        }),
+      ),
+    };
   }
 
   async findRecent(limit: number): Promise<AlertExecution[]> {
@@ -161,12 +172,16 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
         port: execution.port,
         metric: execution.metric as AlertMetric,
         operator: execution.operator as AlertOperator,
+
         metricValue: execution.metricValue,
         threshold: execution.threshold,
+
         channel: execution.channel as NotificationChannel,
         destination: execution.destination,
         status: execution.status as AlertExecutionStatus,
+
         errorMessage: execution.errorMessage ?? undefined,
+
         triggeredAt: execution.triggeredAt,
         sentAt: execution.sentAt ?? undefined,
       }),

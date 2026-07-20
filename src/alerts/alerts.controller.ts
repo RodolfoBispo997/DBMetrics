@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from "@nestjs/common";
@@ -25,6 +26,7 @@ import { GetAlertExecutionUseCase } from "./application/use-cases/get-alert-exec
 import { ListAlertExecutionsUseCase } from "./application/use-cases/list-alert-executions/list-alert-executions.use-case";
 import { AlertExecutionPresenter } from "./presentation/presenters/alert-execution.presenter";
 import { AlertRulePresenter } from "./presentation/presenters/alert-rule.presenter";
+import { ListAlertExecutionsQueryHttpDTO } from "./presentation/dto/list-alert-executions-query-http.dto";
 
 @Controller("alerts")
 export class AlertsController {
@@ -147,12 +149,24 @@ export class AlertsController {
   @Get("/connection/:connectionId/executions")
   async listExecutions(
     @Param("connectionId") connectionId: string,
+    @Query() query: ListAlertExecutionsQueryHttpDTO,
     @Req() request: any,
   ) {
-    const executions = await this.listAlertExecutionsUseCase.execute({
+    const result = await this.listAlertExecutionsUseCase.execute({
       connectionId,
       userId: request.user.userId,
+      page: query.page,
+      pageSize: query.pageSize,
     });
-    return executions.map(AlertExecutionPresenter.toHTTP);
+
+    return {
+      data: result.executions.map(AlertExecutionPresenter.toHTTP),
+      meta: {
+        page: result.page,
+        pageSize: result.pageSize,
+        total: result.total,
+        totalPages: result.totalPages,
+      },
+    };
   }
 }
