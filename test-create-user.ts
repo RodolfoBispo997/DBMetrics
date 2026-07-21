@@ -1,20 +1,22 @@
-import { BcryptHashGenerator } from "./src/shared/cryptography/bcrypt-hash-generator";
 import { CreateUserUseCase } from "./src/user/application/use-cases/create-user/create-user.use-case";
-import { PrismaUserRepository } from "./src/user/infra/repositories/prisma-user.repository";
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./src/app/app.module";
 
 async function main() {
-  const repository = new PrismaUserRepository();
-  const hashGenerator = new BcryptHashGenerator();
+  const app = await NestFactory.createApplicationContext(AppModule);
 
-  const createUserUseCase = new CreateUserUseCase(repository, hashGenerator);
+  try {
+    const createUserUseCase = app.get(CreateUserUseCase, { strict: false });
+    const user = await createUserUseCase.execute({
+      name: "Rodolfo Bispo",
+      email: "rodolfo1@email.com",
+      password: "123456789",
+    });
 
-  const user = await createUserUseCase.execute({
-    name: "Rodolfo Bispo",
-    email: "rodolfo1@email.com",
-    password: "123456789",
-  });
-
-  console.log(user);
+    console.log(user);
+  } finally {
+    await app.close();
+  }
 }
 
 main();

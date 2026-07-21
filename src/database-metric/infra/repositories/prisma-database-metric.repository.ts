@@ -1,6 +1,7 @@
+import { Injectable } from "@nestjs/common";
 import { DatabaseMetricRepository } from "../../application/repositories/database-metric-repository";
 import { DatabaseMetrics } from "../../domain/entities/database-metric";
-import { prisma } from "../../../user/infra/database/prisma/prisma-client";
+import { PrismaService } from "../../../shared/infra/database/prisma/prisma.service";
 import { Prisma } from "../../../../generated/prisma/client";
 
 type DatabaseMetricRow = {
@@ -17,9 +18,12 @@ type DatabaseMetricRow = {
   createdAt: Date;
 };
 
+@Injectable()
 export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
   async findByConnectionId(connectionId: string): Promise<DatabaseMetrics[]> {
-    const metrics = await prisma.databaseMetric.findMany({
+    const metrics = await this.prisma.databaseMetric.findMany({
       where: {
         databaseConnectionId: connectionId,
       },
@@ -57,7 +61,7 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
     skip?: number;
   }): Promise<DatabaseMetrics[]> {
     const order = data.order ?? "desc";
-    const metrics = await prisma.databaseMetric.findMany({
+    const metrics = await this.prisma.databaseMetric.findMany({
       where: {
         databaseConnectionId: data.connectionId,
         createdAt: {
@@ -96,7 +100,7 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
     startDate: Date;
     endDate: Date;
   }): Promise<number> {
-    return prisma.databaseMetric.count({
+    return this.prisma.databaseMetric.count({
       where: {
         databaseConnectionId: data.connectionId,
         createdAt: {
@@ -114,7 +118,7 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
       return new Map();
     }
 
-    const metrics = await prisma.$queryRaw<DatabaseMetricRow[]>(Prisma.sql`
+    const metrics = await this.prisma.$queryRaw<DatabaseMetricRow[]>(Prisma.sql`
       SELECT DISTINCT ON ("databaseConnectionId")
         "id",
         "databaseConnectionId",
@@ -143,7 +147,7 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
   async findLatestByConnectionId(
     connectionId: string,
   ): Promise<DatabaseMetrics | null> {
-    const metric = await prisma.databaseMetric.findFirst({
+    const metric = await this.prisma.databaseMetric.findFirst({
       where: {
         databaseConnectionId: connectionId,
       },
@@ -176,7 +180,7 @@ export class PrismaDatabaseMetricRepository implements DatabaseMetricRepository 
   }
 
   async save(metric: DatabaseMetrics): Promise<void> {
-    await prisma.databaseMetric.create({
+    await this.prisma.databaseMetric.create({
       data: {
         id: metric.id,
 

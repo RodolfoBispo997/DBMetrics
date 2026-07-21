@@ -1,11 +1,15 @@
-import { prisma } from "../../../user/infra/database/prisma/prisma-client";
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../../../shared/infra/database/prisma/prisma.service";
 import { DatabaseConnectionRepository } from "../../application/repositories/database-connection-repository";
 import { DatabaseConnection } from "../../domain/entities/database-connection";
 import { DatabaseProvider } from "../../domain/enums/database-provider.enum";
 
+@Injectable()
 export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
   async save(connection: DatabaseConnection): Promise<void> {
-    await prisma.databaseConnection.create({
+    await this.prisma.databaseConnection.create({
       data: {
         id: connection.id,
         name: connection.name,
@@ -21,7 +25,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
   }
 
   async findManyByUserId(userId: string): Promise<DatabaseConnection[]> {
-    const databaseConnections = await prisma.databaseConnection.findMany({
+    const databaseConnections = await this.prisma.databaseConnection.findMany({
       where: {
         userId,
       },
@@ -43,7 +47,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
   }
 
   async findById(id: string): Promise<DatabaseConnection | null> {
-    const databaseConnection = await prisma.databaseConnection.findUnique({
+    const databaseConnection = await this.prisma.databaseConnection.findUnique({
       where: {
         id: id,
       },
@@ -67,7 +71,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
   }
 
   async findAll(): Promise<DatabaseConnection[]> {
-    const databaseConnections = await prisma.databaseConnection.findMany();
+    const databaseConnections = await this.prisma.databaseConnection.findMany();
 
     return databaseConnections.map((connection) =>
       DatabaseConnection.restore({
@@ -85,7 +89,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
   }
 
   async update(connection: DatabaseConnection): Promise<void> {
-    await prisma.databaseConnection.update({
+    await this.prisma.databaseConnection.update({
       where: {
         id: connection.id,
       },
@@ -102,7 +106,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
   }
 
   async delete(id: string) {
-    await prisma.databaseConnection.delete({
+    await this.prisma.databaseConnection.delete({
       where: {
         id: id,
       },

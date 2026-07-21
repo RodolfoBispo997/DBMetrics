@@ -1,4 +1,5 @@
-import { prisma } from "../../../user/infra/database/prisma/prisma-client";
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../../../shared/infra/database/prisma/prisma.service";
 
 import { AlertRuleRepository } from "../../application/repositories/alert-rule-repository";
 
@@ -7,9 +8,12 @@ import { AlertMetric } from "../../domain/enums/alert-metric.enum";
 import { AlertOperator } from "../../domain/enums/alert-operator.enum";
 import { NotificationChannel } from "../../domain/enums/notification-channel.enum";
 
+@Injectable()
 export class PrismaAlertRuleRepository implements AlertRuleRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
   async save(alertRule: AlertRule): Promise<void> {
-    await prisma.alertRule.create({
+    await this.prisma.alertRule.create({
       data: {
         id: alertRule.id,
         metric: alertRule.metric,
@@ -26,7 +30,7 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
   }
 
   async findById(id: string): Promise<AlertRule | null> {
-    const alertRule = await prisma.alertRule.findUnique({
+    const alertRule = await this.prisma.alertRule.findUnique({
       where: {
         id,
       },
@@ -52,7 +56,7 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
   }
 
   async findManyByConnectionId(connectionId: string): Promise<AlertRule[]> {
-    const alertRules = await prisma.alertRule.findMany({
+    const alertRules = await this.prisma.alertRule.findMany({
       where: {
         databaseConnectionId: connectionId,
       },
@@ -80,7 +84,7 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
   }
 
   async update(alertRule: AlertRule): Promise<void> {
-    await prisma.alertRule.update({
+    await this.prisma.alertRule.update({
       where: {
         id: alertRule.id,
       },
@@ -98,7 +102,7 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await prisma.alertRule.delete({
+    await this.prisma.alertRule.delete({
       where: {
         id,
       },

@@ -8,10 +8,12 @@ import { DatabaseMetricModule } from "../database-metric/database-metric.module"
 import { DashboardModule } from "../dashboard/dashboard.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { AlertsModule } from "../alerts/alerts.module";
+import { PrismaModule } from "../shared/infra/database/prisma/prisma.module";
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    PrismaModule,
     AlertsModule,
     UserModule,
     AuthModule,

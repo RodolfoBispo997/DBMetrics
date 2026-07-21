@@ -1,22 +1,23 @@
-import { BcryptHashComparer } from "./src/shared/cryptography/bcrypt-hash-comparer";
 import { AuthenticateUserUseCase } from "./src/user/application/use-cases/authenticate-user/authenticate-user-use-case";
-import { PrismaUserRepository } from "./src/user/infra/repositories/prisma-user.repository";
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./src/app/app.module";
 
 async function login() {
-  const prismaUserRepository = new PrismaUserRepository();
-  const hashComparer = new BcryptHashComparer();
+  const app = await NestFactory.createApplicationContext(AppModule);
 
-  const authenticateUseCase = new AuthenticateUserUseCase(
-    prismaUserRepository,
-    hashComparer,
-  );
+  try {
+    const authenticateUseCase = app.get(AuthenticateUserUseCase, {
+      strict: false,
+    });
+    const user = await authenticateUseCase.execute({
+      email: "rodolfo1@email.com",
+      password: "1789",
+    });
 
-  const user = await authenticateUseCase.execute({
-    email: "rodolfo1@email.com",
-    password: "1789",
-  });
-
-  console.log(user);
+    console.log(user);
+  } finally {
+    await app.close();
+  }
 }
 
 login();

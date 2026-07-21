@@ -1,5 +1,6 @@
+import { Injectable } from "@nestjs/common";
 import { DatabaseProvider } from "../../../database-connection/domain/enums/database-provider.enum";
-import { prisma } from "../../../user/infra/database/prisma/prisma-client";
+import { PrismaService } from "../../../shared/infra/database/prisma/prisma.service";
 
 import { AlertExecutionRepository } from "../../application/repositories/alert-execution-repository";
 
@@ -10,9 +11,12 @@ import { AlertMetric } from "../../domain/enums/alert-metric.enum";
 import { AlertOperator } from "../../domain/enums/alert-operator.enum";
 import { NotificationChannel } from "../../domain/enums/notification-channel.enum";
 
+@Injectable()
 export class PrismaAlertExecutionRepository implements AlertExecutionRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
   async save(alertExecution: AlertExecution): Promise<void> {
-    await prisma.alertExecution.create({
+    await this.prisma.alertExecution.create({
       data: {
         id: alertExecution.id,
 
@@ -43,7 +47,7 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
   }
 
   async update(alertExecution: AlertExecution): Promise<void> {
-    await prisma.alertExecution.update({
+    await this.prisma.alertExecution.update({
       where: {
         id: alertExecution.id,
       },
@@ -57,7 +61,7 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
   }
 
   async findById(id: string): Promise<AlertExecution | null> {
-    const execution = await prisma.alertExecution.findUnique({
+    const execution = await this.prisma.alertExecution.findUnique({
       where: {
         id,
       },
@@ -105,7 +109,7 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
     };
 
     const [executions, total] = await Promise.all([
-      prisma.alertExecution.findMany({
+      this.prisma.alertExecution.findMany({
         where,
         orderBy: {
           triggeredAt: "desc",
@@ -113,7 +117,7 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
         skip: data.skip,
         take: data.take,
       }),
-      prisma.alertExecution.count({ where }),
+      this.prisma.alertExecution.count({ where }),
     ]);
 
     return {
@@ -150,7 +154,7 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
   }
 
   async findRecent(limit: number): Promise<AlertExecution[]> {
-    const executions = await prisma.alertExecution.findMany({
+    const executions = await this.prisma.alertExecution.findMany({
       take: limit,
 
       orderBy: {
