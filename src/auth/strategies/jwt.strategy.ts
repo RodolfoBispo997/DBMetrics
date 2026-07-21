@@ -1,11 +1,12 @@
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
+import { getEnvironmentConfig } from "../../shared/config/environment.config";
 
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: "dbmetrics-secret",
+      secretOrKey: getEnvironmentConfig().jwtSecret,
     });
   }
 

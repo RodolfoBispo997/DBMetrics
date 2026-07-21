@@ -7,16 +7,19 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { RolesGuard } from "./guards/roles.guard";
+import { getEnvironmentConfig } from "../shared/config/environment.config";
 
 @Module({
   imports: [
     PassportModule,
 
-    JwtModule.register({
-      secret: "dbmetrics-secret",
-      signOptions: {
-        expiresIn: "1d",
-      },
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: getEnvironmentConfig().jwtSecret,
+        signOptions: {
+          expiresIn: "1d",
+        },
+      }),
     }),
   ],
   controllers: [AuthController],

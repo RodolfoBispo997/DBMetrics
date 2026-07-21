@@ -2,16 +2,13 @@ import { Module } from "@nestjs/common";
 import { EvolutionConfig } from "./evolution.config";
 import { HttpEvolutionClient } from "./evolution.client";
 import { EvolutionService } from "./evolution.service";
+import { getEnvironmentConfig } from "../../config/environment.config";
 
 @Module({
   providers: [
     {
       provide: "EvolutionConfig",
-      useFactory: (): EvolutionConfig => ({
-        baseUrl: process.env.EVOLUTION_API_URL!,
-        apiKey: process.env.EVOLUTION_API_KEY!,
-        instance: process.env.EVOLUTION_INSTANCE!,
-      }),
+      useFactory: (): EvolutionConfig => getEnvironmentConfig().evolution,
     },
     {
       provide: "EvolutionClient",

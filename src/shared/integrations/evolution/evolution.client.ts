@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
   EvolutionClient,
   SendTextRequest,
@@ -9,14 +9,12 @@ import { EvolutionConfig } from "./evolution.config";
 @Injectable()
 export class HttpEvolutionClient implements EvolutionClient {
   private readonly http: AxiosInstance;
+  private readonly logger = new Logger(HttpEvolutionClient.name);
 
   constructor(
     @Inject("EvolutionConfig")
     private readonly config: EvolutionConfig,
   ) {
-    console.log("==============================");
-    console.log(config);
-    console.log("==============================");
     this.http = axios.create({
       baseURL: config.baseUrl,
       headers: {
@@ -24,14 +22,34 @@ export class HttpEvolutionClient implements EvolutionClient {
       },
       timeout: 10000,
     });
+
+    this.logger.log("Evolution notification provider initialized");
   }
 
   async sendText(data: SendTextRequest): Promise<void> {
-    console.log("BaseURL:", this.http.defaults.baseURL);
-    console.log("Payload:", data);
-    await this.http.post(`/message/sendText/${data.instance}`, {
-      number: data.number,
-      text: data.text,
-    });
+    this.logger.log("Evolution notification delivery started");
+
+    try {
+      await this.http.post(`/message/sendText/${data.instance}`, {
+        number: data.number,
+        text: data.text,
+      });
+      this.logger.log("Evolution notification delivery completed");
+    } catch (error) {
+      this.logger.error(this.getSanitizedErrorMessage(error));
+      throw error;
+    }
+  }
+
+  private getSanitizedErrorMessage(error: unknown): string {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const code = error.code;
+      const message = error.message.replace(/https?:\/\/\S+/g, "[url]");
+
+      return `Evolution notification delivery failed${status ? ` (status: ${status})` : ""}${code ? ` (code: ${code})` : ""}: ${message}`;
+    }
+
+    return "Evolution notification delivery failed with an unexpected error";
   }
 }
