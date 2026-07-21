@@ -1,12 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../../shared/infra/database/prisma/prisma.service";
+import { DatabaseCredentialsCipherService } from "../../../shared/security/database-credentials/database-credentials-cipher.service";
 import { DatabaseConnectionRepository } from "../../application/repositories/database-connection-repository";
 import { DatabaseConnection } from "../../domain/entities/database-connection";
 import { DatabaseProvider } from "../../domain/enums/database-provider.enum";
 
 @Injectable()
 export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly databaseCredentialsCipher: DatabaseCredentialsCipherService,
+  ) {}
 
   async save(connection: DatabaseConnection): Promise<void> {
     await this.prisma.databaseConnection.create({
@@ -18,7 +22,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
         port: connection.port,
         database: connection.database,
         username: connection.username,
-        password: connection.password,
+        password: this.databaseCredentialsCipher.encrypt(connection.password),
         userId: connection.userId,
       },
     });
@@ -40,7 +44,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
         port: connection.port,
         database: connection.database,
         username: connection.username,
-        password: connection.password,
+        password: this.databaseCredentialsCipher.decrypt(connection.password),
         userId: connection.userId,
       }),
     );
@@ -65,7 +69,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
       port: databaseConnection.port,
       database: databaseConnection.database,
       username: databaseConnection.username,
-      password: databaseConnection.password,
+      password: this.databaseCredentialsCipher.decrypt(databaseConnection.password),
       userId: databaseConnection.userId,
     });
   }
@@ -82,7 +86,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
         port: connection.port,
         database: connection.database,
         username: connection.username,
-        password: connection.password,
+        password: this.databaseCredentialsCipher.decrypt(connection.password),
         userId: connection.userId,
       }),
     );
@@ -100,7 +104,7 @@ export class PrismaDatabaseConnectionRepository implements DatabaseConnectionRep
         port: connection.port,
         database: connection.database,
         username: connection.username,
-        password: connection.password,
+        password: this.databaseCredentialsCipher.encrypt(connection.password),
       },
     });
   }

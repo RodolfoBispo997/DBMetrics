@@ -11,9 +11,10 @@ import { RecordDatabaseMetricUseCase } from "./application/use-cases/record-data
 import { DatabaseMetricScheduler } from "./infra/scheduler/database-metric.scheduler";
 import { CollectDatabaseMetricsUseCase } from "./application/use-cases/collect-database-metrics/collect-database-metrics.use-case";
 import { AlertsModule } from "../alerts/alerts.module";
+import { SecurityModule } from "../shared/security/security.module";
 
 @Module({
-  imports: [AlertsModule],
+  imports: [AlertsModule, SecurityModule],
   controllers: [DatabaseMetricController],
   providers: [
     CollectDatabaseMetricUseCase,

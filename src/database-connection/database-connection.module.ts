@@ -16,8 +16,10 @@ import { GetDatabaseMetricsUseCase } from "./application/use-cases/get-database-
 import { PostgresMetricCollector } from "./infra/services/database-metric/postgres-metric-collector";
 import { MysqlMetricCollector } from "./infra/services/database-metric/mysql-metric-collector";
 import { DatabaseHealthServiceImpl } from "./infra/services/database-health/database-health.service";
+import { SecurityModule } from "../shared/security/security.module";
 
 @Module({
+  imports: [SecurityModule],
   controllers: [DatabaseConnectionController],
   providers: [
     CreateDatabaseConnectionUseCase,

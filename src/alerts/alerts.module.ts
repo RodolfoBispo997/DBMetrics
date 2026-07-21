@@ -18,9 +18,10 @@ import { ListAlertExecutionsUseCase } from "./application/use-cases/list-alert-e
 import { EvolutionNotificationService } from "./infra/notifications/evolution/evolution-notification.service";
 import { NotificationFactoryImpl } from "./infra/notifications/notification.factory";
 import { EvolutionModule } from "../shared/integrations/evolution/evolution.module";
+import { SecurityModule } from "../shared/security/security.module";
 
 @Module({
-  imports: [EvolutionModule],
+  imports: [EvolutionModule, SecurityModule],
   controllers: [AlertsController],
   providers: [
     CreateAlertRuleUseCase,

@@ -7,9 +7,10 @@ import { GetDashboardConnectionMetricsHistoryUseCase } from "./application/use-c
 import { GetDashboardConnectionMetricsChartUseCase } from "./application/use-cases/get-dashboard-connection-metrics-chart/get-dashboard-connection-metrics-chart.use-case";
 import { GetDashboardConnectionMetricsSummaryUseCase } from "./application/use-cases/get-dashboard-connection-metrics-summary/get-dashboard-connection-metrics-summary.use-case";
 import { DatabaseConnectionModule } from "../database-connection/database-connection.module";
+import { SecurityModule } from "../shared/security/security.module";
 
 @Module({
-  imports: [DatabaseConnectionModule],
+  imports: [DatabaseConnectionModule, SecurityModule],
   controllers: [DashboardController],
   providers: [
     GetDashboardOverviewUseCase,
