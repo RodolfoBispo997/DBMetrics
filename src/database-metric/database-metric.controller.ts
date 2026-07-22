@@ -12,6 +12,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CollectDatabaseMetricUseCase } from "./application/use-cases/collect-database-metric/collect-database-metric.use-case";
 import { GetDatabaseMetricUseCase } from "./application/use-cases/get-database-metric/get-database-metric.use-case";
 import { GetDatabaseMetricResponseDTO } from "./application/use-cases/get-database-metric/dto/get-database-metric-response.dto";
+import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
 
 @Controller("database-metrics")
 export class DatabaseMetricController {
@@ -24,7 +25,7 @@ export class DatabaseMetricController {
   @Post(":id/collect")
   @HttpCode(HttpStatus.OK)
   async collect(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,
   ): Promise<{ message: string }> {
     const userId = request.user.userId;
@@ -42,7 +43,7 @@ export class DatabaseMetricController {
   @UseGuards(JwtAuthGuard)
   @Get(":id/history")
   async get(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,
   ): Promise<GetDatabaseMetricResponseDTO[]> {
     const userId = request.user.userId;

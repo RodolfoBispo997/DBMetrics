@@ -66,6 +66,9 @@ importers:
       '@nestjs/cli':
         specifier: ^11.0.21
         version: 11.0.21(@types/node@25.9.0)
+      '@types/express':
+        specifier: ^5.0.6
+        version: 5.0.6
       '@types/node':
         specifier: ^25.9.0
         version: 25.9.0

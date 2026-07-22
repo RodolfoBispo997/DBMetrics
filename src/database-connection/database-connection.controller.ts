@@ -30,6 +30,7 @@ import { GetDatabaseConnectionByIdResponseDTO } from "./application/use-cases/ge
 import { UpdateDatabaseConnectionResponseDTO } from "./application/use-cases/update-database-connection/dto/update-database-connection-response.dto";
 import { TestDatabaseConnectionResponseDTO } from "./application/use-cases/test-database-connection/dto/test-database-connection-response.dto";
 import { GetDatabaseMetricsResponseDTO } from "./application/use-cases/get-database-metrics/dto/get-database-metrics-response.dto";
+import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
 
 @Controller("database-connections")
 export class DatabaseConnectionController {
@@ -47,7 +48,7 @@ export class DatabaseConnectionController {
   @Roles("ADMIN")
   @Post()
   async create(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Body() body: CreateDatabaseConnectionHttpDTO,
   ): Promise<CreateDatabaseConnectionResponseDto> {
     return this.createDatabaseConnectionUseCase.execute({
@@ -59,7 +60,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async list(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<ListDatabaseConnectionsResponseDTO[]> {
     return this.listDatabaseConnectionsUseCase.execute({
       userId: request.user.userId,
@@ -69,7 +70,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Get(":id")
   async findById(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Param("id") id: string,
   ): Promise<GetDatabaseConnectionByIdResponseDTO> {
     const userId = request.user.userId;
@@ -79,7 +80,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Patch(":id")
   async update(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Param("id") id: string,
     @Body() body: UpdateDatabaseConnectionHttpDTO,
   ): Promise<UpdateDatabaseConnectionResponseDTO> {
@@ -101,7 +102,10 @@ export class DatabaseConnectionController {
   @Roles("ADMIN")
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Req() request: any, @Param("id") id: string): Promise<void> {
+  async delete(
+    @Req() request: AuthenticatedRequest,
+    @Param("id") id: string,
+  ): Promise<void> {
     const userId = request.user.userId;
     return this.deleteDatabaseConnectionUseCase.execute({ id, userId });
   }
@@ -111,7 +115,7 @@ export class DatabaseConnectionController {
   @Post(":id/test")
   @HttpCode(HttpStatus.OK)
   async test(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,
   ): Promise<TestDatabaseConnectionResponseDTO> {
     const userId = request.user.userId;
@@ -121,7 +125,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Get(":id/metrics")
   async metrics(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,
   ): Promise<GetDatabaseMetricsResponseDTO> {
     const userId = request.user.userId;

@@ -10,6 +10,7 @@ import { GetDashboardConnectionMetricsChartResponseDTO } from "./application/use
 import { GetDashboardConnectionMetricsSummaryResponseDTO } from "./application/use-cases/get-dashboard-connection-metrics-summary/dto/get-dashboard-connection-metrics-summary-response.dto";
 import { DashboardMetricsHistoryQueryHttpDTO } from "./presentation/dto/dashboard-metrics-history-query-http.dto";
 import { DashboardMetricsChartQueryHttpDTO } from "./presentation/dto/dashboard-metrics-chart-query-http.dto";
+import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
 
 @Controller("dashboard")
 export class DashboardController {
@@ -22,7 +23,9 @@ export class DashboardController {
 
   @UseGuards(JwtAuthGuard)
   @Get("overview")
-  async overview(@Req() request: any): Promise<GetDashboardOverviewResponseDTO> {
+  async overview(
+    @Req() request: AuthenticatedRequest,
+  ): Promise<GetDashboardOverviewResponseDTO> {
     const userId = request.user.userId;
 
     return this.getDashboardOverviewUseCase.execute({ userId });
@@ -31,7 +34,7 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-history")
   async connectionMetricsHistory(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,
     @Query() query: DashboardMetricsHistoryQueryHttpDTO,
   ): Promise<GetDashboardConnectionMetricsHistoryResponseDTO> {
@@ -50,7 +53,7 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-chart")
   async connectionMetricsChart(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,
     @Query() query: DashboardMetricsChartQueryHttpDTO,
   ): Promise<GetDashboardConnectionMetricsChartResponseDTO> {
@@ -67,7 +70,7 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-summary")
   async connectionMetricsSummary(
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,
   ): Promise<GetDashboardConnectionMetricsSummaryResponseDTO> {
     const userId = request.user.userId;

@@ -28,6 +28,7 @@ import { AlertExecutionPresenter } from "./presentation/presenters/alert-executi
 import { AlertRulePresenter } from "./presentation/presenters/alert-rule.presenter";
 import { ListAlertExecutionsQueryHttpDTO } from "./presentation/dto/list-alert-executions-query-http.dto";
 import { ListAlertExecutionsResponseDTO } from "./application/use-cases/list-alert-executions/dto/list-alert-executions-response.dto";
+import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
 
 type AlertRuleResponse = ReturnType<typeof AlertRulePresenter.toHTTP>;
 type AlertExecutionResponse = ReturnType<typeof AlertExecutionPresenter.toHTTP>;
@@ -57,7 +58,7 @@ export class AlertsController {
   @Post()
   async create(
     @Body() body: CreateAlertRuleBodyHttpDTO,
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<AlertRuleResponse> {
     const alertRule = await this.createAlertRuleUseCase.execute({
       userId: request.user.userId,
@@ -75,7 +76,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   async get(
     @Param("id") alertRuleId: string,
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<AlertRuleResponse> {
     const alertRule = await this.getAlertRuleUseCase.execute({
       userId: request.user.userId,
@@ -88,7 +89,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   async list(
     @Param("connectionId") connectionId: string,
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<AlertRuleResponse[]> {
     const alertRules = await this.listAlertRulesUseCase.execute({
       userId: request.user.userId,
@@ -102,7 +103,7 @@ export class AlertsController {
   async update(
     @Param("id") alertRuleId: string,
     @Body() body: UpdateAlertRuleBodyHttpDTO,
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<AlertRuleResponse> {
     const alertRule = await this.updateAlertRuleUseCase.execute({
       userId: request.user.userId,
@@ -120,7 +121,7 @@ export class AlertsController {
   @Patch(":id/enable")
   async enable(
     @Param("id") alertRuleId: string,
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<AlertRuleResponse> {
     const alertRule = await this.enableAlertRuleUseCase.execute({
       userId: request.user.userId,
@@ -133,7 +134,7 @@ export class AlertsController {
   @Patch(":id/disable")
   async disable(
     @Param("id") alertRuleId: string,
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<AlertRuleResponse> {
     const alertRule = await this.disableAlertRuleUseCase.execute({
       userId: request.user.userId,
@@ -147,7 +148,7 @@ export class AlertsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
     @Param("id") alertRuleId: string,
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<void> {
     return this.deleteAlertRuleUseCase.execute({
       userId: request.user.userId,
@@ -159,7 +160,7 @@ export class AlertsController {
   @Get("/executions/:id")
   async getExecution(
     @Param("id") executionId: string,
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<AlertExecutionResponse> {
     const execution = await this.getAlertExecutionUseCase.execute({
       executionId,
@@ -173,7 +174,7 @@ export class AlertsController {
   async listExecutions(
     @Param("connectionId") connectionId: string,
     @Query() query: ListAlertExecutionsQueryHttpDTO,
-    @Req() request: any,
+    @Req() request: AuthenticatedRequest,
   ): Promise<ListAlertExecutionsHttpResponse> {
     const result = await this.listAlertExecutionsUseCase.execute({
       connectionId,

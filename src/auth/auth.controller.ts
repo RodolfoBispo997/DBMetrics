@@ -12,13 +12,7 @@ import { AuthenticateUserUseCase } from "../user/application/use-cases/authentic
 import { AuthenticaUserHttpDTO } from "../user/presentation/dto/authenticate-user-http.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { AuthenticateUserResponseDTO } from "../user/application/use-cases/authenticate-user/dto/authenticate-user-response.dto";
-import { UserRole } from "../user/domain/enums/user-role.enum";
-
-type AuthenticatedUser = {
-  userId: string;
-  email: string;
-  role: UserRole;
-};
+import type { AuthenticatedRequest } from "./types/authenticated-request";
 
 @Controller("auth")
 export class AuthController {
@@ -36,7 +30,7 @@ export class AuthController {
 
   @Get("me")
   @UseGuards(JwtAuthGuard)
-  me(@Req() request: any): AuthenticatedUser {
+  me(@Req() request: AuthenticatedRequest): AuthenticatedRequest["user"] {
     return request.user;
   }
 }
