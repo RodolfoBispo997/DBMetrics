@@ -4,6 +4,7 @@ import { CreateUserHttpDTO } from "./presentation/dto/create-user-http.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { CreateUserResponseDTO } from "./application/use-cases/create-user/dto/create-user-response.dto";
 
 @Controller("users")
 export class UserController {
@@ -12,7 +13,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Post()
-  async create(@Body() body: CreateUserHttpDTO) {
+  async create(@Body() body: CreateUserHttpDTO): Promise<CreateUserResponseDTO> {
     return this.createUserUseCase.execute(body);
   }
 }

@@ -22,6 +22,12 @@ import { UpdateDatabaseConnectionHttpDTO } from "./presentation/dto/update-datab
 import { DeleteDatabaseConnectionUseCase } from "./application/use-cases/delete-database-connection/delete-database-connection.use-case";
 import { TestDatabaseConnectionUseCase } from "./application/use-cases/test-database-connection/test-database-connection.use-case";
 import { GetDatabaseMetricsUseCase } from "./application/use-cases/get-database-metrics/get-database-metrics.use-case";
+import { CreateDatabaseConnectionResponseDto } from "./application/use-cases/create-database-connection/dto/create-database-connection-response.dto";
+import { ListDatabaseConnectionsResponseDTO } from "./application/use-cases/list-database-connections/dto/list-database-connections-response.dto";
+import { GetDatabaseConnectionByIdResponseDTO } from "./application/use-cases/get-database-connection-by-id/dto/get-database-connection-by-id-response.dto";
+import { UpdateDatabaseConnectionResponseDTO } from "./application/use-cases/update-database-connection/dto/update-database-connection-response.dto";
+import { TestDatabaseConnectionResponseDTO } from "./application/use-cases/test-database-connection/dto/test-database-connection-response.dto";
+import { GetDatabaseMetricsResponseDTO } from "./application/use-cases/get-database-metrics/dto/get-database-metrics-response.dto";
 
 @Controller("database-connections")
 export class DatabaseConnectionController {
@@ -41,7 +47,7 @@ export class DatabaseConnectionController {
   async create(
     @Req() request: any,
     @Body() body: CreateDatabaseConnectionHttpDTO,
-  ) {
+  ): Promise<CreateDatabaseConnectionResponseDto> {
     return this.createDatabaseConnectionUseCase.execute({
       ...body,
       userId: request.user.userId,
@@ -50,7 +56,9 @@ export class DatabaseConnectionController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async list(@Req() request: any) {
+  async list(
+    @Req() request: any,
+  ): Promise<ListDatabaseConnectionsResponseDTO[]> {
     return this.listDatabaseConnectionsUseCase.execute({
       userId: request.user.userId,
     });
@@ -58,7 +66,10 @@ export class DatabaseConnectionController {
 
   @UseGuards(JwtAuthGuard)
   @Get(":id")
-  async findById(@Req() request: any, @Param("id") id: string) {
+  async findById(
+    @Req() request: any,
+    @Param("id") id: string,
+  ): Promise<GetDatabaseConnectionByIdResponseDTO> {
     const userId = request.user.userId;
     return this.getDatabaseConnectionByIdUseCase.execute({ id, userId });
   }
@@ -69,7 +80,7 @@ export class DatabaseConnectionController {
     @Req() request: any,
     @Param("id") id: string,
     @Body() body: UpdateDatabaseConnectionHttpDTO,
-  ) {
+  ): Promise<UpdateDatabaseConnectionResponseDTO> {
     const userId = request.user.userId;
     return this.updateDatabaseConnectionUseCase.execute({
       id,
@@ -87,7 +98,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Delete(":id")
-  async delete(@Req() request: any, @Param("id") id: string) {
+  async delete(@Req() request: any, @Param("id") id: string): Promise<void> {
     const userId = request.user.userId;
     return this.deleteDatabaseConnectionUseCase.execute({ id, userId });
   }
@@ -95,14 +106,20 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Post(":id/test")
-  async test(@Req() request: any, @Param("id") connectionId: string) {
+  async test(
+    @Req() request: any,
+    @Param("id") connectionId: string,
+  ): Promise<TestDatabaseConnectionResponseDTO> {
     const userId = request.user.userId;
     return this.testDatabaseConnectionUseCase.execute({ connectionId, userId });
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(":id/metrics")
-  async metrics(@Req() request: any, @Param("id") connectionId: string) {
+  async metrics(
+    @Req() request: any,
+    @Param("id") connectionId: string,
+  ): Promise<GetDatabaseMetricsResponseDTO> {
     const userId = request.user.userId;
     return this.getDatabaseMetricsUseCase.execute({ connectionId, userId });
   }

@@ -2,6 +2,7 @@ import { Controller, Post, Param, Req, UseGuards, Get } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CollectDatabaseMetricUseCase } from "./application/use-cases/collect-database-metric/collect-database-metric.use-case";
 import { GetDatabaseMetricUseCase } from "./application/use-cases/get-database-metric/get-database-metric.use-case";
+import { GetDatabaseMetricResponseDTO } from "./application/use-cases/get-database-metric/dto/get-database-metric-response.dto";
 
 @Controller("database-metrics")
 export class DatabaseMetricController {
@@ -12,7 +13,10 @@ export class DatabaseMetricController {
 
   @UseGuards(JwtAuthGuard)
   @Post(":id/collect")
-  async collect(@Req() request: any, @Param("id") connectionId: string) {
+  async collect(
+    @Req() request: any,
+    @Param("id") connectionId: string,
+  ): Promise<{ message: string }> {
     const userId = request.user.userId;
 
     await this.collectDatabaseMetricUseCase.execute({
@@ -27,7 +31,10 @@ export class DatabaseMetricController {
 
   @UseGuards(JwtAuthGuard)
   @Get(":id/history")
-  async get(@Req() request: any, @Param("id") connectionId: string) {
+  async get(
+    @Req() request: any,
+    @Param("id") connectionId: string,
+  ): Promise<GetDatabaseMetricResponseDTO[]> {
     const userId = request.user.userId;
 
     return this.getDatabaseMetricUseCase.execute({

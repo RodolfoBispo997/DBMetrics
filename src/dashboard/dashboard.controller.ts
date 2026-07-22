@@ -4,6 +4,10 @@ import { GetDashboardConnectionMetricsHistoryUseCase } from "./application/use-c
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { GetDashboardConnectionMetricsChartUseCase } from "./application/use-cases/get-dashboard-connection-metrics-chart/get-dashboard-connection-metrics-chart.use-case";
 import { GetDashboardConnectionMetricsSummaryUseCase } from "./application/use-cases/get-dashboard-connection-metrics-summary/get-dashboard-connection-metrics-summary.use-case";
+import { GetDashboardOverviewResponseDTO } from "./application/use-cases/get-dashboard-overview/dto/get-dashboard-overview-response.dto";
+import { GetDashboardConnectionMetricsHistoryResponseDTO } from "./application/use-cases/get-dashboard-connection-metrics-history/dto/get-dashboard-connection-metrics-history-response.dto";
+import { GetDashboardConnectionMetricsChartResponseDTO } from "./application/use-cases/get-dashboard-connection-metrics-chart/dto/get-dashboard-connection-metrics-chart-response.dto";
+import { GetDashboardConnectionMetricsSummaryResponseDTO } from "./application/use-cases/get-dashboard-connection-metrics-summary/dto/get-dashboard-connection-metrics-summary-response.dto";
 
 @Controller("dashboard")
 export class DashboardController {
@@ -16,7 +20,7 @@ export class DashboardController {
 
   @UseGuards(JwtAuthGuard)
   @Get("overview")
-  async overview(@Req() request: any) {
+  async overview(@Req() request: any): Promise<GetDashboardOverviewResponseDTO> {
     const userId = request.user.userId;
 
     return this.getDashboardOverviewUseCase.execute({ userId });
@@ -31,7 +35,7 @@ export class DashboardController {
     @Query("endDate") endDate?: string,
     @Query("page") page?: string,
     @Query("limit") limit?: string,
-  ) {
+  ): Promise<GetDashboardConnectionMetricsHistoryResponseDTO> {
     const userId = request.user.userId;
 
     return this.getDashboardConnectionMetricsHistoryUseCase.execute({
@@ -51,7 +55,7 @@ export class DashboardController {
     @Param("connectionId") connectionId: string,
     @Query("startDate") startDate?: string,
     @Query("endDate") endDate?: string,
-  ) {
+  ): Promise<GetDashboardConnectionMetricsChartResponseDTO> {
     const userId = request.user.userId;
 
     return this.getDashboardConnectionMetricsChartUseCase.execute({
@@ -67,7 +71,7 @@ export class DashboardController {
   async connectionMetricsSummary(
     @Req() request: any,
     @Param("connectionId") connectionId: string,
-  ) {
+  ): Promise<GetDashboardConnectionMetricsSummaryResponseDTO> {
     const userId = request.user.userId;
 
     return this.getDashboardConnectionMetricsSummaryUseCase.execute({
