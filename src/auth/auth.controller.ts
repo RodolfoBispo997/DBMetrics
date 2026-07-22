@@ -13,7 +13,13 @@ import { AuthenticaUserHttpDTO } from "../user/presentation/dto/authenticate-use
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { AuthenticateUserResponseDTO } from "../user/application/use-cases/authenticate-user/dto/authenticate-user-response.dto";
 import type { AuthenticatedRequest } from "./types/authenticated-request";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
 
 @ApiTags("Authentication")
 @Controller("auth")
@@ -25,6 +31,8 @@ export class AuthController {
   @Post("login")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Authenticate user" })
+  @ApiOkResponse({ description: "Authentication successful" })
+  @ApiUnauthorizedResponse({ description: "Invalid email or password" })
   async login(
     @Body() body: AuthenticaUserHttpDTO,
   ): Promise<AuthenticateUserResponseDTO> {
@@ -35,6 +43,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Get authenticated user" })
+  @ApiOkResponse({ description: "Authenticated user retrieved" })
+  @ApiUnauthorizedResponse()
   me(@Req() request: AuthenticatedRequest): AuthenticatedRequest["user"] {
     return request.user;
   }

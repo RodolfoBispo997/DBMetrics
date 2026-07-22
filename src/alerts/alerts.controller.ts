@@ -29,7 +29,16 @@ import { AlertRulePresenter } from "./presentation/presenters/alert-rule.present
 import { ListAlertExecutionsQueryHttpDTO } from "./presentation/dto/list-alert-executions-query-http.dto";
 import { ListAlertExecutionsResponseDTO } from "./application/use-cases/list-alert-executions/dto/list-alert-executions-response.dto";
 import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
 
 type AlertRuleResponse = ReturnType<typeof AlertRulePresenter.toHTTP>;
 type AlertExecutionResponse = ReturnType<typeof AlertExecutionPresenter.toHTTP>;
@@ -43,6 +52,7 @@ type ListAlertExecutionsHttpResponse = {
 
 @ApiTags("Alerts")
 @ApiBearerAuth()
+@ApiUnauthorizedResponse()
 @Controller("alerts")
 export class AlertsController {
   constructor(
@@ -60,6 +70,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: "Create alert rule" })
+  @ApiCreatedResponse({ description: "Alert rule created" })
   async create(
     @Body() body: CreateAlertRuleBodyHttpDTO,
     @Req() request: AuthenticatedRequest,
@@ -79,6 +90,7 @@ export class AlertsController {
   @Get(":id")
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: "Get alert rule" })
+  @ApiOkResponse({ description: "Alert rule retrieved" })
   async get(
     @Param("id") alertRuleId: string,
     @Req() request: AuthenticatedRequest,
@@ -93,6 +105,7 @@ export class AlertsController {
   @Get("/connection/:connectionId")
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: "List alert rules" })
+  @ApiOkResponse({ description: "Alert rules retrieved" })
   async list(
     @Param("connectionId") connectionId: string,
     @Req() request: AuthenticatedRequest,
@@ -107,6 +120,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Patch(":id")
   @ApiOperation({ summary: "Update alert rule" })
+  @ApiOkResponse({ description: "Alert rule updated" })
   async update(
     @Param("id") alertRuleId: string,
     @Body() body: UpdateAlertRuleBodyHttpDTO,
@@ -127,6 +141,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Patch(":id/enable")
   @ApiOperation({ summary: "Enable alert rule" })
+  @ApiOkResponse({ description: "Alert rule enabled" })
   async enable(
     @Param("id") alertRuleId: string,
     @Req() request: AuthenticatedRequest,
@@ -141,6 +156,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Patch(":id/disable")
   @ApiOperation({ summary: "Disable alert rule" })
+  @ApiOkResponse({ description: "Alert rule disabled" })
   async disable(
     @Param("id") alertRuleId: string,
     @Req() request: AuthenticatedRequest,
@@ -155,6 +171,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Delete(":id")
   @ApiOperation({ summary: "Delete alert rule" })
+  @ApiNoContentResponse()
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
     @Param("id") alertRuleId: string,
@@ -169,6 +186,8 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Get("/executions/:id")
   @ApiOperation({ summary: "Get alert execution" })
+  @ApiOkResponse({ description: "Alert execution retrieved" })
+  @ApiNotFoundResponse()
   async getExecution(
     @Param("id") executionId: string,
     @Req() request: AuthenticatedRequest,
@@ -183,6 +202,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Get("/connection/:connectionId/executions")
   @ApiOperation({ summary: "List alert executions" })
+  @ApiOkResponse({ description: "Alert executions retrieved" })
   async listExecutions(
     @Param("connectionId") connectionId: string,
     @Query() query: ListAlertExecutionsQueryHttpDTO,

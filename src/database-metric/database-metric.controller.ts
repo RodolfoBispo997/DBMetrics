@@ -13,10 +13,17 @@ import { CollectDatabaseMetricUseCase } from "./application/use-cases/collect-da
 import { GetDatabaseMetricUseCase } from "./application/use-cases/get-database-metric/get-database-metric.use-case";
 import { GetDatabaseMetricResponseDTO } from "./application/use-cases/get-database-metric/dto/get-database-metric-response.dto";
 import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
 
 @ApiTags("Database Metrics")
 @ApiBearerAuth()
+@ApiUnauthorizedResponse()
 @Controller("database-metrics")
 export class DatabaseMetricController {
   constructor(
@@ -27,6 +34,7 @@ export class DatabaseMetricController {
   @UseGuards(JwtAuthGuard)
   @Post(":id/collect")
   @ApiOperation({ summary: "Collect database metrics" })
+  @ApiOkResponse({ description: "Database metrics collected" })
   @HttpCode(HttpStatus.OK)
   async collect(
     @Req() request: AuthenticatedRequest,
@@ -47,6 +55,7 @@ export class DatabaseMetricController {
   @UseGuards(JwtAuthGuard)
   @Get(":id/history")
   @ApiOperation({ summary: "Get database metrics history" })
+  @ApiOkResponse({ description: "Database metrics history retrieved" })
   async get(
     @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,

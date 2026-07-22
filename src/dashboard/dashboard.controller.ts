@@ -11,10 +11,17 @@ import { GetDashboardConnectionMetricsSummaryResponseDTO } from "./application/u
 import { DashboardMetricsHistoryQueryHttpDTO } from "./presentation/dto/dashboard-metrics-history-query-http.dto";
 import { DashboardMetricsChartQueryHttpDTO } from "./presentation/dto/dashboard-metrics-chart-query-http.dto";
 import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
 
 @ApiTags("Dashboard")
 @ApiBearerAuth()
+@ApiUnauthorizedResponse()
 @Controller("dashboard")
 export class DashboardController {
   constructor(
@@ -27,6 +34,7 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("overview")
   @ApiOperation({ summary: "Get dashboard overview" })
+  @ApiOkResponse({ description: "Dashboard overview retrieved" })
   async overview(
     @Req() request: AuthenticatedRequest,
   ): Promise<GetDashboardOverviewResponseDTO> {
@@ -38,6 +46,7 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-history")
   @ApiOperation({ summary: "Get dashboard metrics history" })
+  @ApiOkResponse({ description: "Dashboard metrics history retrieved" })
   async connectionMetricsHistory(
     @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,
@@ -58,6 +67,7 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-chart")
   @ApiOperation({ summary: "Get dashboard metrics chart" })
+  @ApiOkResponse({ description: "Dashboard metrics chart retrieved" })
   async connectionMetricsChart(
     @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,
@@ -76,6 +86,7 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-summary")
   @ApiOperation({ summary: "Get dashboard metrics summary" })
+  @ApiOkResponse({ description: "Dashboard metrics summary retrieved" })
   async connectionMetricsSummary(
     @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,

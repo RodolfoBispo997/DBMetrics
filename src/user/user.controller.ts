@@ -5,10 +5,19 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { CreateUserResponseDTO } from "./application/use-cases/create-user/dto/create-user-response.dto";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
 
 @ApiTags("Users")
 @ApiBearerAuth()
+@ApiUnauthorizedResponse()
+@ApiForbiddenResponse()
 @Controller("users")
 export class UserController {
   constructor(private readonly createUserUseCase: CreateUserUseCase) {}
@@ -17,6 +26,7 @@ export class UserController {
   @Roles("ADMIN")
   @Post()
   @ApiOperation({ summary: "Create user" })
+  @ApiCreatedResponse({ description: "User created" })
   async create(@Body() body: CreateUserHttpDTO): Promise<CreateUserResponseDTO> {
     return this.createUserUseCase.execute(body);
   }

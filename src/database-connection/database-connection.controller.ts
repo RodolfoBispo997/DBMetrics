@@ -31,10 +31,20 @@ import { UpdateDatabaseConnectionResponseDTO } from "./application/use-cases/upd
 import { TestDatabaseConnectionResponseDTO } from "./application/use-cases/test-database-connection/dto/test-database-connection-response.dto";
 import { GetDatabaseMetricsResponseDTO } from "./application/use-cases/get-database-metrics/dto/get-database-metrics-response.dto";
 import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
 
 @ApiTags("Database Connections")
 @ApiBearerAuth()
+@ApiUnauthorizedResponse()
 @Controller("database-connections")
 export class DatabaseConnectionController {
   constructor(
@@ -51,6 +61,8 @@ export class DatabaseConnectionController {
   @Roles("ADMIN")
   @Post()
   @ApiOperation({ summary: "Create database connection" })
+  @ApiCreatedResponse({ description: "Database connection created" })
+  @ApiForbiddenResponse()
   async create(
     @Req() request: AuthenticatedRequest,
     @Body() body: CreateDatabaseConnectionHttpDTO,
@@ -64,6 +76,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({ summary: "List database connections" })
+  @ApiOkResponse({ description: "Database connections retrieved" })
   async list(
     @Req() request: AuthenticatedRequest,
   ): Promise<ListDatabaseConnectionsResponseDTO[]> {
@@ -75,6 +88,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Get(":id")
   @ApiOperation({ summary: "Get database connection" })
+  @ApiOkResponse({ description: "Database connection retrieved" })
   async findById(
     @Req() request: AuthenticatedRequest,
     @Param("id") id: string,
@@ -86,6 +100,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Patch(":id")
   @ApiOperation({ summary: "Update database connection" })
+  @ApiOkResponse({ description: "Database connection updated" })
   async update(
     @Req() request: AuthenticatedRequest,
     @Param("id") id: string,
@@ -109,6 +124,8 @@ export class DatabaseConnectionController {
   @Roles("ADMIN")
   @Delete(":id")
   @ApiOperation({ summary: "Delete database connection" })
+  @ApiNoContentResponse()
+  @ApiForbiddenResponse()
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
     @Req() request: AuthenticatedRequest,
@@ -122,6 +139,8 @@ export class DatabaseConnectionController {
   @Roles("ADMIN")
   @Post(":id/test")
   @ApiOperation({ summary: "Test database connection" })
+  @ApiOkResponse({ description: "Database connection test completed" })
+  @ApiForbiddenResponse()
   @HttpCode(HttpStatus.OK)
   async test(
     @Req() request: AuthenticatedRequest,
@@ -134,6 +153,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Get(":id/metrics")
   @ApiOperation({ summary: "Get database metrics" })
+  @ApiOkResponse({ description: "Database metrics retrieved" })
   async metrics(
     @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,
