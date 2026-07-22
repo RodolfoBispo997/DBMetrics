@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -98,6 +100,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Req() request: any, @Param("id") id: string): Promise<void> {
     const userId = request.user.userId;
     return this.deleteDatabaseConnectionUseCase.execute({ id, userId });
@@ -106,6 +109,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Post(":id/test")
+  @HttpCode(HttpStatus.OK)
   async test(
     @Req() request: any,
     @Param("id") connectionId: string,

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthenticateUserUseCase } from "../user/application/use-cases/authenticate-user/authenticate-user-use-case";
 import { AuthenticaUserHttpDTO } from "../user/presentation/dto/authenticate-user-http.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
@@ -18,6 +27,7 @@ export class AuthController {
   ) {}
 
   @Post("login")
+  @HttpCode(HttpStatus.OK)
   async login(
     @Body() body: AuthenticaUserHttpDTO,
   ): Promise<AuthenticateUserResponseDTO> {

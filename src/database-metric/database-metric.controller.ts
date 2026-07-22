@@ -1,4 +1,13 @@
-import { Controller, Post, Param, Req, UseGuards, Get } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Param,
+  Req,
+  UseGuards,
+  Get,
+  HttpCode,
+  HttpStatus,
+} from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CollectDatabaseMetricUseCase } from "./application/use-cases/collect-database-metric/collect-database-metric.use-case";
 import { GetDatabaseMetricUseCase } from "./application/use-cases/get-database-metric/get-database-metric.use-case";
@@ -13,6 +22,7 @@ export class DatabaseMetricController {
 
   @UseGuards(JwtAuthGuard)
   @Post(":id/collect")
+  @HttpCode(HttpStatus.OK)
   async collect(
     @Req() request: any,
     @Param("id") connectionId: string,
