@@ -8,6 +8,8 @@ import { GetDashboardOverviewResponseDTO } from "./application/use-cases/get-das
 import { GetDashboardConnectionMetricsHistoryResponseDTO } from "./application/use-cases/get-dashboard-connection-metrics-history/dto/get-dashboard-connection-metrics-history-response.dto";
 import { GetDashboardConnectionMetricsChartResponseDTO } from "./application/use-cases/get-dashboard-connection-metrics-chart/dto/get-dashboard-connection-metrics-chart-response.dto";
 import { GetDashboardConnectionMetricsSummaryResponseDTO } from "./application/use-cases/get-dashboard-connection-metrics-summary/dto/get-dashboard-connection-metrics-summary-response.dto";
+import { DashboardMetricsHistoryQueryHttpDTO } from "./presentation/dto/dashboard-metrics-history-query-http.dto";
+import { DashboardMetricsChartQueryHttpDTO } from "./presentation/dto/dashboard-metrics-chart-query-http.dto";
 
 @Controller("dashboard")
 export class DashboardController {
@@ -31,20 +33,17 @@ export class DashboardController {
   async connectionMetricsHistory(
     @Req() request: any,
     @Param("connectionId") connectionId: string,
-    @Query("startDate") startDate?: string,
-    @Query("endDate") endDate?: string,
-    @Query("page") page?: string,
-    @Query("limit") limit?: string,
+    @Query() query: DashboardMetricsHistoryQueryHttpDTO,
   ): Promise<GetDashboardConnectionMetricsHistoryResponseDTO> {
     const userId = request.user.userId;
 
     return this.getDashboardConnectionMetricsHistoryUseCase.execute({
       userId,
       connectionId,
-      startDate,
-      endDate,
-      page,
-      limit,
+      startDate: query.startDate,
+      endDate: query.endDate,
+      page: query.page,
+      limit: query.limit,
     });
   }
 
@@ -53,16 +52,15 @@ export class DashboardController {
   async connectionMetricsChart(
     @Req() request: any,
     @Param("connectionId") connectionId: string,
-    @Query("startDate") startDate?: string,
-    @Query("endDate") endDate?: string,
+    @Query() query: DashboardMetricsChartQueryHttpDTO,
   ): Promise<GetDashboardConnectionMetricsChartResponseDTO> {
     const userId = request.user.userId;
 
     return this.getDashboardConnectionMetricsChartUseCase.execute({
       userId,
       connectionId,
-      startDate,
-      endDate,
+      startDate: query.startDate,
+      endDate: query.endDate,
     });
   }
 
