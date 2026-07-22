@@ -13,7 +13,10 @@ import { CollectDatabaseMetricUseCase } from "./application/use-cases/collect-da
 import { GetDatabaseMetricUseCase } from "./application/use-cases/get-database-metric/get-database-metric.use-case";
 import { GetDatabaseMetricResponseDTO } from "./application/use-cases/get-database-metric/dto/get-database-metric-response.dto";
 import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+@ApiTags("Database Metrics")
+@ApiBearerAuth()
 @Controller("database-metrics")
 export class DatabaseMetricController {
   constructor(
@@ -23,6 +26,7 @@ export class DatabaseMetricController {
 
   @UseGuards(JwtAuthGuard)
   @Post(":id/collect")
+  @ApiOperation({ summary: "Collect database metrics" })
   @HttpCode(HttpStatus.OK)
   async collect(
     @Req() request: AuthenticatedRequest,
@@ -42,6 +46,7 @@ export class DatabaseMetricController {
 
   @UseGuards(JwtAuthGuard)
   @Get(":id/history")
+  @ApiOperation({ summary: "Get database metrics history" })
   async get(
     @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,

@@ -11,7 +11,10 @@ import { GetDashboardConnectionMetricsSummaryResponseDTO } from "./application/u
 import { DashboardMetricsHistoryQueryHttpDTO } from "./presentation/dto/dashboard-metrics-history-query-http.dto";
 import { DashboardMetricsChartQueryHttpDTO } from "./presentation/dto/dashboard-metrics-chart-query-http.dto";
 import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+@ApiTags("Dashboard")
+@ApiBearerAuth()
 @Controller("dashboard")
 export class DashboardController {
   constructor(
@@ -23,6 +26,7 @@ export class DashboardController {
 
   @UseGuards(JwtAuthGuard)
   @Get("overview")
+  @ApiOperation({ summary: "Get dashboard overview" })
   async overview(
     @Req() request: AuthenticatedRequest,
   ): Promise<GetDashboardOverviewResponseDTO> {
@@ -33,6 +37,7 @@ export class DashboardController {
 
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-history")
+  @ApiOperation({ summary: "Get dashboard metrics history" })
   async connectionMetricsHistory(
     @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,
@@ -52,6 +57,7 @@ export class DashboardController {
 
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-chart")
+  @ApiOperation({ summary: "Get dashboard metrics chart" })
   async connectionMetricsChart(
     @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,
@@ -69,6 +75,7 @@ export class DashboardController {
 
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-summary")
+  @ApiOperation({ summary: "Get dashboard metrics summary" })
   async connectionMetricsSummary(
     @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,

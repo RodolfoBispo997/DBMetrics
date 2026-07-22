@@ -31,7 +31,10 @@ import { UpdateDatabaseConnectionResponseDTO } from "./application/use-cases/upd
 import { TestDatabaseConnectionResponseDTO } from "./application/use-cases/test-database-connection/dto/test-database-connection-response.dto";
 import { GetDatabaseMetricsResponseDTO } from "./application/use-cases/get-database-metrics/dto/get-database-metrics-response.dto";
 import type { AuthenticatedRequest } from "../auth/types/authenticated-request";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+@ApiTags("Database Connections")
+@ApiBearerAuth()
 @Controller("database-connections")
 export class DatabaseConnectionController {
   constructor(
@@ -47,6 +50,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Post()
+  @ApiOperation({ summary: "Create database connection" })
   async create(
     @Req() request: AuthenticatedRequest,
     @Body() body: CreateDatabaseConnectionHttpDTO,
@@ -59,6 +63,7 @@ export class DatabaseConnectionController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
+  @ApiOperation({ summary: "List database connections" })
   async list(
     @Req() request: AuthenticatedRequest,
   ): Promise<ListDatabaseConnectionsResponseDTO[]> {
@@ -69,6 +74,7 @@ export class DatabaseConnectionController {
 
   @UseGuards(JwtAuthGuard)
   @Get(":id")
+  @ApiOperation({ summary: "Get database connection" })
   async findById(
     @Req() request: AuthenticatedRequest,
     @Param("id") id: string,
@@ -79,6 +85,7 @@ export class DatabaseConnectionController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(":id")
+  @ApiOperation({ summary: "Update database connection" })
   async update(
     @Req() request: AuthenticatedRequest,
     @Param("id") id: string,
@@ -101,6 +108,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Delete(":id")
+  @ApiOperation({ summary: "Delete database connection" })
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
     @Req() request: AuthenticatedRequest,
@@ -113,6 +121,7 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles("ADMIN")
   @Post(":id/test")
+  @ApiOperation({ summary: "Test database connection" })
   @HttpCode(HttpStatus.OK)
   async test(
     @Req() request: AuthenticatedRequest,
@@ -124,6 +133,7 @@ export class DatabaseConnectionController {
 
   @UseGuards(JwtAuthGuard)
   @Get(":id/metrics")
+  @ApiOperation({ summary: "Get database metrics" })
   async metrics(
     @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,
