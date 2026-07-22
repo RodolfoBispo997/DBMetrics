@@ -17,6 +17,7 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
@@ -34,7 +35,16 @@ export class DatabaseMetricController {
   @UseGuards(JwtAuthGuard)
   @Post(":id/collect")
   @ApiOperation({ summary: "Collect database metrics" })
-  @ApiOkResponse({ description: "Database metrics collected" })
+  @ApiOkResponse({
+    description:
+      "Collects and persists a new metric snapshot for the selected database connection.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   @HttpCode(HttpStatus.OK)
   async collect(
     @Req() request: AuthenticatedRequest,
@@ -55,7 +65,15 @@ export class DatabaseMetricController {
   @UseGuards(JwtAuthGuard)
   @Get(":id/history")
   @ApiOperation({ summary: "Get database metrics history" })
-  @ApiOkResponse({ description: "Database metrics history retrieved" })
+  @ApiOkResponse({
+    description: "Returns the metric history for the selected database connection.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async get(
     @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,

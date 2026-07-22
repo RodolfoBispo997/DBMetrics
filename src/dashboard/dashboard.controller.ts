@@ -15,6 +15,7 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
@@ -34,7 +35,9 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("overview")
   @ApiOperation({ summary: "Get dashboard overview" })
-  @ApiOkResponse({ description: "Dashboard overview retrieved" })
+  @ApiOkResponse({
+    description: "Returns the dashboard overview for the authenticated user.",
+  })
   async overview(
     @Req() request: AuthenticatedRequest,
   ): Promise<GetDashboardOverviewResponseDTO> {
@@ -46,7 +49,16 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-history")
   @ApiOperation({ summary: "Get dashboard metrics history" })
-  @ApiOkResponse({ description: "Dashboard metrics history retrieved" })
+  @ApiOkResponse({
+    description:
+      "Returns paginated historical metrics for the selected database connection.",
+  })
+  @ApiParam({
+    name: "connectionId",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async connectionMetricsHistory(
     @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,
@@ -67,7 +79,15 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-chart")
   @ApiOperation({ summary: "Get dashboard metrics chart" })
-  @ApiOkResponse({ description: "Dashboard metrics chart retrieved" })
+  @ApiOkResponse({
+    description: "Returns chart data for the selected database connection.",
+  })
+  @ApiParam({
+    name: "connectionId",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async connectionMetricsChart(
     @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,
@@ -86,7 +106,16 @@ export class DashboardController {
   @UseGuards(JwtAuthGuard)
   @Get("connections/:connectionId/metrics-summary")
   @ApiOperation({ summary: "Get dashboard metrics summary" })
-  @ApiOkResponse({ description: "Dashboard metrics summary retrieved" })
+  @ApiOkResponse({
+    description:
+      "Returns the latest metrics summary for the selected database connection.",
+  })
+  @ApiParam({
+    name: "connectionId",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async connectionMetricsSummary(
     @Req() request: AuthenticatedRequest,
     @Param("connectionId") connectionId: string,

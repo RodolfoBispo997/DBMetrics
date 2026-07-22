@@ -38,6 +38,7 @@ import {
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
@@ -61,7 +62,7 @@ export class DatabaseConnectionController {
   @Roles("ADMIN")
   @Post()
   @ApiOperation({ summary: "Create database connection" })
-  @ApiCreatedResponse({ description: "Database connection created" })
+  @ApiCreatedResponse({ description: "Creates a database connection." })
   @ApiForbiddenResponse()
   async create(
     @Req() request: AuthenticatedRequest,
@@ -76,7 +77,10 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({ summary: "List database connections" })
-  @ApiOkResponse({ description: "Database connections retrieved" })
+  @ApiOkResponse({
+    description:
+      "Returns all database connections owned by the authenticated user.",
+  })
   async list(
     @Req() request: AuthenticatedRequest,
   ): Promise<ListDatabaseConnectionsResponseDTO[]> {
@@ -88,7 +92,13 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Get(":id")
   @ApiOperation({ summary: "Get database connection" })
-  @ApiOkResponse({ description: "Database connection retrieved" })
+  @ApiOkResponse({ description: "Returns the selected database connection." })
+  @ApiParam({
+    name: "id",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async findById(
     @Req() request: AuthenticatedRequest,
     @Param("id") id: string,
@@ -100,7 +110,13 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Patch(":id")
   @ApiOperation({ summary: "Update database connection" })
-  @ApiOkResponse({ description: "Database connection updated" })
+  @ApiOkResponse({ description: "Updates the selected database connection." })
+  @ApiParam({
+    name: "id",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async update(
     @Req() request: AuthenticatedRequest,
     @Param("id") id: string,
@@ -124,7 +140,13 @@ export class DatabaseConnectionController {
   @Roles("ADMIN")
   @Delete(":id")
   @ApiOperation({ summary: "Delete database connection" })
-  @ApiNoContentResponse()
+  @ApiNoContentResponse({ description: "Deletes the selected database connection." })
+  @ApiParam({
+    name: "id",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   @ApiForbiddenResponse()
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
@@ -139,7 +161,15 @@ export class DatabaseConnectionController {
   @Roles("ADMIN")
   @Post(":id/test")
   @ApiOperation({ summary: "Test database connection" })
-  @ApiOkResponse({ description: "Database connection test completed" })
+  @ApiOkResponse({
+    description: "Tests connectivity with the selected database connection.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   @ApiForbiddenResponse()
   @HttpCode(HttpStatus.OK)
   async test(
@@ -153,7 +183,16 @@ export class DatabaseConnectionController {
   @UseGuards(JwtAuthGuard)
   @Get(":id/metrics")
   @ApiOperation({ summary: "Get database metrics" })
-  @ApiOkResponse({ description: "Database metrics retrieved" })
+  @ApiOkResponse({
+    description:
+      "Returns the latest persisted metrics for the selected database connection.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async metrics(
     @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,

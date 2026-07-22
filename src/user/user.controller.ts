@@ -26,7 +26,7 @@ export class UserController {
   @Roles("ADMIN")
   @Post()
   @ApiOperation({ summary: "Create user" })
-  @ApiCreatedResponse({ description: "User created" })
+  @ApiCreatedResponse({ description: "Creates a new user." })
   async create(@Body() body: CreateUserHttpDTO): Promise<CreateUserResponseDTO> {
     return this.createUserUseCase.execute(body);
   }

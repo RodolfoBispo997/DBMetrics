@@ -31,7 +31,9 @@ export class AuthController {
   @Post("login")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Authenticate user" })
-  @ApiOkResponse({ description: "Authentication successful" })
+  @ApiOkResponse({
+    description: "Returns the access token and authenticated user data.",
+  })
   @ApiUnauthorizedResponse({ description: "Invalid email or password" })
   async login(
     @Body() body: AuthenticaUserHttpDTO,
@@ -43,7 +45,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Get authenticated user" })
-  @ApiOkResponse({ description: "Authenticated user retrieved" })
+  @ApiOkResponse({ description: "Returns the currently authenticated user." })
   @ApiUnauthorizedResponse()
   me(@Req() request: AuthenticatedRequest): AuthenticatedRequest["user"] {
     return request.user;

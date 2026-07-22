@@ -36,6 +36,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
@@ -70,7 +71,7 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: "Create alert rule" })
-  @ApiCreatedResponse({ description: "Alert rule created" })
+  @ApiCreatedResponse({ description: "Creates an alert rule for a database connection." })
   async create(
     @Body() body: CreateAlertRuleBodyHttpDTO,
     @Req() request: AuthenticatedRequest,
@@ -90,7 +91,13 @@ export class AlertsController {
   @Get(":id")
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: "Get alert rule" })
-  @ApiOkResponse({ description: "Alert rule retrieved" })
+  @ApiOkResponse({ description: "Returns the selected alert rule." })
+  @ApiParam({
+    name: "id",
+    description: "Alert rule identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async get(
     @Param("id") alertRuleId: string,
     @Req() request: AuthenticatedRequest,
@@ -105,7 +112,15 @@ export class AlertsController {
   @Get("/connection/:connectionId")
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: "List alert rules" })
-  @ApiOkResponse({ description: "Alert rules retrieved" })
+  @ApiOkResponse({
+    description: "Returns all alert rules for the selected database connection.",
+  })
+  @ApiParam({
+    name: "connectionId",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async list(
     @Param("connectionId") connectionId: string,
     @Req() request: AuthenticatedRequest,
@@ -120,7 +135,13 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Patch(":id")
   @ApiOperation({ summary: "Update alert rule" })
-  @ApiOkResponse({ description: "Alert rule updated" })
+  @ApiOkResponse({ description: "Updates the selected alert rule." })
+  @ApiParam({
+    name: "id",
+    description: "Alert rule identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async update(
     @Param("id") alertRuleId: string,
     @Body() body: UpdateAlertRuleBodyHttpDTO,
@@ -141,7 +162,13 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Patch(":id/enable")
   @ApiOperation({ summary: "Enable alert rule" })
-  @ApiOkResponse({ description: "Alert rule enabled" })
+  @ApiOkResponse({ description: "Enables the selected alert rule." })
+  @ApiParam({
+    name: "id",
+    description: "Alert rule identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async enable(
     @Param("id") alertRuleId: string,
     @Req() request: AuthenticatedRequest,
@@ -156,7 +183,13 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Patch(":id/disable")
   @ApiOperation({ summary: "Disable alert rule" })
-  @ApiOkResponse({ description: "Alert rule disabled" })
+  @ApiOkResponse({ description: "Disables the selected alert rule." })
+  @ApiParam({
+    name: "id",
+    description: "Alert rule identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async disable(
     @Param("id") alertRuleId: string,
     @Req() request: AuthenticatedRequest,
@@ -171,7 +204,13 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Delete(":id")
   @ApiOperation({ summary: "Delete alert rule" })
-  @ApiNoContentResponse()
+  @ApiNoContentResponse({ description: "Deletes the selected alert rule." })
+  @ApiParam({
+    name: "id",
+    description: "Alert rule identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
     @Param("id") alertRuleId: string,
@@ -186,8 +225,14 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Get("/executions/:id")
   @ApiOperation({ summary: "Get alert execution" })
-  @ApiOkResponse({ description: "Alert execution retrieved" })
+  @ApiOkResponse({ description: "Returns the selected alert execution." })
   @ApiNotFoundResponse()
+  @ApiParam({
+    name: "id",
+    description: "Alert execution identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async getExecution(
     @Param("id") executionId: string,
     @Req() request: AuthenticatedRequest,
@@ -202,7 +247,16 @@ export class AlertsController {
   @UseGuards(JwtAuthGuard)
   @Get("/connection/:connectionId/executions")
   @ApiOperation({ summary: "List alert executions" })
-  @ApiOkResponse({ description: "Alert executions retrieved" })
+  @ApiOkResponse({
+    description:
+      "Returns paginated alert executions for the selected database connection.",
+  })
+  @ApiParam({
+    name: "connectionId",
+    description: "Database connection identifier",
+    example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
+    format: "uuid",
+  })
   async listExecutions(
     @Param("connectionId") connectionId: string,
     @Query() query: ListAlertExecutionsQueryHttpDTO,
