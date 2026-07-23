@@ -2,20 +2,26 @@ import { Client } from "pg";
 import { DatabaseMetricCollector } from "../../../application/services/database-metric/database-metric-collector";
 import { DatabaseConnection } from "../../../domain/entities/database-connection";
 import { DatabaseMetricData } from "../../../application/types/database-metric-data.type";
+import { getEnvironmentConfig } from "../../../../shared/config/environment.config";
 
 export class PostgresMetricCollector implements DatabaseMetricCollector {
   async collect(connection: DatabaseConnection): Promise<DatabaseMetricData> {
+    const timeoutMs =
+      getEnvironmentConfig().scheduler.databaseMetrics.connectionTimeoutMs;
     const client = new Client({
       host: connection.host,
       port: connection.port,
       database: connection.database,
       user: connection.username,
       password: connection.password,
+      connectionTimeoutMillis: timeoutMs,
+      query_timeout: timeoutMs,
+      statement_timeout: timeoutMs,
     });
 
-    await client.connect();
-
     try {
+      await client.connect();
+
       const versionResult = await client.query(`
         SELECT version()
       `);
@@ -44,7 +50,7 @@ export class PostgresMetricCollector implements DatabaseMetricCollector {
       `);
 
       const indexesResult = await client.query(`
-        SELECT COUNT(indexname)
+        SELECT COUNT(indexname) AS count
         FROM pg_indexes
         WHERE schemaname='public'
       `);

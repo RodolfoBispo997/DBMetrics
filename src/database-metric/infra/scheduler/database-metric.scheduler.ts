@@ -1,7 +1,19 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { Cron, CronExpression } from "@nestjs/schedule";
+import { Cron } from "@nestjs/schedule";
 
 import { CollectDatabaseMetricsUseCase } from "../../application/use-cases/collect-database-metrics/collect-database-metrics.use-case";
+import { getEnvironmentConfig } from "../../../shared/config/environment.config";
+
+function DatabaseMetricsCron(): MethodDecorator {
+  // Scheduler configuration is resolved during module initialization.
+  const schedulerConfig = getEnvironmentConfig().scheduler.databaseMetrics;
+
+  return Cron(schedulerConfig.cron, {
+    name: "database-metrics-collection",
+    waitForCompletion: true,
+    disabled: !schedulerConfig.enabled,
+  });
+}
 
 @Injectable()
 export class DatabaseMetricScheduler {
@@ -11,15 +23,25 @@ export class DatabaseMetricScheduler {
     private readonly collectDatabaseMetricsUseCase: CollectDatabaseMetricsUseCase,
   ) {}
 
-  // @Cron(CronExpression.EVERY_5_MINUTES)
-  // @Cron(CronExpression.EVERY_30_SECONDS)
+  @DatabaseMetricsCron()
   async handleDatabaseMetricsCollection(): Promise<void> {
-    this.logger.log("Starting metrics collection...");
+    const startedAt = Date.now();
+    this.logger.log("Starting scheduled database metrics collection...");
 
-    const result = await this.collectDatabaseMetricsUseCase.execute();
+    try {
+      const result = await this.collectDatabaseMetricsUseCase.execute();
+      const durationMs = Date.now() - startedAt;
 
-    this.logger.log(
-      `Metrics collection finished: ${result.success}/${result.processed} successful (${result.failed} failed)`,
-    );
+      this.logger.log(
+        `Scheduled database metrics collection finished: processed=${result.processed} success=${result.success} failed=${result.failed} durationMs=${durationMs}`,
+      );
+    } catch (error) {
+      const durationMs = Date.now() - startedAt;
+
+      this.logger.error(
+        `Scheduled database metrics collection failed globally after durationMs=${durationMs}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+    }
   }
 }

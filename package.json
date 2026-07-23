@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:security": "tsx --test test/database-credentials-cipher.test.ts test/prisma-database-connection.repository.test.ts",
+    "test:scheduler": "tsx --test test/database-metric.scheduler.test.ts",
     "migrate:encrypt-database-connection-passwords": "tsx scripts/migrations/encrypt-database-connection-passwords.ts"
   },
   "keywords": [],

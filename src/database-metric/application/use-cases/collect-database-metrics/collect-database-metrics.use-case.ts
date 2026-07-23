@@ -34,7 +34,7 @@ export class CollectDatabaseMetricsUseCase {
         failed++;
 
         this.logger.error(
-          `Failed to collect metrics for connection ${connection.id}`,
+          `Failed to collect metrics for connection id=${connection.id} name=${connection.name} provider=${connection.provider}`,
           error instanceof Error ? error.stack : undefined,
         );
       }
