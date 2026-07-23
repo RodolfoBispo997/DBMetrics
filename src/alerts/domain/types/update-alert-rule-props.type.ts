@@ -8,4 +8,5 @@ export type UpdateAlertRuleProps = {
   threshold: number;
   channel: NotificationChannel;
   destination: string;
+  cooldownMinutes: number;
 };

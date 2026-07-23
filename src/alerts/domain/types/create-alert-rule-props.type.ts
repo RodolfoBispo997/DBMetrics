@@ -8,5 +8,6 @@ export type CreateAlertRuleProps = {
   threshold: number;
   channel: NotificationChannel;
   destination: string;
+  cooldownMinutes: number;
   databaseConnectionId: string;
 };

@@ -6,6 +6,7 @@ import { AlertRuleRepository } from "../../application/repositories/alert-rule-r
 import { AlertRule } from "../../domain/entities/alert-rule";
 import { AlertMetric } from "../../domain/enums/alert-metric.enum";
 import { AlertOperator } from "../../domain/enums/alert-operator.enum";
+import { AlertRuleState } from "../../domain/enums/alert-rule-state.enum";
 import { NotificationChannel } from "../../domain/enums/notification-channel.enum";
 
 @Injectable()
@@ -22,6 +23,9 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
         channel: alertRule.channel,
         destination: alertRule.destination,
         enabled: alertRule.enabled,
+        cooldownMinutes: alertRule.cooldownMinutes,
+        currentState: alertRule.currentState,
+        lastNotificationAt: alertRule.lastNotificationAt,
         databaseConnectionId: alertRule.databaseConnectionId,
         createdAt: alertRule.createdAt,
         updatedAt: alertRule.updatedAt,
@@ -49,6 +53,9 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
       channel: alertRule.channel as NotificationChannel,
       destination: alertRule.destination,
       enabled: alertRule.enabled,
+      cooldownMinutes: alertRule.cooldownMinutes,
+      currentState: alertRule.currentState as AlertRuleState,
+      lastNotificationAt: alertRule.lastNotificationAt,
       databaseConnectionId: alertRule.databaseConnectionId,
       createdAt: alertRule.createdAt,
       updatedAt: alertRule.updatedAt,
@@ -76,6 +83,9 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
         channel: alertRule.channel as NotificationChannel,
         destination: alertRule.destination,
         enabled: alertRule.enabled,
+        cooldownMinutes: alertRule.cooldownMinutes,
+        currentState: alertRule.currentState as AlertRuleState,
+        lastNotificationAt: alertRule.lastNotificationAt,
         databaseConnectionId: alertRule.databaseConnectionId,
         createdAt: alertRule.createdAt,
         updatedAt: alertRule.updatedAt,
@@ -96,6 +106,9 @@ export class PrismaAlertRuleRepository implements AlertRuleRepository {
         channel: alertRule.channel,
         destination: alertRule.destination,
         enabled: alertRule.enabled,
+        cooldownMinutes: alertRule.cooldownMinutes,
+        currentState: alertRule.currentState,
+        lastNotificationAt: alertRule.lastNotificationAt,
         updatedAt: alertRule.updatedAt,
       },
     });

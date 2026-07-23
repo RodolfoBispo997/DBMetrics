@@ -11,6 +11,9 @@ export class AlertRulePresenter {
       channel: alertRule.channel,
       destination: alertRule.destination,
       enabled: alertRule.enabled,
+      cooldownMinutes: alertRule.cooldownMinutes,
+      currentState: alertRule.currentState,
+      lastNotificationAt: alertRule.lastNotificationAt,
       createdAt: alertRule.createdAt,
       updatedAt: alertRule.updatedAt,
     };

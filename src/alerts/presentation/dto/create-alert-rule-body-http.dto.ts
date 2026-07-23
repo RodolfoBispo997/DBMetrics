@@ -1,4 +1,4 @@
-import { IsEnum, IsIn, IsNumber, IsString, IsUUID } from "class-validator";
+import { IsEnum, IsIn, IsInt, IsNumber, IsString, IsUUID, Max, Min } from "class-validator";
 import { AlertMetric } from "../../domain/enums/alert-metric.enum";
 import { AlertOperator } from "../../domain/enums/alert-operator.enum";
 import { NotificationChannel } from "../../domain/enums/notification-channel.enum";
@@ -26,8 +26,18 @@ export class CreateAlertRuleBodyHttpDTO {
   channel!: NotificationChannel;
 
   @IsString()
-  @ApiProperty({ description: "Notification destination", example: "+5511999999999" })
+  @ApiProperty({ description: "Notification destination", example: "5511999999999" })
   destination!: string;
+
+  @IsInt()
+  @Min(1)
+  @Max(10080)
+  @ApiProperty({
+    description:
+      "Minimum interval in minutes between successful notifications while the alert remains triggered.",
+    example: 30,
+  })
+  cooldownMinutes!: number;
 
   @IsUUID()
   @ApiProperty({

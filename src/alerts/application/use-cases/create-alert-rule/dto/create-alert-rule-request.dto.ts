@@ -10,4 +10,5 @@ export type CreateAlertRuleRequestDTO = {
   threshold: number;
   channel: NotificationChannel;
   destination: string;
+  cooldownMinutes: number;
 };

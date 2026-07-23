@@ -53,6 +53,11 @@ enum AlertExecutionStatus {
   FAILED
 }
 
+enum AlertRuleState {
+  NORMAL
+  TRIGGERED
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -128,6 +133,9 @@ model AlertRule {
   threshold Float
   channel NotificationChannel
   enabled Boolean @default(true)
+  cooldownMinutes Int @default(30)
+  currentState AlertRuleState @default(NORMAL)
+  lastNotificationAt DateTime?
   
 
   databaseConnectionId String

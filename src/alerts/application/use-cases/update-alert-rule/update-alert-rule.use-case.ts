@@ -42,6 +42,7 @@ export class UpdateAlertRuleUseCase {
       threshold: data.threshold,
       channel: data.channel,
       destination: data.destination,
+      cooldownMinutes: data.cooldownMinutes,
     });
 
     await this.alertRuleRepository.update(alertRule);

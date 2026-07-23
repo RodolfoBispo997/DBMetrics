@@ -84,6 +84,7 @@ export class AlertsController {
       threshold: body.threshold,
       channel: body.channel,
       destination: body.destination,
+      cooldownMinutes: body.cooldownMinutes,
     });
     return AlertRulePresenter.toHTTP(alertRule);
   }
@@ -155,6 +156,7 @@ export class AlertsController {
       threshold: body.threshold,
       channel: body.channel,
       destination: body.destination,
+      cooldownMinutes: body.cooldownMinutes,
     });
     return AlertRulePresenter.toHTTP(alertRule);
   }

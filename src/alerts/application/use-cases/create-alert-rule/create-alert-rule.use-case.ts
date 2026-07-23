@@ -36,6 +36,7 @@ export class CreateAlertRuleUseCase {
       threshold: data.threshold,
       channel: data.channel,
       destination: data.destination,
+      cooldownMinutes: data.cooldownMinutes,
       databaseConnectionId: connection.id,
     });
 
