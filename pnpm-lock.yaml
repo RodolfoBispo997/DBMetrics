@@ -44,6 +44,9 @@ importers:
       class-validator:
         specifier: ^0.15.1
         version: 0.15.1
+      dotenv:
+        specifier: ^16.6.1
+        version: 16.6.1
       mysql2:
         specifier: ^3.22.5
         version: 3.22.5(@types/node@25.9.0)

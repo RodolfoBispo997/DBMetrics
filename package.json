@@ -12,6 +12,7 @@
     "test:connections": "tsx --test test/database-connection.use-cases.test.ts",
     "test:metrics": "tsx --test test/database-metric.use-cases.test.ts",
     "test:dashboard": "tsx --test test/dashboard.use-cases.test.ts",
+    "seed:admin": "tsx scripts/seed-admin.ts",
     "migrate:encrypt-database-connection-passwords": "tsx scripts/migrations/encrypt-database-connection-passwords.ts"
   },
   "keywords": [],
@@ -40,6 +41,7 @@
     "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "dotenv": "^16.6.1",
     "mysql2": "^3.22.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
