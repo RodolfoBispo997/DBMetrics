@@ -6,10 +6,15 @@ import { DomainExceptionFilter } from "./shared/filters/domain-exception.filter"
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const corsOrigin = process.env.CORS_ORIGIN?.trim() || "http://localhost:3000";
+
+  if (corsOrigin === "*") {
+    throw new Error("CORS_ORIGIN cannot be '*' when credentials are enabled");
+  }
 
   //Cors para conectar com o front-end
   app.enableCors({
-    origin: "http://localhost:3000",
+    origin: corsOrigin,
     credentials: true,
   });
 
