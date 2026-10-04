@@ -30,3 +30,8 @@ Thumbs.db
 
 # Temporary files
 *.zip
+
+# Local infrastructure state
+# Docker volumes may contain databases, Redis data and Evolution API sessions.
+# They must remain local and must never be committed.
+/infra/evolution/volumes/

@@ -428,6 +428,10 @@ A infraestrutura local da Evolution utiliza:
 
 O PostgreSQL e o Redis da Evolution não são acessados diretamente pelo DBMetrics. Eles são dependências internas da própria Evolution API.
 
+### Estado local dos volumes
+
+`infra/evolution/volumes/` contém estado local do PostgreSQL, Redis e sessões da Evolution API. Esse conteúdo deve permanecer local e não deve ser versionado. A regra no `.gitignore` evita adicionar novos arquivos, mas a remoção de qualquer conteúdo já presente no índice ou no histórico ocorrerá somente em uma alteração futura, após backup local prévio.
+
 ---
 
 ## Tecnologias
@@ -592,17 +596,38 @@ Migrations devem ser executadas somente contra o banco correto e com as variáve
 
 ## Testes
 
-Os testes atualmente disponíveis validam principalmente:
+Os testes automatizados existentes cobrem domínio, casos de uso, scheduler e segurança, incluindo:
 
 - criptografia e descriptografia das credenciais;
 - integridade do payload AES-256-GCM;
-- comportamento do repositório relacionado às credenciais protegidas.
+- comportamento dos casos de uso e das regras de domínio;
+- comportamento do scheduler.
+
+Ainda não há testes de integração com PostgreSQL real nem testes E2E HTTP.
 
 Execução:
 
 ```bash
+pnpm test
+```
+
+Execução somente dos testes de segurança:
+
+```bash
 pnpm run test:security
 ```
+
+---
+
+## Health check e readiness
+
+O endpoint atual `GET /health` retorna o estado do processo HTTP (`{ "status": "ok" }`). Ele verifica a disponibilidade do processo, mas ainda não verifica dependências externas. Readiness com validação dessas dependências será implementado posteriormente.
+
+---
+
+## CI/CD e deploy
+
+Pushes na branch `main` executam os testes e o build, publicam a imagem no Amazon ECR e atualizam automaticamente o serviço no Amazon ECS. Portanto, mudanças na `main` precisam manter compatibilidade com as variáveis de ambiente e a task definition atuais.
 
 ---
 
@@ -717,13 +742,16 @@ Funcionalidades disponíveis:
 - [x] Alertas por WhatsApp
 - [x] Criptografia de credenciais
 - [x] Swagger
+- [x] Health check HTTP (`GET /health`)
+- [x] Pipeline de CI/CD (testes, build, publicação no ECR e deploy no ECS)
+- [x] Testes de domínio, casos de uso, scheduler e segurança
 - [ ] Coleta agendada habilitada
 - [ ] Refresh token
 - [ ] Notificações por e-mail
 - [ ] Notificações por Discord
 - [ ] Notificações por webhook
-- [ ] Testes E2E
-- [ ] Pipeline de CI/CD
+- [ ] Testes de integração com PostgreSQL real
+- [ ] Testes E2E HTTP
 
 ---
 
@@ -772,8 +800,8 @@ Por isso, hash não seria suficiente. O projeto utiliza criptografia autenticada
 - O scheduler está implementado estruturalmente, mas a coleta periódica não está habilitada.
 - O canal funcional de notificação é o WhatsApp.
 - Os tokens JWT não possuem refresh token ou revogação.
-- A cobertura automatizada ainda está concentrada na segurança das credenciais.
-- Não há pipeline de integração contínua configurado.
+- Já existem testes de domínio, casos de uso, scheduler e segurança, mas ainda não há testes de integração com PostgreSQL real nem testes E2E HTTP.
+- `GET /health` verifica somente a disponibilidade do processo HTTP; readiness com dependências externas ainda será implementado.
 - A infraestrutura da Evolution API precisa estar ativa para o envio de alertas.
 - A execução depende de variáveis disponibilizadas ao ambiente do processo.
 
@@ -784,10 +812,8 @@ Por isso, hash não seria suficiente. O projeto utiliza criptografia autenticada
 - Habilitar coleta agendada configurável.
 - Implementar refresh token e rotação de sessão.
 - Expandir canais de notificação.
-- Adicionar testes unitários dos casos de uso.
-- Adicionar testes de integração e E2E.
-- Criar health check da aplicação.
-- Implementar pipeline de CI/CD.
+- Implementar readiness e observabilidade.
+- Adicionar testes de integração com PostgreSQL real e testes E2E HTTP.
 - Ampliar estratégias de agregação para históricos extensos.
 
 ---
