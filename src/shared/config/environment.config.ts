@@ -13,6 +13,7 @@ export type EnvironmentConfig = {
     apiKey: string;
     instance: string;
   };
+  publicRegistrationEnabled: boolean;
 };
 
 let environmentConfig: EnvironmentConfig | undefined;
@@ -48,9 +49,29 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       instance:
         process.env.EVOLUTION_INSTANCE_NAME ?? process.env.EVOLUTION_INSTANCE ?? "",
     },
+    publicRegistrationEnabled: getPublicRegistrationEnabled(),
   };
 
   return environmentConfig;
+}
+
+export function getPublicRegistrationEnabled(): boolean {
+  const enabled = getBooleanEnvironmentVariable(
+    "PUBLIC_REGISTRATION_ENABLED",
+    false,
+  );
+
+  if (
+    enabled &&
+    process.env.NODE_ENV !== "development" &&
+    process.env.NODE_ENV !== "test"
+  ) {
+    throw new Error(
+      "PUBLIC_REGISTRATION_ENABLED requires a real email confirmation provider outside development and test",
+    );
+  }
+
+  return enabled;
 }
 
 export function getDatabaseCredentialsKey(): Buffer {

@@ -6,4 +6,5 @@ export type UserProps = {
   email: string;
   password: string;
   role: UserRole;
+  emailVerifiedAt: Date | null;
 };

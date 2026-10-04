@@ -26,6 +26,7 @@ export class PrismaUserRepository implements UserRepository {
       email: user.email,
       password: user.password,
       role: user.role as UserRole,
+      emailVerifiedAt: user.emailVerifiedAt,
     });
   }
   async findById(id: string): Promise<User | null> {
@@ -45,6 +46,7 @@ export class PrismaUserRepository implements UserRepository {
       email: user.email,
       password: user.password,
       role: user.role as UserRole,
+      emailVerifiedAt: user.emailVerifiedAt,
     });
   }
 
@@ -56,6 +58,7 @@ export class PrismaUserRepository implements UserRepository {
         email: user.email,
         password: user.password,
         role: user.role as UserRole,
+        emailVerifiedAt: user.emailVerifiedAt,
       },
     });
   }

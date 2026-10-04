@@ -19,11 +19,15 @@ export class User {
       email: email,
       password: password,
       role: props.role ?? UserRole.ADMIN,
+      emailVerifiedAt: props.emailVerifiedAt,
     });
   }
 
   public static restore(props: UserProps) {
-    return new User(props);
+    return new User({
+      ...props,
+      emailVerifiedAt: props.emailVerifiedAt ?? null,
+    });
   }
 
   private static validateAndNormalizeName(name: string): string {
@@ -115,5 +119,9 @@ export class User {
 
   get password() {
     return this.props.password;
+  }
+
+  get emailVerifiedAt() {
+    return this.props.emailVerifiedAt;
   }
 }

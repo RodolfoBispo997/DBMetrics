@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { HashComparer } from "../../../../shared/cryptography/hash-comparer";
 import { InvalidCredentialsError } from "../../../domain/errors/invalid-credentials-error";
+import { EmailNotVerifiedError } from "../../../domain/errors/email-not-verified-error";
 import { UserRepository } from "../../repositories/user-repository";
 import { AuthenticateUserRequestDTO } from "./dto/authenticate-user-request.dto";
 import { AuthenticateUserResponseDTO } from "./dto/authenticate-user-response.dto";
@@ -32,6 +33,10 @@ export class AuthenticateUserUseCase {
 
     if (!passwordMatch) {
       throw new InvalidCredentialsError("Invalid credentials");
+    }
+
+    if (user.emailVerifiedAt === null) {
+      throw new EmailNotVerifiedError();
     }
 
     const accessToken = await this.jwtService.signAsync({

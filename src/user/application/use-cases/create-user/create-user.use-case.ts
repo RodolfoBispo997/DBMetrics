@@ -30,6 +30,7 @@ export class CreateUserUseCase {
       email: data.email,
       password: hashedPassword,
       role: data.role ?? UserRole.ADMIN,
+      emailVerifiedAt: new Date(),
     });
 
     await this.userRepository.save(user);

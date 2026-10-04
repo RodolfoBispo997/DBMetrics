@@ -60,6 +60,7 @@ async function main(): Promise<void> {
         email,
         password: passwordHash,
         role: UserRole.ADMIN,
+        emailVerifiedAt: new Date(),
       },
     });
 
