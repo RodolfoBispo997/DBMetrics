@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createHash } from "node:crypto";
 import { NotFoundException } from "@nestjs/common";
-import { GUARDS_METADATA } from "@nestjs/common/constants";
+import { ThrottlerGuard } from "@nestjs/throttler";
+import {
+  GUARDS_METADATA,
+  HTTP_CODE_METADATA,
+} from "@nestjs/common/constants";
 import { JwtService } from "@nestjs/jwt";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
@@ -191,7 +195,7 @@ test("AuthenticateUserUseCase uses one indistinguishable error and never signs i
   }
 });
 
-test("public registration creates only an unverified MEMBER and exposes no password or token", async () => {
+test("public registration creates only an unverified MEMBER and returns a generic response", async () => {
   let persistedUser: User | undefined;
   let persistedToken: EmailConfirmationToken | undefined;
   let deliveredToken = "";
@@ -244,13 +248,9 @@ test("public registration creates only an unverified MEMBER and exposes no passw
     24 * 60 * 60 * 1000,
   );
   assert.deepEqual(result, {
-    id: persistedUser?.id,
-    name: "Ada Lovelace",
-    email: "ada@example.com",
-    role: UserRole.MEMBER,
+    message:
+      "If your information is valid, an email confirmation message will be sent shortly.",
   });
-  assert.equal("password" in result, false);
-  assert.equal("token" in result, false);
 });
 
 test("public registration DTO rejects a role field", async () => {
@@ -266,8 +266,9 @@ test("public registration DTO rejects a role field", async () => {
   assert.ok(errors.some((error) => error.property === "role"));
 });
 
-test("public registration rejects normalized duplicate emails before hashing", async () => {
+test("public registration returns the same generic response for an existing normalized email without sending", async () => {
   let hashed = false;
+  let sent = false;
   const useCase = new RegisterPublicUserUseCase(
     {
       findByEmail: async (email) => {
@@ -290,14 +291,55 @@ test("public registration rejects normalized duplicate emails before hashing", a
         return "hash";
       },
     },
-    { send: async () => undefined },
+    {
+      send: async () => {
+        sent = true;
+      },
+    },
   );
 
-  await assert.rejects(
-    () => useCase.execute({ ...input, email: " ADA@EXAMPLE.COM " }),
-    EmailAlreadyExistsError,
+  assert.deepEqual(
+    await useCase.execute({ ...input, email: " ADA@EXAMPLE.COM " }),
+    {
+      message:
+        "If your information is valid, an email confirmation message will be sent shortly.",
+    },
   );
   assert.equal(hashed, false);
+  assert.equal(sent, false);
+});
+
+test("public registration masks a Prisma email unique-constraint race", async () => {
+  let sent = false;
+  const useCase = new RegisterPublicUserUseCase(
+    {
+      findByEmail: async () => null,
+      findById: async () => null,
+      save: async () => undefined,
+    },
+    {
+      createUserWithConfirmation: async () => {
+        throw {
+          code: "P2002",
+          meta: { target: ["email"] },
+        };
+      },
+      findActiveTokenByHash: async () => null,
+      confirmEmail: async () => false,
+    },
+    { hash: async () => "hashed-password" },
+    {
+      send: async () => {
+        sent = true;
+      },
+    },
+  );
+
+  assert.deepEqual(await useCase.execute(input), {
+    message:
+      "If your information is valid, an email confirmation message will be sent shortly.",
+  });
+  assert.equal(sent, false);
 });
 
 test("valid email confirmation verifies the account and makes its token unusable", async () => {
@@ -421,15 +463,41 @@ test("public registration guard returns 404 when disabled", async () => {
   }
 });
 
-test("verify-email endpoint uses the registration guard and returns 404 before its use case", async () => {
+test("public email endpoints use the registration guard and return 404 when disabled", async () => {
   const priorValue = process.env.PUBLIC_REGISTRATION_ENABLED;
 
   try {
-    const guards = Reflect.getMetadata(
-      GUARDS_METADATA,
-      AuthController.prototype.verifyEmail,
-    ) as unknown[];
-    assert.ok(guards.includes(PublicRegistrationEnabledGuard));
+    for (const route of [
+      "register",
+      "verifyEmail",
+      "resendVerification",
+    ] as const) {
+      const guards = Reflect.getMetadata(
+        GUARDS_METADATA,
+        AuthController.prototype[route],
+      ) as unknown[];
+      assert.ok(guards.includes(PublicRegistrationEnabledGuard));
+      assert.ok(guards.includes(ThrottlerGuard));
+    }
+    assert.ok(
+      (
+        Reflect.getMetadata(
+          GUARDS_METADATA,
+          AuthController.prototype.login,
+        ) as unknown[]
+      ).includes(ThrottlerGuard),
+    );
+    assert.equal(
+      Reflect.getMetadata(HTTP_CODE_METADATA, AuthController.prototype.register),
+      202,
+    );
+    assert.equal(
+      Reflect.getMetadata(
+        HTTP_CODE_METADATA,
+        AuthController.prototype.resendVerification,
+      ),
+      202,
+    );
 
     for (const value of ["false", undefined]) {
       if (value === undefined) {
@@ -466,31 +534,39 @@ test("public registration defaults to disabled when the environment variable is 
 });
 
 test("public registration cannot be enabled outside development without a provider", () => {
-  const priorEnabled = process.env.PUBLIC_REGISTRATION_ENABLED;
-  const priorNodeEnv = process.env.NODE_ENV;
+  const environmentNames = [
+    "PUBLIC_REGISTRATION_ENABLED",
+    "NODE_ENV",
+    "EMAIL_PROVIDER",
+    "RESEND_API_KEY",
+    "EMAIL_FROM",
+    "PUBLIC_WEB_URL",
+  ] as const;
+  const previousValues = environmentNames.map((name) => process.env[name]);
   process.env.PUBLIC_REGISTRATION_ENABLED = "true";
   process.env.NODE_ENV = "production";
+  for (const name of environmentNames.slice(2)) {
+    delete process.env[name];
+  }
 
   try {
     assert.throws(
       () => getPublicRegistrationEnabled(),
-      /requires a real email confirmation provider/,
+      /complete Resend configuration/,
     );
   } finally {
-    if (priorEnabled === undefined) {
-      delete process.env.PUBLIC_REGISTRATION_ENABLED;
-    } else {
-      process.env.PUBLIC_REGISTRATION_ENABLED = priorEnabled;
-    }
-    if (priorNodeEnv === undefined) {
-      delete process.env.NODE_ENV;
-    } else {
-      process.env.NODE_ENV = priorNodeEnv;
-    }
+    environmentNames.forEach((name, index) => {
+      const previousValue = previousValues[index];
+      if (previousValue === undefined) {
+        delete process.env[name];
+      } else {
+        process.env[name] = previousValue;
+      }
+    });
   }
 });
 
-test("local confirmation sender logs no email address or raw token", async () => {
+test("local confirmation sender logs only its confirmation URL", async () => {
   const priorInfo = console.info;
   const logged: unknown[][] = [];
   console.info = (...args: unknown[]) => {
@@ -507,6 +583,8 @@ test("local confirmation sender logs no email address or raw token", async () =>
     console.info = priorInfo;
   }
 
+  assert.deepEqual(logged, [
+    ["http://localhost:3000/verify-email?token=raw-secret-token"],
+  ]);
   assert.equal(JSON.stringify(logged).includes("private@example.com"), false);
-  assert.equal(JSON.stringify(logged).includes("raw-secret-token"), false);
 });

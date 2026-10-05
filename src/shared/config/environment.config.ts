@@ -14,6 +14,12 @@ export type EnvironmentConfig = {
     instance: string;
   };
   publicRegistrationEnabled: boolean;
+  email: {
+    provider: "resend" | undefined;
+    apiKey: string | undefined;
+    from: string | undefined;
+    publicWebUrl: string;
+  };
 };
 
 let environmentConfig: EnvironmentConfig | undefined;
@@ -22,6 +28,8 @@ export function getEnvironmentConfig(): EnvironmentConfig {
   if (environmentConfig) {
     return environmentConfig;
   }
+
+  const publicRegistrationEnabled = getPublicRegistrationEnabled();
 
   environmentConfig = {
     jwtSecret: getRequiredEnvironmentVariable("JWT_SECRET"),
@@ -49,7 +57,8 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       instance:
         process.env.EVOLUTION_INSTANCE_NAME ?? process.env.EVOLUTION_INSTANCE ?? "",
     },
-    publicRegistrationEnabled: getPublicRegistrationEnabled(),
+    publicRegistrationEnabled,
+    email: getEmailConfiguration(publicRegistrationEnabled),
   };
 
   return environmentConfig;
@@ -61,17 +70,61 @@ export function getPublicRegistrationEnabled(): boolean {
     false,
   );
 
-  if (
-    enabled &&
-    process.env.NODE_ENV !== "development" &&
-    process.env.NODE_ENV !== "test"
-  ) {
-    throw new Error(
-      "PUBLIC_REGISTRATION_ENABLED requires a real email confirmation provider outside development and test",
-    );
+  if (enabled) {
+    getEmailConfiguration(true);
   }
 
   return enabled;
+}
+
+function getEmailConfiguration(
+  registrationEnabled: boolean,
+): EnvironmentConfig["email"] {
+  const providerValue = process.env.EMAIL_PROVIDER?.trim();
+  if (providerValue && providerValue !== "resend") {
+    throw new Error('EMAIL_PROVIDER must be "resend"');
+  }
+
+  const apiKey = process.env.RESEND_API_KEY?.trim() || undefined;
+  const from = process.env.EMAIL_FROM?.trim() || undefined;
+  const configuredWebUrl = process.env.PUBLIC_WEB_URL?.trim() || undefined;
+  const isProduction =
+    process.env.NODE_ENV !== "development" &&
+    process.env.NODE_ENV !== "test";
+
+  if (registrationEnabled && isProduction) {
+    const missingVariables = [
+      !providerValue && "EMAIL_PROVIDER",
+      !apiKey && "RESEND_API_KEY",
+      !from && "EMAIL_FROM",
+      !configuredWebUrl && "PUBLIC_WEB_URL",
+    ].filter((value): value is string => Boolean(value));
+
+    if (missingVariables.length > 0) {
+      throw new Error(
+        `Public registration requires a complete Resend configuration outside development and test. Configure: ${missingVariables.join(", ")}`,
+      );
+    }
+  }
+
+  const publicWebUrl = configuredWebUrl ?? "http://localhost:3000";
+  let parsedWebUrl: URL;
+  try {
+    parsedWebUrl = new URL(publicWebUrl);
+  } catch {
+    throw new Error("PUBLIC_WEB_URL must be a valid absolute URL");
+  }
+
+  if (parsedWebUrl.protocol !== "http:" && parsedWebUrl.protocol !== "https:") {
+    throw new Error("PUBLIC_WEB_URL must use http or https");
+  }
+
+  return {
+    provider: providerValue === "resend" ? "resend" : undefined,
+    apiKey,
+    from,
+    publicWebUrl: publicWebUrl.replace(/\/+$/, ""),
+  };
 }
 
 export function getDatabaseCredentialsKey(): Buffer {

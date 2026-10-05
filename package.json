@@ -6,7 +6,7 @@
   "scripts": {
     "build": "prisma generate && nest build",
     "start:prod": "node dist/main.js",
-    "test": "tsx --test test/database-credentials-cipher.test.ts test/prisma-database-connection.repository.test.ts test/database-metric.scheduler.test.ts test/alert-rule.test.ts test/alert-processor.service.test.ts test/user-auth.use-cases.test.ts test/database-connection.use-cases.test.ts test/database-metric.use-cases.test.ts test/dashboard.use-cases.test.ts test/alert-rule.use-cases.test.ts",
+    "test": "tsx --test test/database-credentials-cipher.test.ts test/prisma-database-connection.repository.test.ts test/database-metric.scheduler.test.ts test/alert-rule.test.ts test/alert-processor.service.test.ts test/user-auth.use-cases.test.ts test/email-confirmation.test.ts test/rate-limiting.test.ts test/database-connection.use-cases.test.ts test/database-metric.use-cases.test.ts test/dashboard.use-cases.test.ts test/alert-rule.use-cases.test.ts",
     "test:security": "tsx --test test/database-credentials-cipher.test.ts test/prisma-database-connection.repository.test.ts",
     "test:scheduler": "tsx --test test/database-metric.scheduler.test.ts",
     "test:alerts": "tsx --test test/alert-rule.test.ts test/alert-processor.service.test.ts test/alert-rule.use-cases.test.ts",
@@ -38,6 +38,7 @@
     "@nestjs/platform-express": "^11.1.23",
     "@nestjs/schedule": "^6.1.3",
     "@nestjs/swagger": "^11.4.6",
+    "@nestjs/throttler": "^6.7.1",
     "@prisma/client": "^6.19.3",
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
@@ -50,6 +51,7 @@
     "pg": "^8.21.0",
     "prisma": "^6.19.3",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.32.0",
     "rxjs": "^7.8.2",
     "swagger-ui-express": "^5.0.1"
   }

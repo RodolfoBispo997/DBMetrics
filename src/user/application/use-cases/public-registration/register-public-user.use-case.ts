@@ -4,7 +4,6 @@ import { HashGenerator } from "../../../../shared/cryptography/hash-generator";
 import { EmailConfirmationToken } from "../../../domain/entities/email-confirmation-token.entity";
 import { User } from "../../../domain/entities/user.entity";
 import { UserRole } from "../../../domain/enums/user-role.enum";
-import { EmailAlreadyExistsError } from "../../../domain/errors/email-already-exists-error";
 import { PublicRegistrationRepository } from "../../repositories/public-registration-repository";
 import { UserRepository } from "../../repositories/user-repository";
 import {
@@ -13,6 +12,11 @@ import {
 } from "./email-confirmation-sender";
 import { PublicRegistrationRequestDTO } from "./dto/public-registration-request.dto";
 import { PublicRegistrationResponseDTO } from "./dto/public-registration-response.dto";
+
+const genericResponse: PublicRegistrationResponseDTO = {
+  message:
+    "If your information is valid, an email confirmation message will be sent shortly.",
+};
 
 @Injectable()
 export class RegisterPublicUserUseCase {
@@ -34,7 +38,7 @@ export class RegisterPublicUserUseCase {
     const existingUser = await this.userRepository.findByEmail(normalizedEmail);
 
     if (existingUser) {
-      throw new EmailAlreadyExistsError("Email already exist");
+      return genericResponse;
     }
 
     const hashedPassword = await this.hashGenerator.hash(data.password);
@@ -47,21 +51,48 @@ export class RegisterPublicUserUseCase {
     });
     const rawToken = randomBytes(32).toString("base64url");
     const tokenHash = createHash("sha256").update(rawToken).digest("hex");
-    // A later phase will resend by invalidating prior active tokens for this user.
     const token = EmailConfirmationToken.create(user.id, tokenHash);
 
-    await this.registrationRepository.createUserWithConfirmation(user, token);
+    try {
+      await this.registrationRepository.createUserWithConfirmation(user, token);
+    } catch (error) {
+      if (isEmailUniqueConstraintViolation(error)) {
+        return genericResponse;
+      }
+
+      throw error;
+    }
+
     await this.confirmationSender.send({
       email: user.email,
       name: user.name,
       token: rawToken,
     });
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: UserRole.MEMBER,
-    };
+    return genericResponse;
   }
+}
+
+function isEmailUniqueConstraintViolation(error: unknown): boolean {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("code" in error) ||
+    error.code !== "P2002" ||
+    !("meta" in error) ||
+    typeof error.meta !== "object" ||
+    error.meta === null ||
+    !("target" in error.meta)
+  ) {
+    return false;
+  }
+
+  const target = error.meta.target;
+  if (Array.isArray(target)) {
+    return target.some(
+      (field) => typeof field === "string" && field.toLowerCase() === "email",
+    );
+  }
+
+  return typeof target === "string" && target.toLowerCase().includes("email");
 }

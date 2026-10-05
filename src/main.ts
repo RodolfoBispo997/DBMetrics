@@ -1,11 +1,18 @@
 import { NestFactory } from "@nestjs/core";
+import { ExpressAdapter } from "@nestjs/platform-express";
+import type { Application as ExpressApplication } from "express";
 import { AppModule } from "./app/app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { DomainExceptionFilter } from "./shared/filters/domain-exception.filter";
+import { configureExpressTrustProxy } from "./shared/config/express-trust-proxy";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const expressAdapter = new ExpressAdapter();
+  const app = await NestFactory.create(AppModule, expressAdapter);
+  configureExpressTrustProxy(
+    expressAdapter.getInstance<ExpressApplication>(),
+  );
   const corsOrigin = process.env.CORS_ORIGIN?.trim() || "http://localhost:3000";
 
   if (corsOrigin === "*") {

@@ -6,6 +6,11 @@ export type ActiveEmailConfirmationToken = {
   userId: string;
 };
 
+export type PendingVerificationUser = {
+  name: string;
+  email: string;
+};
+
 export interface PublicRegistrationRepository {
   createUserWithConfirmation(
     user: User,
@@ -16,4 +21,10 @@ export interface PublicRegistrationRepository {
     now: Date,
   ): Promise<ActiveEmailConfirmationToken | null>;
   confirmEmail(tokenId: string, userId: string, at: Date): Promise<boolean>;
+  replacePendingUserConfirmationToken(
+    email: string,
+    userId: string,
+    token: EmailConfirmationToken,
+    at: Date,
+  ): Promise<PendingVerificationUser | null>;
 }

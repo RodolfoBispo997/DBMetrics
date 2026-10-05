@@ -40,6 +40,16 @@ A API é responsável por:
   - `VIEWER`
 
 - Consulta do usuário autenticado em `/auth/me`.
+- Cadastro público e confirmação de e-mail permanecem desligados por padrão.
+- Quando habilitado, o reenvio usa `POST /auth/resend-verification` e mantém
+  resposta genérica para endereços inexistentes ou já verificados.
+- Cadastro e confirmação de conta não revelam se um e-mail já está cadastrado.
+- As rotas públicas de autenticação possuem limites por endereço IP: login
+  (5/minuto), cadastro (3/hora), reenvio (3/hora) e confirmação (5/15 minutos).
+  O excesso retorna HTTP 429. A primeira implementação mantém contadores por
+  instância da aplicação; uma fase futura com Redis permitirá rate limiting
+  distribuído. O IP é obtido atrás de exatamente um proxy confiável: o ALB
+  encaminha para a task ECS, cujo security group aceita tráfego apenas do ALB.
 
 ### Gerenciamento de conexões
 
@@ -527,6 +537,12 @@ JWT_SECRET=replace-with-a-secure-secret
 
 DATABASE_CREDENTIALS_KEY=replace-with-a-valid-32-byte-base64-key
 
+PUBLIC_REGISTRATION_ENABLED=false
+EMAIL_PROVIDER=
+RESEND_API_KEY=
+EMAIL_FROM=
+PUBLIC_WEB_URL=http://localhost:3000
+
 EVOLUTION_API_URL=http://localhost:8080
 EVOLUTION_API_KEY=replace-with-your-evolution-api-key
 EVOLUTION_INSTANCE_NAME=dbmetrics
@@ -539,6 +555,25 @@ EVOLUTION_INSTANCE_NAME=dbmetrics
 | `DATABASE_URL`             | Conexão com o PostgreSQL principal          |
 | `JWT_SECRET`               | Chave utilizada para assinar tokens JWT     |
 | `DATABASE_CREDENTIALS_KEY` | Chave usada na criptografia das credenciais |
+
+### Cadastro público e confirmação de e-mail
+
+O cadastro público fica desligado por padrão com
+`PUBLIC_REGISTRATION_ENABLED=false`. Em `development` e `test`, a aplicação usa
+um sender local que registra apenas a URL de confirmação para facilitar testes.
+Em outros ambientes, habilitar o cadastro exige Resend e todas as variáveis
+abaixo; a aplicação falha no startup se a configuração estiver incompleta.
+
+| Variável | Descrição |
+| -------- | --------- |
+| `PUBLIC_REGISTRATION_ENABLED` | Habilita cadastro, verificação e reenvio; padrão `false` |
+| `EMAIL_PROVIDER` | Deve ser `resend` ao habilitar o cadastro fora de development/test |
+| `RESEND_API_KEY` | Chave obtida pelo operador; mantê-la somente no ambiente seguro do processo |
+| `EMAIL_FROM` | Remetente configurado no Resend |
+| `PUBLIC_WEB_URL` | URL base do frontend; o link enviado usa `/verify-email?token=...` |
+
+Não habilite o cadastro em produção antes de configurar o provedor, o remetente
+e o endereço público do frontend.
 
 ### Variáveis da Evolution API
 

@@ -1,8 +1,9 @@
-import { UserRole } from "../../../../domain/enums/user-role.enum";
+import { ApiProperty } from "@nestjs/swagger";
 
-export type PublicRegistrationResponseDTO = {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-};
+export class PublicRegistrationResponseDTO {
+  @ApiProperty({
+    example:
+      "If your information is valid, an email confirmation message will be sent shortly.",
+  })
+  message!: string;
+}

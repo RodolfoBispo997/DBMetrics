@@ -16,10 +16,21 @@ import { BcryptHashGenerator } from "../shared/cryptography/bcrypt-hash-generato
 import { EMAIL_CONFIRMATION_SENDER } from "../user/application/use-cases/public-registration/email-confirmation-sender";
 import { LocalEmailConfirmationSender } from "../user/infra/email-confirmation/local-email-confirmation-sender";
 import { UnconfiguredEmailConfirmationSender } from "../user/infra/email-confirmation/unconfigured-email-confirmation-sender";
+import { ResendEmailConfirmationSender } from "../user/infra/email-confirmation/resend-email-confirmation-sender";
+import { Resend } from "resend";
+import { ResendVerificationUseCase } from "../user/application/use-cases/public-registration/resend-verification.use-case";
+import { ThrottlerModule } from "@nestjs/throttler";
 
 @Module({
   imports: [
     PassportModule,
+    ThrottlerModule.forRoot([
+      {
+        name: "default",
+        ttl: 60 * 1000,
+        limit: 60,
+      },
+    ]),
 
     JwtModule.registerAsync({
       useFactory: () => ({
@@ -35,6 +46,7 @@ import { UnconfiguredEmailConfirmationSender } from "../user/infra/email-confirm
     AuthenticateUserUseCase,
     RegisterPublicUserUseCase,
     VerifyEmailUseCase,
+    ResendVerificationUseCase,
     JwtStrategy,
     RolesGuard,
     PublicRegistrationEnabledGuard,
@@ -49,20 +61,32 @@ import { UnconfiguredEmailConfirmationSender } from "../user/infra/email-confirm
     {
       provide: EMAIL_CONFIRMATION_SENDER,
       useFactory: () => {
+        const config = getEnvironmentConfig();
         if (
           process.env.NODE_ENV !== "development" &&
           process.env.NODE_ENV !== "test"
         ) {
-          if (getEnvironmentConfig().publicRegistrationEnabled) {
-            throw new Error(
-              "Public registration in production requires a real email confirmation provider",
+          if (config.publicRegistrationEnabled) {
+            if (
+              config.email.provider !== "resend" ||
+              !config.email.apiKey ||
+              !config.email.from
+            ) {
+              throw new Error(
+                "Public registration requires a complete Resend configuration outside development and test",
+              );
+            }
+
+            return new ResendEmailConfirmationSender(
+              new Resend(config.email.apiKey),
+              config.email.from,
+              config.email.publicWebUrl,
             );
           }
-
           return new UnconfiguredEmailConfirmationSender();
         }
 
-        return new LocalEmailConfirmationSender();
+        return new LocalEmailConfirmationSender(config.email.publicWebUrl);
       },
     },
     {
