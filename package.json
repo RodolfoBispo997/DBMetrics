@@ -7,6 +7,8 @@
     "build": "prisma generate && nest build",
     "start:prod": "node dist/main.js",
     "test": "tsx --test test/database-credentials-cipher.test.ts test/prisma-database-connection.repository.test.ts test/database-metric.scheduler.test.ts test/alert-rule.test.ts test/alert-processor.service.test.ts test/user-auth.use-cases.test.ts test/email-confirmation.test.ts test/rate-limiting.test.ts test/readiness.test.ts test/database-connection.use-cases.test.ts test/database-metric.use-cases.test.ts test/dashboard.use-cases.test.ts test/alert-rule.use-cases.test.ts",
+    "test:integration": "tsx scripts/run-postgres-tests.ts integration",
+    "test:e2e": "tsx scripts/run-postgres-tests.ts e2e",
     "test:security": "tsx --test test/database-credentials-cipher.test.ts test/prisma-database-connection.repository.test.ts",
     "test:scheduler": "tsx --test test/database-metric.scheduler.test.ts",
     "test:alerts": "tsx --test test/alert-rule.test.ts test/alert-processor.service.test.ts test/alert-rule.use-cases.test.ts",
@@ -23,10 +25,14 @@
   "packageManager": "pnpm@10.33.0",
   "devDependencies": {
     "@nestjs/cli": "^11.0.21",
+    "@nestjs/testing": "^11.2.7",
+    "@testcontainers/postgresql": "^11.14.0",
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/pg": "^8.20.0",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.3.1",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   },

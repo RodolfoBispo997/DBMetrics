@@ -612,9 +612,10 @@ as configurações do workflow e os demais passos não foram alterados.
 ### CI/CD
 
 O pipeline de CI/CD está ativo no GitHub Actions e é executado em push para
-`main`. Ele instala dependências, executa `pnpm test` e `pnpm build`, publica a
-imagem no Amazon ECR e atualiza o serviço no Amazon ECS, aguardando a
-estabilização do serviço.
+`main`. Ele instala dependências, executa `pnpm test`, `pnpm test:integration` e
+`pnpm test:e2e`, faz o build, publica a imagem no Amazon ECR e atualiza o
+serviço no Amazon ECS, aguardando a estabilização do serviço. Qualquer falha
+nessas suítes impede que o workflow avance para build e deploy.
 
 ---
 
@@ -658,13 +659,19 @@ Migrations devem ser executadas somente contra o banco correto e com as variáve
 
 Os testes automatizados cobrem domínio e casos de uso, scheduler, alertas,
 autenticação, cadastro e confirmação de e-mail, rate limiting, liveness e
-readiness, além de criptografia de credenciais e repositórios. Ainda faltam
-testes de integração com PostgreSQL real e testes E2E HTTP.
+readiness, além de criptografia de credenciais e repositórios. As suítes de
+integração e E2E usam PostgreSQL efêmero em Docker/Testcontainers e aplicam as
+migrations existentes somente nesse banco temporário.
 
-Execução:
+Pré-requisitos para executar as suítes de integração e E2E: Docker instalado e
+em execução. Cada comando cria um PostgreSQL temporário, executa
+`prisma migrate deploy` nesse container e o remove ao concluir, inclusive se a
+suíte falhar. Não é usado banco local permanente nem URL remota.
 
 ```bash
 pnpm test
+pnpm test:integration
+pnpm test:e2e
 ```
 
 ---
