@@ -9,6 +9,8 @@ import { DashboardModule } from "../dashboard/dashboard.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { AlertsModule } from "../alerts/alerts.module";
 import { PrismaModule } from "../shared/infra/database/prisma/prisma.module";
+import { ReadinessService, APP_READINESS_TIMEOUT_MS } from "./readiness.service";
+import { getAppReadinessTimeoutMs } from "../shared/config/environment.config";
 
 @Module({
   imports: [
@@ -22,6 +24,13 @@ import { PrismaModule } from "../shared/infra/database/prisma/prisma.module";
     DashboardModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    ReadinessService,
+    {
+      provide: APP_READINESS_TIMEOUT_MS,
+      useFactory: getAppReadinessTimeoutMs,
+    },
+  ],
 })
 export class AppModule {}

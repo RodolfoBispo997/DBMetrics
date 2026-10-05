@@ -6,10 +6,12 @@ import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { DomainExceptionFilter } from "./shared/filters/domain-exception.filter";
 import { configureExpressTrustProxy } from "./shared/config/express-trust-proxy";
+import { enableGracefulShutdown } from "./shared/lifecycle/enable-graceful-shutdown";
 
 async function bootstrap() {
   const expressAdapter = new ExpressAdapter();
   const app = await NestFactory.create(AppModule, expressAdapter);
+  enableGracefulShutdown(app);
   configureExpressTrustProxy(
     expressAdapter.getInstance<ExpressApplication>(),
   );

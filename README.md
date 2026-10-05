@@ -587,6 +587,35 @@ O backend também mantém compatibilidade com `EVOLUTION_INSTANCE` como nome leg
 
 A aplicação lê as configurações diretamente do ambiente do processo. As variáveis devem estar disponíveis no terminal, IDE, container ou processo responsável por iniciar a aplicação.
 
+### Liveness e readiness
+
+- `GET /health` é liveness: retorna HTTP 200 com `{"status":"ok"}` sem consultar
+  banco de dados ou qualquer serviço externo. O health check atual do ALB deve
+  continuar usando este endpoint.
+- `GET /ready` verifica somente a conexão com o banco primário do DBMetrics por
+  meio de `SELECT 1`. Responde HTTP 200 com `{"status":"ready"}` quando a consulta
+  termina e HTTP 503 com `{"status":"not_ready"}` em caso de falha ou timeout.
+- `APP_READINESS_TIMEOUT_MS` limita a espera da consulta; o padrão é 2000 ms e
+  somente inteiros positivos são aceitos.
+
+Não configure `/ready` como health check do ALB sem revisar o comportamento de
+deploy e a política de substituição de tasks, pois uma indisponibilidade do banco
+poderá impedir que uma task seja considerada saudável.
+
+O workflow de deploy atualizou `actions/checkout` de `v4` para `v5`,
+`actions/setup-node` de `v4` para `v6`, `pnpm/action-setup` de `v4` para `v5` e
+`aws-actions/configure-aws-credentials` de `v4` para `v6`. Os manifests dessas
+versões declaram runtime `node24`, eliminando o uso das versões Node 20 que
+gerava o aviso de compatibilidade. A versão do Node instalada para o projeto,
+as configurações do workflow e os demais passos não foram alterados.
+
+### CI/CD
+
+O pipeline de CI/CD está ativo no GitHub Actions e é executado em push para
+`main`. Ele instala dependências, executa `pnpm test` e `pnpm build`, publica a
+imagem no Amazon ECR e atualiza o serviço no Amazon ECS, aguardando a
+estabilização do serviço.
+
 ---
 
 ## Execução
@@ -627,16 +656,15 @@ Migrations devem ser executadas somente contra o banco correto e com as variáve
 
 ## Testes
 
-Os testes atualmente disponíveis validam principalmente:
-
-- criptografia e descriptografia das credenciais;
-- integridade do payload AES-256-GCM;
-- comportamento do repositório relacionado às credenciais protegidas.
+Os testes automatizados cobrem domínio e casos de uso, scheduler, alertas,
+autenticação, cadastro e confirmação de e-mail, rate limiting, liveness e
+readiness, além de criptografia de credenciais e repositórios. Ainda faltam
+testes de integração com PostgreSQL real e testes E2E HTTP.
 
 Execução:
 
 ```bash
-pnpm run test:security
+pnpm test
 ```
 
 ---
@@ -752,13 +780,13 @@ Funcionalidades disponíveis:
 - [x] Alertas por WhatsApp
 - [x] Criptografia de credenciais
 - [x] Swagger
+- [x] Liveness `/health` e readiness `/ready`
+- [x] Pipeline de CI/CD em push para `main`
 - [ ] Coleta agendada habilitada
 - [ ] Refresh token
-- [ ] Notificações por e-mail
+- [ ] Cadastro público e confirmação de e-mail habilitados (permanecem desligados)
 - [ ] Notificações por Discord
 - [ ] Notificações por webhook
-- [ ] Testes E2E
-- [ ] Pipeline de CI/CD
 
 ---
 
@@ -806,9 +834,11 @@ Por isso, hash não seria suficiente. O projeto utiliza criptografia autenticada
 
 - O scheduler está implementado estruturalmente, mas a coleta periódica não está habilitada.
 - O canal funcional de notificação é o WhatsApp.
+- O cadastro público permanece desligado; a integração de confirmação de e-mail não é um fluxo público funcional enquanto essa configuração estiver desabilitada.
 - Os tokens JWT não possuem refresh token ou revogação.
-- A cobertura automatizada ainda está concentrada na segurança das credenciais.
-- Não há pipeline de integração contínua configurado.
+- Ainda faltam testes de integração com PostgreSQL real e testes E2E HTTP.
+- O rate limiting é por instância; ainda não há limitação distribuída com Redis.
+- A observabilidade ampliada ainda está pendente.
 - A infraestrutura da Evolution API precisa estar ativa para o envio de alertas.
 - A execução depende de variáveis disponibilizadas ao ambiente do processo.
 
@@ -819,10 +849,9 @@ Por isso, hash não seria suficiente. O projeto utiliza criptografia autenticada
 - Habilitar coleta agendada configurável.
 - Implementar refresh token e rotação de sessão.
 - Expandir canais de notificação.
-- Adicionar testes unitários dos casos de uso.
-- Adicionar testes de integração e E2E.
-- Criar health check da aplicação.
-- Implementar pipeline de CI/CD.
+- Adicionar testes de integração com PostgreSQL real e testes E2E HTTP.
+- Implementar rate limiting distribuído com Redis.
+- Ampliar a observabilidade da aplicação.
 - Ampliar estratégias de agregação para históricos extensos.
 
 ---

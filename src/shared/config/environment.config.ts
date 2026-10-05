@@ -14,6 +14,7 @@ export type EnvironmentConfig = {
     instance: string;
   };
   publicRegistrationEnabled: boolean;
+  appReadinessTimeoutMs: number;
   email: {
     provider: "resend" | undefined;
     apiKey: string | undefined;
@@ -58,6 +59,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
         process.env.EVOLUTION_INSTANCE_NAME ?? process.env.EVOLUTION_INSTANCE ?? "",
     },
     publicRegistrationEnabled,
+    appReadinessTimeoutMs: getAppReadinessTimeoutMs(),
     email: getEmailConfiguration(publicRegistrationEnabled),
   };
 
@@ -75,6 +77,13 @@ export function getPublicRegistrationEnabled(): boolean {
   }
 
   return enabled;
+}
+
+export function getAppReadinessTimeoutMs(): number {
+  return getPositiveIntegerEnvironmentVariable(
+    "APP_READINESS_TIMEOUT_MS",
+    2000,
+  );
 }
 
 function getEmailConfiguration(
