@@ -2,13 +2,17 @@ import type { INestApplication } from "@nestjs/common";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import type { Application as ExpressApplication } from "express";
-import { DomainExceptionFilter } from "../shared/filters/domain-exception.filter";
+import { Logger as PinoNestLogger } from "nestjs-pino";
+import { HttpExceptionLoggingFilter } from "../shared/filters/http-exception-logging.filter";
 import { configureExpressTrustProxy } from "../shared/config/express-trust-proxy";
 
 export function configureHttpApplication(
   app: INestApplication,
   expressApplication: ExpressApplication,
 ): void {
+  app.useLogger(app.get(PinoNestLogger));
+  app.flushLogs();
+
   configureExpressTrustProxy(expressApplication);
 
   const corsOrigin = process.env.CORS_ORIGIN?.trim() || "http://localhost:3000";
@@ -19,6 +23,7 @@ export function configureHttpApplication(
   app.enableCors({
     origin: corsOrigin,
     credentials: true,
+    exposedHeaders: ["X-Request-Id"],
   });
 
   app.useGlobalPipes(
@@ -28,7 +33,7 @@ export function configureHttpApplication(
       transform: true,
     }),
   );
-  app.useGlobalFilters(new DomainExceptionFilter());
+  app.useGlobalFilters(app.get(HttpExceptionLoggingFilter));
 
   const config = new DocumentBuilder()
     .setTitle("DBMetrics API")

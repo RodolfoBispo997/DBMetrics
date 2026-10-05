@@ -495,7 +495,7 @@ A documentação permite:
 
 ## Requisitos
 
-- Node.js 20
+- Node.js 22.12 ou superior
 - pnpm
 - PostgreSQL
 - Docker e Docker Compose para alertas por WhatsApp
@@ -601,6 +601,30 @@ A aplicação lê as configurações diretamente do ambiente do processo. As var
 Não configure `/ready` como health check do ALB sem revisar o comportamento de
 deploy e a política de substituição de tasks, pois uma indisponibilidade do banco
 poderá impedir que uma task seja considerada saudável.
+
+### Logs estruturados e correlação
+
+Os logs da aplicação são emitidos como JSON pelo Pino em `stdout`/`stderr` e
+continuam sendo coletados pelo CloudWatch já usado pelo ambiente. Não há
+formatter pretty no container nem serviço externo adicional.
+
+`LOG_LEVEL` controla o nível mínimo (`trace`, `debug`, `info`, `warn`, `error`,
+`fatal` ou `silent`) e assume `info` quando não definido. Cada requisição recebe
+um `requestId`: um `X-Request-Id` externo é aceito somente com 1 a 128 caracteres
+seguros (`A-Z`, `a-z`, dígitos, `.`, `_`, `:` e `-`); nos demais casos é gerado
+um UUID. O valor é devolvido em `X-Request-Id`, exposto pelo CORS para o frontend
+e incluído nos logs.
+
+Os logs HTTP incluem somente método, path sem query string, status, duração e
+requestId. Bodies, query strings, cookies e headers completos não são
+registrados. Authorization, cookies, API keys, JWTs, senhas, access tokens,
+tokens de confirmação e URLs com credenciais de banco são redigidos. Stack
+traces sanitizados ficam restritos aos logs internos de erro e nunca são
+incluídos na resposta HTTP. Acesso normal a `/health` e `/ready` não é logado;
+falhas de readiness e exceções continuam observáveis.
+
+Métricas e tracing distribuído permanecem como evolução futura e não fazem parte
+desta entrega.
 
 O workflow de deploy atualizou `actions/checkout` de `v4` para `v5`,
 `actions/setup-node` de `v4` para `v6`, `pnpm/action-setup` de `v4` para `v5` e

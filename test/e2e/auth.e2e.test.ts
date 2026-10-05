@@ -62,6 +62,38 @@ test("GET /health returns liveness without database dependency", async () => {
   await request(baseUrl).get("/health").expect(200, { status: "ok" });
 });
 
+test("responses expose and preserve a valid external request ID", async () => {
+  const requestId = "e2e-request-123";
+  const response = await request(baseUrl)
+    .get("/health")
+    .set("X-Request-Id", requestId)
+    .expect(200);
+  const generatedResponse = await request(baseUrl).get("/health").expect(200);
+  const malformedHeaderResponse = await request(baseUrl)
+    .get("/health")
+    .set("X-Request-Id", "x".repeat(129))
+    .expect(200);
+  const preflightResponse = await request(baseUrl)
+    .options("/health")
+    .set("Origin", "http://localhost:3000")
+    .set("Access-Control-Request-Method", "GET")
+    .expect(204);
+
+  assert.equal(response.headers["x-request-id"], requestId);
+  assert.match(
+    generatedResponse.headers["x-request-id"],
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+  );
+  assert.match(
+    malformedHeaderResponse.headers["x-request-id"],
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+  );
+  assert.equal(
+    preflightResponse.headers["access-control-expose-headers"],
+    "X-Request-Id",
+  );
+});
+
 test("GET /ready responds ready with the ephemeral PostgreSQL database", async () => {
   await request(baseUrl).get("/ready").expect(200, { status: "ready" });
 });

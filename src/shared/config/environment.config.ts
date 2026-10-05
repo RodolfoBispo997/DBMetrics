@@ -1,3 +1,5 @@
+import type { LevelWithSilent } from "pino";
+
 export type EnvironmentConfig = {
   jwtSecret: string;
   databaseCredentialsKey: Buffer;
@@ -22,6 +24,16 @@ export type EnvironmentConfig = {
     publicWebUrl: string;
   };
 };
+
+const logLevels = new Set<LevelWithSilent>([
+  "trace",
+  "debug",
+  "info",
+  "warn",
+  "error",
+  "fatal",
+  "silent",
+]);
 
 let environmentConfig: EnvironmentConfig | undefined;
 
@@ -84,6 +96,16 @@ export function getAppReadinessTimeoutMs(): number {
     "APP_READINESS_TIMEOUT_MS",
     2000,
   );
+}
+
+export function getLogLevel(): LevelWithSilent {
+  const value = process.env.LOG_LEVEL?.trim() || "info";
+  if (!logLevels.has(value as LevelWithSilent)) {
+    throw new Error(
+      "LOG_LEVEL must be one of: trace, debug, info, warn, error, fatal, silent",
+    );
+  }
+  return value as LevelWithSilent;
 }
 
 function getEmailConfiguration(

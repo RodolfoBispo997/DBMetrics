@@ -60,6 +60,7 @@ async function run(): Promise<void> {
       DATABASE_CREDENTIALS_KEY: randomBytes(32).toString("base64"),
       PUBLIC_REGISTRATION_ENABLED: "false",
       CORS_ORIGIN: "http://localhost:3000",
+      LOG_LEVEL: "info",
       EMAIL_PROVIDER: "",
       RESEND_API_KEY: "",
       EMAIL_FROM: "",

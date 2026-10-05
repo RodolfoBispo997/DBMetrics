@@ -1,10 +1,12 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../shared/infra/database/prisma/prisma.service";
 
 export const APP_READINESS_TIMEOUT_MS = "APP_READINESS_TIMEOUT_MS";
 
 @Injectable()
 export class ReadinessService {
+	private readonly logger = new Logger(ReadinessService.name);
+
 	constructor(
 		private readonly prisma: PrismaService,
 		@Inject(APP_READINESS_TIMEOUT_MS)
@@ -27,6 +29,7 @@ export class ReadinessService {
 
 			return true;
 		} catch {
+			this.logger.warn("Primary database readiness check failed");
 			return false;
 		} finally {
 			if (timeout) {
