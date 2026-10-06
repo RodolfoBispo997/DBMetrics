@@ -79,6 +79,14 @@ async function run(): Promise<void> {
       }
     }
 
+    const generateExitCode = runPnpm(
+      ["exec", "prisma", "generate"],
+      testEnvironment,
+    );
+    if (generateExitCode !== 0) {
+      throw new Error(`Prisma client generation failed with exit code ${generateExitCode}`);
+    }
+
     const migrateExitCode = runPnpm(
       ["exec", "prisma", "migrate", "deploy"],
       testEnvironment,
