@@ -15,6 +15,17 @@ export type EnvironmentConfig = {
     apiKey: string;
     instance: string;
   };
+  alerts: {
+    asyncDeliveryEnabled: boolean;
+    rabbitMqUrl: string;
+    outbox: {
+      leaseMs: number;
+      pollIntervalMs: number;
+      maxAttempts: number;
+      retryBaseDelayMs: number;
+      retryMaxDelayMs: number;
+    };
+  };
   publicRegistrationEnabled: boolean;
   appReadinessTimeoutMs: number;
   refreshTokenTtlDays: number;
@@ -70,6 +81,38 @@ export function getEnvironmentConfig(): EnvironmentConfig {
       // EVOLUTION_INSTANCE is retained temporarily for existing deployments.
       instance:
         process.env.EVOLUTION_INSTANCE_NAME ?? process.env.EVOLUTION_INSTANCE ?? "",
+    },
+    alerts: {
+      asyncDeliveryEnabled: getBooleanEnvironmentVariable(
+        "ALERT_ASYNC_DELIVERY_ENABLED",
+        false,
+      ),
+      rabbitMqUrl: getNonEmptyEnvironmentVariable(
+        "RABBITMQ_URL",
+        "amqp://127.0.0.1:5672",
+      ),
+      outbox: {
+        leaseMs: getPositiveIntegerEnvironmentVariable(
+          "ALERT_OUTBOX_LEASE_MS",
+          60000,
+        ),
+        pollIntervalMs: getPositiveIntegerEnvironmentVariable(
+          "ALERT_OUTBOX_POLL_INTERVAL_MS",
+          5000,
+        ),
+        maxAttempts: getPositiveIntegerEnvironmentVariable(
+          "ALERT_OUTBOX_MAX_ATTEMPTS",
+          5,
+        ),
+        retryBaseDelayMs: getPositiveIntegerEnvironmentVariable(
+          "ALERT_OUTBOX_RETRY_BASE_DELAY_MS",
+          1000,
+        ),
+        retryMaxDelayMs: getPositiveIntegerEnvironmentVariable(
+          "ALERT_OUTBOX_RETRY_MAX_DELAY_MS",
+          300000,
+        ),
+      },
     },
     publicRegistrationEnabled,
     appReadinessTimeoutMs: getAppReadinessTimeoutMs(),

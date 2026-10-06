@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Prisma schema
+        env:
+          DATABASE_URL: "postgresql://dbmetrics:dbmetrics@127.0.0.1:5432/dbmetrics?schema=public"
+        run: pnpm exec prisma validate
+
+      - name: Run unit tests
+        run: pnpm test
+
+      - name: Run PostgreSQL integration tests
+        run: pnpm test:integration
+
+      - name: Run messaging tests
+        run: pnpm test:messaging
+
+      - name: Run HTTP end-to-end tests
+        run: pnpm test:e2e
+
+      - name: Build application
+        run: pnpm build

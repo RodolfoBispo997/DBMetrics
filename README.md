@@ -174,6 +174,48 @@ A integração utiliza:
 - tratamento de falhas;
 - persistência do erro da notificação.
 
+### Entrega assíncrona com Outbox + RabbitMQ
+
+A Fase 5 introduz a entrega assíncrona de alertas por meio de **Transactional Outbox** e **RabbitMQ**, mantendo o comportamento atual como padrão em produção.
+
+- `ALERT_ASYNC_DELIVERY_ENABLED=false` é o valor padrão e preserva o fluxo síncrono atual, sem depender de RabbitMQ.
+- Quando a flag está habilitada, o processamento do alerta grava a execução como pendente e registra um evento de outbox na mesma transação do banco.
+- O evento de outbox é processado por um worker separado, que publica na fila principal de alertas e confirma a entrega ao broker antes de marcar o evento como publicado.
+- A idempotência operacional é protegida pela chave derivada do `AlertExecution.id`, impedindo duplicação no mesmo fluxo.
+- O worker também mantém uma fila de erro/DLQ para falhas finais de processamento e backoff progressivo para retry.
+- Enquanto outro consumidor mantém o lease de entrega, a mensagem é confirmadamente encaminhada para `dbmetrics.alerts.delivery-retry`, uma fila durável com TTL por mensagem e dead-letter de volta à exchange principal; isso evita perder a mensagem sem plugin RabbitMQ.
+- O lease de entrega usa `deliveryClaimToken` verificável. Isso não fornece exactly-once para o provedor externo: um crash depois do envio e antes da persistência pode causar redelivery; a garantia é `at-least-once` com deduplicação local.
+- Em caso de falha transitória do provedor externo, a execução permanece em `PENDING`, o retry é re-agendado com backoff progressivo e a regra não avança o cooldown antes do sucesso efetivo.
+
+Limite técnico relevante: sem idempotência no provedor externo, não é possível oferecer exactly-once diante de crash entre o envio externo e a persistência do sucesso. O sistema fornece entrega `at-least-once` com deduplicação persistente do próprio lado.
+
+### Infraestrutura local
+
+Para rodar a API, o worker, PostgreSQL e RabbitMQ localmente, utilize:
+
+```bash
+docker compose -f docker-compose.local.yml up --build
+```
+
+Em seguida:
+
+```bash
+pnpm install
+pnpm exec prisma migrate deploy
+pnpm run dev:worker
+```
+
+O RabbitMQ expõe:
+
+- AMQP em `amqp://127.0.0.1:5672`
+- Management UI em `http://127.0.0.1:15672`
+
+A API fica em `http://127.0.0.1:3333`.
+
+O compose local usa portas localizadas em `127.0.0.1` e não altera recursos AWS ou produção.
+
+Observação importante para o cenário assíncrono: o worker não inclui um provedor de envio real. Para testar o fluxo de entrega, forneça uma URL e credenciais válidas para a Evolution API (ou um stub local de teste) nas variáveis `EVOLUTION_API_URL`, `EVOLUTION_API_KEY` e `EVOLUTION_INSTANCE_NAME`; sem isso, o envio real falhará e o worker apenas re-agendará conforme a política de retry.
+
 ---
 
 ## Arquitetura

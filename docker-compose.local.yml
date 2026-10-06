@@ -1,0 +1,87 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dbmetrics-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dbmetrics
+      POSTGRES_PASSWORD: dbmetrics
+      POSTGRES_DB: dbmetrics
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./docker/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbmetrics -d dbmetrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: dbmetrics-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - ./docker/rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dbmetrics-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://dbmetrics:dbmetrics@postgres:5432/dbmetrics?schema=public
+      JWT_SECRET: change-me
+      DATABASE_CREDENTIALS_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      CORS_ORIGIN: http://localhost:3000
+      LOG_LEVEL: info
+      PUBLIC_REGISTRATION_ENABLED: "false"
+      ALERT_ASYNC_DELIVERY_ENABLED: "true"
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      ALERT_OUTBOX_POLL_INTERVAL_MS: "5000"
+      ALERT_OUTBOX_MAX_ATTEMPTS: "5"
+      ALERT_OUTBOX_RETRY_BASE_DELAY_MS: "1000"
+      ALERT_OUTBOX_RETRY_MAX_DELAY_MS: "300000"
+    ports:
+      - "127.0.0.1:3333:3333"
+    command: sh -c "pnpm exec prisma migrate deploy && node dist/main.js"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dbmetrics-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://dbmetrics:dbmetrics@postgres:5432/dbmetrics?schema=public
+      JWT_SECRET: change-me
+      DATABASE_CREDENTIALS_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      EVOLUTION_API_URL: http://host.docker.internal:8080
+      EVOLUTION_API_KEY: change-me
+      EVOLUTION_INSTANCE_NAME: dbmetrics
+      ALERT_ASYNC_DELIVERY_ENABLED: "true"
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      ALERT_OUTBOX_POLL_INTERVAL_MS: "5000"
+      ALERT_OUTBOX_MAX_ATTEMPTS: "5"
+      ALERT_OUTBOX_RETRY_BASE_DELAY_MS: "1000"
+      ALERT_OUTBOX_RETRY_MAX_DELAY_MS: "300000"
+    command: sh -c "node dist/worker.js"

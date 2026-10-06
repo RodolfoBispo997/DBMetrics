@@ -115,6 +115,10 @@ export class AlertProcessorService {
         connection,
       );
 
+      if (process.env.ALERT_ASYNC_DELIVERY_ENABLED === "true") {
+        return;
+      }
+
       let notificationSent = false;
 
       try {
