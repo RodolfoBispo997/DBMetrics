@@ -40,6 +40,11 @@ A API é responsável por:
   - `VIEWER`
 
 - Consulta do usuário autenticado em `/auth/me`.
+- Sessões de refresh com rotação e revogação: o refresh token opaco é entregue
+  somente no cookie HttpOnly `dbmetrics_refresh_token`; `POST /auth/refresh`
+  troca a sessão e `POST /auth/logout` a revoga e limpa o cookie.
+- O frontend atual ainda não renova access tokens automaticamente; essa
+  integração será implementada na fase de frontend.
 - Cadastro público e confirmação de e-mail permanecem desligados por padrão.
 - Quando habilitado, o reenvio usa `POST /auth/resend-verification` e mantém
   resposta genérica para endereços inexistentes ou já verificados.
@@ -538,6 +543,7 @@ JWT_SECRET=replace-with-a-secure-secret
 DATABASE_CREDENTIALS_KEY=replace-with-a-valid-32-byte-base64-key
 
 PUBLIC_REGISTRATION_ENABLED=false
+REFRESH_TOKEN_TTL_DAYS=30
 EMAIL_PROVIDER=
 RESEND_API_KEY=
 EMAIL_FROM=
@@ -555,6 +561,22 @@ EVOLUTION_INSTANCE_NAME=dbmetrics
 | `DATABASE_URL`             | Conexão com o PostgreSQL principal          |
 | `JWT_SECRET`               | Chave utilizada para assinar tokens JWT     |
 | `DATABASE_CREDENTIALS_KEY` | Chave usada na criptografia das credenciais |
+
+### Sessões e refresh token
+
+O login mantém o access token JWT atual com validade de um dia no JSON da
+resposta. O refresh token é aleatório e opaco, nunca é retornado no JSON ou
+persistido em texto puro (somente seu hash SHA-256 é armazenado). Ele é enviado
+no cookie `dbmetrics_refresh_token`, com `HttpOnly`, `SameSite=Lax`,
+`Path=/auth` e `Secure` fora de development/test.
+`REFRESH_TOKEN_TTL_DAYS` configura a validade do refresh token e cookie em dias;
+o padrão é `30` e somente inteiros positivos são aceitos.
+
+`POST /auth/refresh` rotaciona a sessão em transação serializável; o cookie
+anterior deixa de ser reutilizável. `POST /auth/logout` revoga a sessão atual
+quando possível e sempre limpa o cookie, sem exigir access token. O frontend
+atual ainda não faz renovação automática; isso será conectado na fase de
+frontend.
 
 ### Cadastro público e confirmação de e-mail
 

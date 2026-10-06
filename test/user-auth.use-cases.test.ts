@@ -160,7 +160,10 @@ test("AuthenticateUserUseCase compares the persisted hash and signs the exact sa
   );
   assert.deepEqual(
     await useCase.execute({ email: input.email, password: input.password }),
-    { accessToken: "token" },
+    {
+      accessToken: "token",
+      userId: "00000000-0000-4000-8000-000000000001",
+    },
   );
   assert.deepEqual(compared, [[input.password, "hashed-password"]]);
   assert.deepEqual(payload, {
@@ -518,6 +521,20 @@ test("public email endpoints use the registration guard and return 404 when disa
       process.env.PUBLIC_REGISTRATION_ENABLED = priorValue;
     }
   }
+});
+
+test("refresh endpoint is rate limited to ten requests per minute", () => {
+  const route = AuthController.prototype.refresh;
+  assert.ok(
+    (
+      Reflect.getMetadata(GUARDS_METADATA, route) as unknown[]
+    ).includes(ThrottlerGuard),
+  );
+  assert.equal(Reflect.getMetadata("THROTTLER:LIMITdefault", route), 10);
+  assert.equal(
+    Reflect.getMetadata("THROTTLER:TTLdefault", route),
+    60 * 1000,
+  );
 });
 
 test("public registration defaults to disabled when the environment variable is absent", () => {

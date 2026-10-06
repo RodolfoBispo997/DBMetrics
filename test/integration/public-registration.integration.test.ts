@@ -11,25 +11,36 @@ import { EmailConfirmationToken } from "../../src/user/domain/entities/email-con
 import { User } from "../../src/user/domain/entities/user.entity";
 import { UserRole } from "../../src/user/domain/enums/user-role.enum";
 import { InvalidEmailConfirmationTokenError } from "../../src/user/domain/errors/invalid-email-confirmation-token-error";
+import { PrismaRefreshSessionRepository } from "../../src/user/infra/repositories/prisma-refresh-session.repository";
+import { CreateRefreshSessionUseCase } from "../../src/user/application/use-cases/refresh-session/create-refresh-session.use-case";
+import { RotateRefreshSessionUseCase } from "../../src/user/application/use-cases/refresh-session/rotate-refresh-session.use-case";
+import { RefreshSession } from "../../src/user/domain/entities/refresh-session.entity";
+import { InvalidRefreshSessionError } from "../../src/user/domain/errors/invalid-refresh-session-error";
+import type { User as PrismaUser } from "../../generated/prisma/client";
+import type { JwtService } from "@nestjs/jwt";
 
 const emailPrefix = `integration-${process.pid}-`;
 let prisma: PrismaService;
 let userRepository: PrismaUserRepository;
 let registrationRepository: PrismaPublicRegistrationRepository;
+let refreshSessionRepository: PrismaRefreshSessionRepository;
 
 before(async () => {
   prisma = new PrismaService();
   await prisma.$connect();
   userRepository = new PrismaUserRepository(prisma);
   registrationRepository = new PrismaPublicRegistrationRepository(prisma);
+  refreshSessionRepository = new PrismaRefreshSessionRepository(prisma);
 });
 
 beforeEach(async () => {
+  await prisma.refreshSession.deleteMany();
   await prisma.emailConfirmationToken.deleteMany();
   await prisma.user.deleteMany();
 });
 
 afterEach(async () => {
+  await prisma.refreshSession.deleteMany();
   await prisma.emailConfirmationToken.deleteMany();
   await prisma.user.deleteMany();
 });
@@ -47,6 +58,29 @@ function createRegistrationUseCase(deliveredTokens: string[]) {
     { hash: async (value) => `integration-hash:${value}` },
     { send: async ({ token }) => void deliveredTokens.push(token) },
   );
+}
+
+async function createVerifiedPrismaUser(email: string): Promise<PrismaUser> {
+  return prisma.user.create({
+    data: {
+      name: "Refresh Integration User",
+      email,
+      password: "hashed-integration-password",
+      role: UserRole.MEMBER,
+      emailVerifiedAt: new Date(),
+    },
+  });
+}
+
+function createRefreshUseCases() {
+  return {
+    create: new CreateRefreshSessionUseCase(refreshSessionRepository, 30),
+    rotate: new RotateRefreshSessionUseCase(
+      refreshSessionRepository,
+      30,
+      { signAsync: async () => "integration-access-token" } as JwtService,
+    ),
+  };
 }
 
 test("persists a pending user and only the hash of its confirmation token", async () => {
@@ -178,5 +212,120 @@ test("PostgreSQL enforces unique user email values", async () => {
       error !== null &&
       "code" in error &&
       error.code === "P2002",
+  );
+});
+
+test("PostgreSQL enforces refresh token hash uniqueness and rotates in one transaction", async () => {
+  const user = await createVerifiedPrismaUser(
+    `${emailPrefix}refresh@example.com`,
+  );
+  const { create, rotate } = createRefreshUseCases();
+  const { refreshToken } = await create.execute(user.id);
+  const tokenHash = RefreshSession.hashToken(refreshToken);
+  const stored = await prisma.refreshSession.findUnique({
+    where: { tokenHash },
+  });
+  assert.ok(stored);
+  assert.equal(stored.userId, user.id);
+  assert.notEqual(stored.tokenHash, refreshToken);
+
+  await assert.rejects(
+    () =>
+      refreshSessionRepository.create(
+        RefreshSession.create(
+          user.id,
+          refreshToken,
+          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        ),
+      ),
+    (error: unknown) =>
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2002",
+  );
+
+  const rotated = await rotate.execute(refreshToken);
+  assert.equal(rotated.accessToken, "integration-access-token");
+  const priorSession = await prisma.refreshSession.findUnique({
+    where: { tokenHash },
+  });
+  const replacement = await prisma.refreshSession.findUnique({
+    where: { tokenHash: RefreshSession.hashToken(rotated.refreshToken) },
+  });
+  assert.ok(priorSession?.revokedAt instanceof Date);
+  assert.ok(replacement);
+  assert.equal(replacement.userId, user.id);
+  await assert.rejects(() => rotate.execute(refreshToken), InvalidRefreshSessionError);
+});
+
+test("concurrent refresh attempts with the same token allow only one rotation", async () => {
+  const user = await createVerifiedPrismaUser(
+    `${emailPrefix}concurrent-refresh@example.com`,
+  );
+  const { create, rotate } = createRefreshUseCases();
+  const { refreshToken } = await create.execute(user.id);
+
+  const results = await Promise.allSettled([
+    rotate.execute(refreshToken),
+    rotate.execute(refreshToken),
+  ]);
+
+  assert.equal(
+    results.filter((result) => result.status === "fulfilled").length,
+    1,
+  );
+  assert.equal(
+    results.filter((result) => result.status === "rejected").length,
+    1,
+  );
+  const rejected = results.find(
+    (result): result is PromiseRejectedResult => result.status === "rejected",
+  );
+  assert.ok(rejected?.reason instanceof InvalidRefreshSessionError);
+  assert.equal(await prisma.refreshSession.count({ where: { userId: user.id } }), 2);
+});
+
+test("PostgreSQL rejects expired and revoked refresh sessions generically", async () => {
+  const user = await createVerifiedPrismaUser(
+    `${emailPrefix}inactive-refresh@example.com`,
+  );
+  const { create, rotate } = createRefreshUseCases();
+  const expired = await create.execute(user.id);
+  const expiredHash = RefreshSession.hashToken(expired.refreshToken);
+  await prisma.refreshSession.update({
+    where: { tokenHash: expiredHash },
+    data: { expiresAt: new Date(Date.now() - 1000) },
+  });
+
+  await assert.rejects(
+    () => rotate.execute(expired.refreshToken),
+    InvalidRefreshSessionError,
+  );
+
+  const revoked = await create.execute(user.id);
+  const revokedHash = RefreshSession.hashToken(revoked.refreshToken);
+  await prisma.refreshSession.update({
+    where: { tokenHash: revokedHash },
+    data: { revokedAt: new Date() },
+  });
+  await assert.rejects(
+    () => rotate.execute(revoked.refreshToken),
+    InvalidRefreshSessionError,
+  );
+});
+
+test("deleting a user cascades to their refresh sessions", async () => {
+  const user = await createVerifiedPrismaUser(
+    `${emailPrefix}cascade-refresh@example.com`,
+  );
+  const { refreshToken } = await createRefreshUseCases().create.execute(user.id);
+  const tokenHash = RefreshSession.hashToken(refreshToken);
+
+  await prisma.user.delete({ where: { id: user.id } });
+
+  assert.equal(
+    await prisma.refreshSession.findUnique({ where: { tokenHash } }),
+    null,
   );
 });

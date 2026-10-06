@@ -2,6 +2,7 @@ import type { INestApplication } from "@nestjs/common";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import type { Application as ExpressApplication } from "express";
+import cookieParser from "cookie-parser";
 import { Logger as PinoNestLogger } from "nestjs-pino";
 import { HttpExceptionLoggingFilter } from "../shared/filters/http-exception-logging.filter";
 import { configureExpressTrustProxy } from "../shared/config/express-trust-proxy";
@@ -14,6 +15,7 @@ export function configureHttpApplication(
   app.flushLogs();
 
   configureExpressTrustProxy(expressApplication);
+  app.use(cookieParser());
 
   const corsOrigin = process.env.CORS_ORIGIN?.trim() || "http://localhost:3000";
   if (corsOrigin === "*") {

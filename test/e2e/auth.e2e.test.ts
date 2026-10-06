@@ -11,6 +11,7 @@ import { AppModule } from "../../dist/app/app.module";
 import { configureHttpApplication } from "../../dist/app/configure-http-application";
 import { PrismaService } from "../../dist/shared/infra/database/prisma/prisma.service";
 import { UserRole } from "../../dist/user/domain/enums/user-role.enum";
+import { serializeHttpAccessLog } from "../../dist/shared/observability/structured-logging";
 
 let app: INestApplication;
 let prisma: PrismaService;
@@ -122,6 +123,70 @@ test("login with an account seeded in PostgreSQL returns a valid access token", 
     .get("/auth/me")
     .set("Authorization", `Bearer ${accessToken}`)
     .expect(200);
+});
+
+test("refresh rotates the HttpOnly cookie and logout revokes it", async () => {
+  const loginResponse = await request(baseUrl)
+    .post("/auth/login")
+    .send({ email: userEmail, password: userPassword })
+    .expect(200);
+  const loginCookie = loginResponse.headers["set-cookie"]?.[0];
+  assert.equal(typeof loginResponse.body.refreshToken, "undefined");
+  assert.ok(loginCookie);
+  assert.match(loginCookie, /^dbmetrics_refresh_token=/);
+  assert.match(loginCookie, /HttpOnly/i);
+  assert.match(loginCookie, /SameSite=Lax/i);
+  assert.match(loginCookie, /Path=\/auth/i);
+  assert.doesNotMatch(loginCookie, /;\s*Secure(?:;|$)/i);
+  const oldCookiePair = loginCookie.split(";", 1)[0];
+  const oldRefreshToken = oldCookiePair.slice(oldCookiePair.indexOf("=") + 1);
+  assert.equal(JSON.stringify(loginResponse.body).includes(oldRefreshToken), false);
+  assert.match(loginCookie, /Max-Age=2592000/i);
+  const accessLog = serializeHttpAccessLog(
+    {
+      method: "POST",
+      url: "/auth/login?marker=must-not-be-logged",
+      id: "refresh-e2e-request",
+      headers: { cookie: loginCookie },
+      body: loginResponse.body,
+    },
+    { statusCode: loginResponse.status, headers: { "set-cookie": loginCookie } },
+    1,
+  );
+  assert.equal(JSON.stringify(accessLog).includes(oldRefreshToken), false);
+  assert.equal(JSON.stringify(accessLog).includes("must-not-be-logged"), false);
+
+  const refreshResponse = await request(baseUrl)
+    .post("/auth/refresh")
+    .set("Cookie", oldCookiePair)
+    .expect(200);
+  const rotatedCookie = refreshResponse.headers["set-cookie"]?.[0];
+  assert.equal(typeof refreshResponse.body.accessToken, "string");
+  assert.equal(typeof refreshResponse.body.refreshToken, "undefined");
+  assert.ok(rotatedCookie);
+  const rotatedCookiePair = rotatedCookie.split(";", 1)[0];
+  const rotatedRefreshToken = rotatedCookiePair.slice(
+    rotatedCookiePair.indexOf("=") + 1,
+  );
+  assert.notEqual(rotatedRefreshToken, oldRefreshToken);
+  assert.equal(JSON.stringify(refreshResponse.body).includes(rotatedRefreshToken), false);
+
+  await request(baseUrl)
+    .post("/auth/refresh")
+    .set("Cookie", oldCookiePair)
+    .expect(401, { statusCode: 401, message: "Invalid refresh session" });
+
+  const logoutResponse = await request(baseUrl)
+    .post("/auth/logout")
+    .set("Cookie", rotatedCookiePair)
+    .expect(204);
+  assert.match(logoutResponse.headers["set-cookie"]?.[0] ?? "", /Path=\/auth/i);
+  assert.match(logoutResponse.headers["set-cookie"]?.[0] ?? "", /HttpOnly/i);
+
+  await request(baseUrl)
+    .post("/auth/refresh")
+    .set("Cookie", rotatedCookiePair)
+    .expect(401, { statusCode: 401, message: "Invalid refresh session" });
 });
 
 test("login with invalid credentials returns unauthorized", async () => {

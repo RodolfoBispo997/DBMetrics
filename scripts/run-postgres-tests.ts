@@ -66,6 +66,7 @@ async function run(): Promise<void> {
       EMAIL_FROM: "",
       PUBLIC_WEB_URL: "http://localhost:3000",
       APP_READINESS_TIMEOUT_MS: "2000",
+      REFRESH_TOKEN_TTL_DAYS: "30",
       DATABASE_METRICS_SCHEDULER_ENABLED: "false",
     };
 

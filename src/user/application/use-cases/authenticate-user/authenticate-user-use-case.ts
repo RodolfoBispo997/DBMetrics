@@ -19,7 +19,7 @@ export class AuthenticateUserUseCase {
 
   async execute(
     data: AuthenticateUserRequestDTO,
-  ): Promise<AuthenticateUserResponseDTO> {
+  ): Promise<AuthenticateUserResponseDTO & { userId: string }> {
     const user = await this.userRepository.findByEmail(data.email);
 
     if (!user) {
@@ -47,6 +47,7 @@ export class AuthenticateUserUseCase {
 
     return {
       accessToken,
+      userId: user.id,
     };
   }
 }

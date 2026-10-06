@@ -17,6 +17,7 @@ export type EnvironmentConfig = {
   };
   publicRegistrationEnabled: boolean;
   appReadinessTimeoutMs: number;
+  refreshTokenTtlDays: number;
   email: {
     provider: "resend" | undefined;
     apiKey: string | undefined;
@@ -72,6 +73,7 @@ export function getEnvironmentConfig(): EnvironmentConfig {
     },
     publicRegistrationEnabled,
     appReadinessTimeoutMs: getAppReadinessTimeoutMs(),
+    refreshTokenTtlDays: getRefreshTokenTtlDays(),
     email: getEmailConfiguration(publicRegistrationEnabled),
   };
 
@@ -96,6 +98,10 @@ export function getAppReadinessTimeoutMs(): number {
     "APP_READINESS_TIMEOUT_MS",
     2000,
   );
+}
+
+export function getRefreshTokenTtlDays(): number {
+  return getPositiveIntegerEnvironmentVariable("REFRESH_TOKEN_TTL_DAYS", 30);
 }
 
 export function getLogLevel(): LevelWithSilent {

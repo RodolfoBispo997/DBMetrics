@@ -20,6 +20,12 @@ import { ResendEmailConfirmationSender } from "../user/infra/email-confirmation/
 import { Resend } from "resend";
 import { ResendVerificationUseCase } from "../user/application/use-cases/public-registration/resend-verification.use-case";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { CreateRefreshSessionUseCase } from "../user/application/use-cases/refresh-session/create-refresh-session.use-case";
+import { RotateRefreshSessionUseCase } from "../user/application/use-cases/refresh-session/rotate-refresh-session.use-case";
+import { LogoutRefreshSessionUseCase } from "../user/application/use-cases/refresh-session/logout-refresh-session.use-case";
+import { PrismaRefreshSessionRepository } from "../user/infra/repositories/prisma-refresh-session.repository";
+import { getRefreshTokenTtlDays } from "../shared/config/environment.config";
+import { REFRESH_TOKEN_TTL_DAYS } from "../user/application/use-cases/refresh-session/refresh-session.constants";
 
 @Module({
   imports: [
@@ -47,6 +53,9 @@ import { ThrottlerModule } from "@nestjs/throttler";
     RegisterPublicUserUseCase,
     VerifyEmailUseCase,
     ResendVerificationUseCase,
+    CreateRefreshSessionUseCase,
+    RotateRefreshSessionUseCase,
+    LogoutRefreshSessionUseCase,
     JwtStrategy,
     RolesGuard,
     PublicRegistrationEnabledGuard,
@@ -92,6 +101,14 @@ import { ThrottlerModule } from "@nestjs/throttler";
     {
       provide: "UserRepository",
       useClass: PrismaUserRepository,
+    },
+    {
+      provide: "RefreshSessionRepository",
+      useClass: PrismaRefreshSessionRepository,
+    },
+    {
+      provide: REFRESH_TOKEN_TTL_DAYS,
+      useFactory: getRefreshTokenTtlDays,
     },
     {
       provide: "HashComparer",

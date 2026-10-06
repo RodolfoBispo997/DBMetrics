@@ -60,10 +60,13 @@ test("HTTP access serializer excludes query strings, headers, and request bodies
       authorization: "Bearer jwt-secret",
       cookie: "session=session-secret",
       "x-api-key": "api-secret",
+      "set-cookie": "dbmetrics_refresh_token=refresh-secret",
     },
     body: {
       password: "password-secret",
       token: "body-token",
+      refreshToken: "refresh-secret",
+      tokenHash: "hash-secret",
     },
   };
   const logEntry = serializeHttpAccessLog(
@@ -81,6 +84,8 @@ test("HTTP access serializer excludes query strings, headers, and request bodies
   });
   assert.equal(JSON.stringify(logEntry).includes("secret"), false);
   assert.equal(JSON.stringify(logEntry).includes("token"), false);
+  assert.equal(JSON.stringify(logEntry).includes("refresh-secret"), false);
+  assert.equal(JSON.stringify(logEntry).includes("hash-secret"), false);
 });
 
 test("health and readiness paths are excluded from ordinary access logging", () => {

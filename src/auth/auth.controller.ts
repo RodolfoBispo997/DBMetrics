@@ -4,10 +4,13 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Post,
   Req,
+  Res,
   UseGuards,
 } from "@nestjs/common";
+import type { Request, Response } from "express";
 import { AuthenticateUserUseCase } from "../user/application/use-cases/authenticate-user/authenticate-user-use-case";
 import { AuthenticaUserHttpDTO } from "../user/presentation/dto/authenticate-user-http.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
@@ -30,8 +33,20 @@ import {
   ApiTags,
   ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
+  ApiNoContentResponse,
 } from "@nestjs/swagger";
 import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { CreateRefreshSessionUseCase } from "../user/application/use-cases/refresh-session/create-refresh-session.use-case";
+import { RotateRefreshSessionUseCase } from "../user/application/use-cases/refresh-session/rotate-refresh-session.use-case";
+import { LogoutRefreshSessionUseCase } from "../user/application/use-cases/refresh-session/logout-refresh-session.use-case";
+import {
+  REFRESH_SESSION_COOKIE,
+  REFRESH_TOKEN_TTL_DAYS,
+} from "../user/application/use-cases/refresh-session/refresh-session.constants";
+import {
+  clearRefreshSessionCookie,
+  setRefreshSessionCookie,
+} from "./refresh-session-cookie";
 
 @ApiTags("Authentication")
 @Controller("auth")
@@ -41,6 +56,11 @@ export class AuthController {
     private readonly registerPublicUserUseCase: RegisterPublicUserUseCase,
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
     private readonly resendVerificationUseCase: ResendVerificationUseCase,
+    private readonly createRefreshSessionUseCase: CreateRefreshSessionUseCase,
+    private readonly rotateRefreshSessionUseCase: RotateRefreshSessionUseCase,
+    private readonly logoutRefreshSessionUseCase: LogoutRefreshSessionUseCase,
+    @Inject(REFRESH_TOKEN_TTL_DAYS)
+    private readonly refreshTokenTtlDays: number,
   ) {}
 
   @Post("register")
@@ -93,16 +113,67 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60 * 1000 } })
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Authenticate user" })
+  @ApiOperation({
+    summary: "Authenticate user",
+    description:
+      "Returns the current access-token response and sets a refresh session in an HttpOnly cookie.",
+  })
   @ApiOkResponse({
-    description: "Returns the access token and authenticated user data.",
+    description: "Returns the access token and sets the refresh-session cookie.",
   })
   @ApiUnauthorizedResponse({ description: "Invalid email or password" })
   @ApiTooManyRequestsResponse({ description: "Too many login attempts." })
   async login(
     @Body() body: AuthenticaUserHttpDTO,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<AuthenticateUserResponseDTO> {
-    return this.authenticateUserUseCase.execute(body);
+    const authentication = await this.authenticateUserUseCase.execute(body);
+    const { refreshToken } = await this.createRefreshSessionUseCase.execute(
+      authentication.userId,
+    );
+    setRefreshSessionCookie(response, refreshToken, this.refreshTokenTtlDays);
+    return { accessToken: authentication.accessToken };
+  }
+
+  @Post("refresh")
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60 * 1000 } })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Refresh an access token",
+    description:
+      "Rotates the HttpOnly refresh-session cookie and returns a new access token.",
+  })
+  @ApiOkResponse({ description: "Returns a new access token." })
+  @ApiUnauthorizedResponse({ description: "Invalid refresh session." })
+  @ApiTooManyRequestsResponse({ description: "Too many refresh requests." })
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ accessToken: string }> {
+    const result = await this.rotateRefreshSessionUseCase.execute(
+      request.cookies?.[REFRESH_SESSION_COOKIE],
+    );
+    setRefreshSessionCookie(response, result.refreshToken, this.refreshTokenTtlDays);
+    return { accessToken: result.accessToken };
+  }
+
+  @Post("logout")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: "Revoke the current refresh session",
+    description:
+      "Revokes the session from the HttpOnly cookie, if present, and clears that cookie.",
+  })
+  @ApiNoContentResponse({ description: "The refresh cookie has been cleared." })
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    await this.logoutRefreshSessionUseCase.execute(
+      request.cookies?.[REFRESH_SESSION_COOKIE],
+    );
+    clearRefreshSessionCookie(response, this.refreshTokenTtlDays);
   }
 
   @Get("me")
