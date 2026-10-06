@@ -213,10 +213,41 @@ model AlertExecution {
   errorMessage String?
   triggeredAt DateTime @default(now())
   sentAt DateTime?
+  deliveryAttemptCount Int @default(0)
+  deliveryClaimedAt DateTime?
+  deliveryClaimExpiresAt DateTime?
+  deliveryClaimToken String?
 
-  
+  alertOutboxEvent AlertOutboxEvent?
+
   @@index([databaseConnectionId])
   @@index([alertRuleId])
   @@index([status])
+  @@index([deliveryClaimExpiresAt, status])
   @@map("alert_executions")
+}
+
+model AlertOutboxEvent {
+  id String @id @default(uuid())
+  alertExecutionId String @unique
+  alertExecution AlertExecution @relation(fields: [alertExecutionId], references: [id], onDelete: Cascade)
+  type String
+  payload Json
+  idempotencyKey String @unique
+  publishAttemptCount Int @default(0)
+  availableAt DateTime @default(now())
+  publishedAt DateTime?
+  claimedAt DateTime?
+  claimExpiresAt DateTime?
+  failedAt DateTime?
+  lastError String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([alertExecutionId])
+  @@index([availableAt, publishedAt])
+  @@index([publishedAt])
+  @@index([claimExpiresAt, availableAt, publishedAt, failedAt])
+  @@index([createdAt])
+  @@map("alert_outbox_events")
 }

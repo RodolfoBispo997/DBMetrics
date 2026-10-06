@@ -3,6 +3,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { AlertExecutionRepository } from "../../repositories/alert-execution-repository";
 
 import { AlertExecution } from "../../../domain/entities/alert-execution";
+import { AlertOutboxEvent } from "../../../domain/entities/alert-outbox-event";
 import { AlertRule } from "../../../domain/entities/alert-rule";
 
 import { DatabaseMetrics } from "../../../../database-metric/domain/entities/database-metric";
@@ -41,6 +42,22 @@ export class CreateAlertExecutionUseCase {
       channel: rule.channel,
       destination: rule.destination,
     });
+
+    if (process.env.ALERT_ASYNC_DELIVERY_ENABLED === "true") {
+      const outboxEvent = AlertOutboxEvent.create(
+        {
+          alertExecutionId: execution.id,
+          channel: execution.channel,
+          destination: execution.destination,
+          executedAt: execution.triggeredAt.toISOString(),
+        },
+        execution.id,
+        execution.id,
+      );
+
+      await this.alertExecutionRepository.saveWithOutbox(execution, outboxEvent);
+      return execution;
+    }
 
     await this.alertExecutionRepository.save(execution);
 
