@@ -663,6 +663,11 @@ pnpm exec nest build
 node dist/main
 ```
 
+A imagem Docker de produção inicia `node dist/main.js` diretamente como PID 1,
+em vez de executar o wrapper pnpm. Assim, SIGTERM do ECS chega ao processo Nest,
+que usa os shutdown hooks para encerrar graciosamente durante rolling deploys.
+O script `pnpm start:prod` continua disponível para execução local.
+
 ### Prisma Studio
 
 ```bash
