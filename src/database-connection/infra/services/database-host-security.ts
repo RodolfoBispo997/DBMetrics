@@ -1,6 +1,5 @@
 import { lookup as dnsLookup } from "node:dns/promises";
 import { isIP, Socket } from "node:net";
-import { checkServerIdentity, connect as tlsConnect, TLSSocket } from "node:tls";
 
 export class UnsafeDatabaseHostError extends Error {
   constructor() {
@@ -56,6 +55,10 @@ export type DatabaseConnectionTestProbe = {
   run(): Promise<void>;
   cancel(): void;
 };
+
+export type DatabaseHostResolver = (
+  hostname: string,
+) => Promise<DatabaseHostResolution>;
 
 type HostLookup = (hostname: string) => Promise<string[]>;
 
@@ -139,39 +142,23 @@ export async function connectMysqlToValidatedAddress(
   return socket;
 }
 
-export async function secureMysqlStream(
-  socket: Socket,
-  hostname: string,
+export type MysqlTlsOptions = {
+  ca: string;
+  rejectUnauthorized: true;
+  verifyIdentity: true;
+};
+
+export function getMysqlTlsOptions(
   environment = process.env.NODE_ENV,
   ca?: string,
-): Promise<Socket | TLSSocket> {
+): MysqlTlsOptions | undefined {
   if (environment === "development" || environment === "test") {
-    return socket;
+    return undefined;
   }
   if (!ca) {
-    socket.destroy();
     throw new MysqlTlsConfigurationError();
   }
-
-  return new Promise((resolve, reject) => {
-    const secureSocket = tlsConnect({
-      socket,
-      servername: hostname,
-      ca,
-      rejectUnauthorized: true,
-      checkServerIdentity: (serverName, certificate) =>
-        checkServerIdentity(serverName, certificate),
-    });
-    const onError = (error: Error) => {
-      secureSocket.destroy();
-      reject(error);
-    };
-    secureSocket.once("secureConnect", () => {
-      secureSocket.removeListener("error", onError);
-      resolve(secureSocket);
-    });
-    secureSocket.once("error", onError);
-  });
+  return { ca, rejectUnauthorized: true, verifyIdentity: true };
 }
 
 function isPublicIpv4(address: string): boolean {

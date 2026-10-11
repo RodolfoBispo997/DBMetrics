@@ -15,6 +15,7 @@
     "test:messaging": "tsx --test test/alert-outbox.worker.test.ts test/alert-delivery-consumer.service.test.ts test/integration/alert-outbox.integration.test.ts test/integration/alert-delivery.integration.test.ts",
     "test:security": "tsx --test test/database-credentials-cipher.test.ts test/prisma-database-connection.repository.test.ts",
     "test:ssrf": "tsx --test ssrf-host.test.ts",
+    "test:mysql-tls:integration": "tsx --test test/mysql-tls.integration.test.ts",
     "test:scheduler": "tsx --test test/database-metric.scheduler.test.ts",
     "test:alerts": "tsx --test test/alert-rule.test.ts test/alert-processor.service.test.ts test/alert-rule.use-cases.test.ts test/alert-outbox.worker.test.ts test/alert-email-notification.test.ts",
     "test:auth": "tsx --test test/user-auth.use-cases.test.ts",
