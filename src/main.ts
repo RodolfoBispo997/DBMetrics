@@ -1,4 +1,5 @@
 import { NestFactory } from "@nestjs/core";
+import "dotenv/config";
 import { ExpressAdapter } from "@nestjs/platform-express";
 import { Logger as PinoNestLogger } from "nestjs-pino";
 import type { Application as ExpressApplication } from "express";

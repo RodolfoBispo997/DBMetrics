@@ -115,6 +115,13 @@ export class AlertProcessorService {
         connection,
       );
 
+      if (!execution) {
+        this.logger.debug(
+          `Alert rule ${rule.id} is within cooldown or already has a pending delivery; duplicate execution was suppressed`,
+        );
+        return;
+      }
+
       if (process.env.ALERT_ASYNC_DELIVERY_ENABLED === "true") {
         return;
       }

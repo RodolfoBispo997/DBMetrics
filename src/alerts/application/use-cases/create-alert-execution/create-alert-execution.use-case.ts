@@ -24,7 +24,7 @@ export class CreateAlertExecutionUseCase {
     rule: AlertRule,
     metrics: DatabaseMetrics,
     connection: DatabaseConnection,
-  ): Promise<AlertExecution> {
+  ): Promise<AlertExecution | null> {
     const execution = AlertExecution.create({
       alertRuleId: rule.id,
 
@@ -43,8 +43,9 @@ export class CreateAlertExecutionUseCase {
       destination: rule.destination,
     });
 
+    let outboxEvent: AlertOutboxEvent | undefined;
     if (process.env.ALERT_ASYNC_DELIVERY_ENABLED === "true") {
-      const outboxEvent = AlertOutboxEvent.create(
+      outboxEvent = AlertOutboxEvent.create(
         {
           alertExecutionId: execution.id,
           channel: execution.channel,
@@ -55,12 +56,12 @@ export class CreateAlertExecutionUseCase {
         execution.id,
       );
 
-      await this.alertExecutionRepository.saveWithOutbox(execution, outboxEvent);
-      return execution;
     }
 
-    await this.alertExecutionRepository.save(execution);
-
-    return execution;
+    const saved = await this.alertExecutionRepository.saveIfNotificationEligible(
+      execution,
+      outboxEvent,
+    );
+    return saved ? execution : null;
   }
 }

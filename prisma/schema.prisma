@@ -235,14 +235,14 @@ model AlertOutboxEvent {
   payload Json
   idempotencyKey String @unique
   publishAttemptCount Int @default(0)
-  availableAt DateTime @default(now())
-  publishedAt DateTime?
-  claimedAt DateTime?
-  claimExpiresAt DateTime?
-  failedAt DateTime?
+  availableAt DateTime @default(now()) @db.Timestamptz(3)
+  publishedAt DateTime? @db.Timestamptz(3)
+  claimedAt DateTime? @db.Timestamptz(3)
+  claimExpiresAt DateTime? @db.Timestamptz(3)
+  failedAt DateTime? @db.Timestamptz(3)
   lastError String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   @@index([alertExecutionId])
   @@index([availableAt, publishedAt])

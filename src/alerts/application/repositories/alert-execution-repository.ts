@@ -13,6 +13,10 @@ export type DeliveryClaimResult =
   | { kind: "missing" };
 
 export interface AlertExecutionRepository {
+  saveIfNotificationEligible(
+    alertExecution: AlertExecution,
+    alertOutboxEvent?: AlertOutboxEvent,
+  ): Promise<boolean>;
   save(alertExecution: AlertExecution): Promise<void>;
   saveWithOutbox(
     alertExecution: AlertExecution,

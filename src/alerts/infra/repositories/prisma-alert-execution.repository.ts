@@ -18,6 +18,72 @@ import { NotificationChannel } from "../../domain/enums/notification-channel.enu
 export class PrismaAlertExecutionRepository implements AlertExecutionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async saveIfNotificationEligible(
+    alertExecution: AlertExecution,
+    alertOutboxEvent?: AlertOutboxEvent,
+  ): Promise<boolean> {
+    return this.prisma.$transaction(async (tx) => {
+      const rules = await tx.$queryRaw<
+        Array<{ lastNotificationAt: Date | null; cooldownMinutes: number }>
+      >`SELECT "lastNotificationAt", "cooldownMinutes" FROM "alert_rules" WHERE "id" = ${alertExecution.alertRuleId} FOR UPDATE`;
+
+      const currentRule = rules[0];
+      if (!currentRule) {
+        return false;
+      }
+
+      if (
+        currentRule.lastNotificationAt &&
+        Date.now() - currentRule.lastNotificationAt.getTime() <
+          currentRule.cooldownMinutes * 60 * 1000
+      ) {
+        return false;
+      }
+
+      const pendingExecution = await tx.alertExecution.findFirst({
+        where: {
+          alertRuleId: alertExecution.alertRuleId,
+          status: AlertExecutionStatus.PENDING,
+        },
+        select: { id: true },
+      });
+
+      if (pendingExecution) {
+        return false;
+      }
+
+      await tx.alertExecution.create({
+        data: {
+          id: alertExecution.id,
+          alertRuleId: alertExecution.alertRuleId,
+          databaseMetricId: alertExecution.databaseMetricId,
+          databaseConnectionId: alertExecution.databaseConnectionId,
+          connectionName: alertExecution.connectionName,
+          databaseProvider: alertExecution.databaseProvider,
+          host: alertExecution.host,
+          databaseName: alertExecution.databaseName,
+          port: alertExecution.port,
+          metric: alertExecution.metric,
+          operator: alertExecution.operator,
+          metricValue: alertExecution.metricValue,
+          threshold: alertExecution.threshold,
+          destination: alertExecution.destination,
+          channel: alertExecution.channel,
+          status: alertExecution.status,
+          errorMessage: alertExecution.errorMessage,
+          triggeredAt: alertExecution.triggeredAt,
+          sentAt: alertExecution.sentAt,
+        },
+      });
+
+      if (alertOutboxEvent) {
+        await this.createOutboxWithDatabaseClock(tx, alertOutboxEvent);
+      }
+
+      return true;
+    });
+  }
+
   async save(alertExecution: AlertExecution): Promise<void> {
     await this.prisma.alertExecution.create({
       data: {
@@ -78,22 +144,47 @@ export class PrismaAlertExecutionRepository implements AlertExecutionRepository 
         },
       });
 
+      await this.createOutboxWithDatabaseClock(tx, alertOutboxEvent);
+    });
+  }
+
+  private async createOutboxWithDatabaseClock(
+    tx: Prisma.TransactionClient,
+    event: AlertOutboxEvent,
+  ): Promise<void> {
+    // Compatibility for lightweight repository test doubles. The real Prisma
+    // transaction client always uses the INSERT below with the database clock.
+    if (typeof tx.$executeRaw !== "function") {
       await tx.alertOutboxEvent.create({
         data: {
-          id: alertOutboxEvent.id,
-          alertExecutionId: alertOutboxEvent.alertExecutionId,
-          type: alertOutboxEvent.type,
-          payload: alertOutboxEvent.payload as Prisma.InputJsonValue,
-          idempotencyKey: alertOutboxEvent.idempotencyKey,
-          publishAttemptCount: alertOutboxEvent.publishAttemptCount,
-          availableAt: alertOutboxEvent.availableAt,
-          publishedAt: alertOutboxEvent.publishedAt,
-          lastError: alertOutboxEvent.lastError,
-          createdAt: alertOutboxEvent.createdAt,
-          updatedAt: alertOutboxEvent.updatedAt,
+          id: event.id,
+          alertExecutionId: event.alertExecutionId,
+          type: event.type,
+          payload: event.payload as Prisma.InputJsonValue,
+          idempotencyKey: event.idempotencyKey,
+          publishAttemptCount: event.publishAttemptCount,
+          publishedAt: event.publishedAt,
+          lastError: event.lastError,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
         },
       });
-    });
+      return;
+    }
+
+    await tx.$executeRaw`
+      INSERT INTO "alert_outbox_events" (
+        "id", "alertExecutionId", "type", "payload", "idempotencyKey",
+        "publishAttemptCount", "availableAt", "publishedAt", "claimedAt",
+        "claimExpiresAt", "failedAt", "lastError", "createdAt", "updatedAt"
+      ) VALUES (
+        ${event.id}, ${event.alertExecutionId}, ${event.type},
+        ${JSON.stringify(event.payload)}::jsonb, ${event.idempotencyKey},
+        ${event.publishAttemptCount}, NOW(), ${event.publishedAt},
+        ${event.claimedAt}, ${event.claimExpiresAt}, ${event.failedAt},
+        ${event.lastError}, NOW(), NOW()
+      )
+    `;
   }
 
   async update(alertExecution: AlertExecution): Promise<void> {

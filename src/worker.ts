@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { connect, type Channel, type ConfirmChannel, type Connection } from "amqplib";
 import { Logger } from "@nestjs/common";
 
@@ -13,6 +14,9 @@ import { AlertDeliveryConsumerService } from "./alerts/application/services/aler
 import { EvolutionService } from "./shared/integrations/evolution/evolution.service";
 import { HttpEvolutionClient } from "./shared/integrations/evolution/evolution.client";
 import { EvolutionNotificationService } from "./alerts/infra/notifications/evolution/evolution-notification.service";
+import { ResendEmailAlertNotificationService } from "./alerts/infra/notifications/resend-email-alert-notification.service";
+import { NotificationFactoryImpl } from "./alerts/infra/notifications/notification.factory";
+import { ChannelNotificationService } from "./alerts/infra/notifications/channel-notification.service";
 import { AlertExecution } from "./alerts/domain/entities/alert-execution";
 import { AlertExecutionStatus } from "./alerts/domain/enums/alert-execution-status.enum";
 import { AlertMetric } from "./alerts/domain/enums/alert-metric.enum";
@@ -128,7 +132,11 @@ async function runWorker(): Promise<void> {
     instance: evolutionConfig.instance,
   } as never);
 
-  const notificationService = new EvolutionNotificationService(evolutionService);
+  const notificationFactory = new NotificationFactoryImpl(
+    new EvolutionNotificationService(evolutionService),
+    new ResendEmailAlertNotificationService(),
+  );
+  const notificationService = new ChannelNotificationService(notificationFactory);
 
   const connection = (await connect(config.alerts.rabbitMqUrl)) as Awaited<
     ReturnType<typeof connect>
