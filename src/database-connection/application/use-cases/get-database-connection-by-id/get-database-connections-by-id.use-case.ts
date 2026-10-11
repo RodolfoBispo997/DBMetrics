@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { DatabaseConnectionNotFoundError } from "../../../domain/errors/database-connection-not-found-error";
+import { DatabaseConnectionForbiddenError } from "../../../domain/errors/database-connection-forbidden-error";
 import { DatabaseConnectionRepository } from "../../repositories/database-connection-repository";
 import { GetDatabaseConnectionByIdRequestDTO } from "./dto/get-database-connection-by-id-request.dto";
 import { GetDatabaseConnectionByIdResponseDTO } from "./dto/get-database-connection-by-id-response.dto";
@@ -14,20 +15,14 @@ export class GetDatabaseConnectionByIdUseCase {
   async execute(
     data: GetDatabaseConnectionByIdRequestDTO,
   ): Promise<GetDatabaseConnectionByIdResponseDTO> {
-    const databaseConnection = await this.databaseConnectionRepository.findById(
-      data.id,
-    );
+    const databaseConnection = await this.databaseConnectionRepository.findById(data.id);
 
     if (!databaseConnection) {
-      throw new DatabaseConnectionNotFoundError(
-        "Database connection not found.",
-      );
+      throw new DatabaseConnectionNotFoundError("Database connection not found.");
     }
 
     if (databaseConnection.userId !== data.userId) {
-      throw new DatabaseConnectionNotFoundError(
-        "Database connection not found.",
-      );
+      throw new DatabaseConnectionForbiddenError();
     }
 
     return {

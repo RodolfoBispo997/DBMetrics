@@ -30,12 +30,11 @@ export class CollectDatabaseMetricsUseCase {
         await this.recordDatabaseMetricUseCase.execute(connection);
 
         success++;
-      } catch (error) {
+      } catch {
         failed++;
 
         this.logger.error(
           `Failed to collect metrics for connection id=${connection.id} name=${connection.name} provider=${connection.provider}`,
-          error instanceof Error ? error.stack : undefined,
         );
       }
     }

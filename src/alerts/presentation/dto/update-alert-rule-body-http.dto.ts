@@ -18,9 +18,9 @@ export class UpdateAlertRuleBodyHttpDTO {
   @ApiProperty({ description: "Threshold value", example: 80 })
   threshold!: number;
 
-  @IsIn([NotificationChannel.WHATSAPP])
+  @IsIn([NotificationChannel.WHATSAPP, NotificationChannel.EMAIL])
   @ApiProperty({
-    enum: [NotificationChannel.WHATSAPP],
+    enum: [NotificationChannel.WHATSAPP, NotificationChannel.EMAIL],
     description: "Notification channel",
     example: NotificationChannel.WHATSAPP,
   })

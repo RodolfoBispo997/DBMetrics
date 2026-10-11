@@ -3,6 +3,7 @@ import test from "node:test";
 import { DatabaseConnection } from "../src/database-connection/domain/entities/database-connection";
 import { DatabaseProvider } from "../src/database-connection/domain/enums/database-provider.enum";
 import { DatabaseConnectionNotFoundError } from "../src/database-connection/domain/errors/database-connection-not-found-error";
+import { DatabaseConnectionForbiddenError } from "../src/database-connection/domain/errors/database-connection-forbidden-error";
 import { UserNotFoundError } from "../src/database-connection/domain/errors/user-not-found-error";
 import { CreateDatabaseConnectionUseCase } from "../src/database-connection/application/use-cases/create-database-connection/create-database-connection.use-case";
 import { UpdateDatabaseConnectionUseCase } from "../src/database-connection/application/use-cases/update-database-connection/update-database-connection.use-case";
@@ -106,15 +107,15 @@ test("Update, get and delete enforce ownership without revealing another user's 
   const updateData = { ...request, id: connection.id, password: undefined };
   await assert.rejects(
     () => update.execute(updateData),
-    DatabaseConnectionNotFoundError,
+    DatabaseConnectionForbiddenError,
   );
   await assert.rejects(
     () => get.execute({ id: connection.id, userId: owner }),
-    DatabaseConnectionNotFoundError,
+    DatabaseConnectionForbiddenError,
   );
   await assert.rejects(
     () => remove.execute({ id: connection.id, userId: owner }),
-    DatabaseConnectionNotFoundError,
+    DatabaseConnectionForbiddenError,
   );
   assert.equal(updates, 0);
   assert.equal(deletes, 0);
@@ -198,7 +199,7 @@ test("TestDatabaseConnectionUseCase selects the provider tester only after owner
   );
   await assert.rejects(
     () => forbidden.execute({ connectionId: connection.id, userId: owner }),
-    DatabaseConnectionNotFoundError,
+    DatabaseConnectionForbiddenError,
   );
 });
 

@@ -17,6 +17,7 @@ import { GetAlertExecutionUseCase } from "./application/use-cases/get-alert-exec
 import { ListAlertExecutionsUseCase } from "./application/use-cases/list-alert-executions/list-alert-executions.use-case";
 import { EvolutionNotificationService } from "./infra/notifications/evolution/evolution-notification.service";
 import { NotificationFactoryImpl } from "./infra/notifications/notification.factory";
+import { ResendEmailAlertNotificationService } from "./infra/notifications/resend-email-alert-notification.service";
 import { EvolutionModule } from "../shared/integrations/evolution/evolution.module";
 import { SecurityModule } from "../shared/security/security.module";
 
@@ -36,6 +37,7 @@ import { SecurityModule } from "../shared/security/security.module";
     GetAlertExecutionUseCase,
     ListAlertExecutionsUseCase,
     EvolutionNotificationService,
+    { provide: ResendEmailAlertNotificationService, useFactory: () => new ResendEmailAlertNotificationService() },
 
     AlertEvaluatorService,
     AlertProcessorService,

@@ -36,7 +36,7 @@ export class AlertRule {
       operator: AlertRule.validateOperator(data.operator),
       threshold: AlertRule.validateThreshold(data.threshold),
       channel: AlertRule.validateChannel(data.channel),
-      destination: AlertRule.validateDestination(data.destination),
+      destination: AlertRule.validateDestination(data.channel, data.destination),
       enabled: true,
       cooldownMinutes: AlertRule.validateCooldownMinutes(data.cooldownMinutes),
       currentState: AlertRuleState.NORMAL,
@@ -58,7 +58,7 @@ export class AlertRule {
     this.props.operator = AlertRule.validateOperator(data.operator);
     this.props.threshold = AlertRule.validateThreshold(data.threshold);
     this.props.channel = AlertRule.validateChannel(data.channel);
-    this.props.destination = AlertRule.validateDestination(data.destination);
+    this.props.destination = AlertRule.validateDestination(data.channel, data.destination);
     this.props.cooldownMinutes = AlertRule.validateCooldownMinutes(
       data.cooldownMinutes,
     );
@@ -147,9 +147,9 @@ export class AlertRule {
   private static validateChannel(
     channel: NotificationChannel,
   ): NotificationChannel {
-    if (channel !== NotificationChannel.WHATSAPP) {
+    if (channel !== NotificationChannel.WHATSAPP && channel !== NotificationChannel.EMAIL) {
       throw new InvalidNotificationChannelError(
-        "Only WhatsApp notifications are supported",
+        "Only WhatsApp and email notifications are supported",
       );
     }
 
@@ -184,17 +184,21 @@ export class AlertRule {
     return value;
   }
 
-  private static validateDestination(destination: string): string {
+  private static validateDestination(channel: NotificationChannel, destination: string): string {
     const normalized = destination.trim();
 
     if (!normalized) {
       throw new InvalidDestinationError("Destination cannot be empty");
     }
 
-    if (!this.PHONE_REGEX.test(normalized)) {
+    if (channel === NotificationChannel.WHATSAPP && !this.PHONE_REGEX.test(normalized)) {
       throw new InvalidDestinationError(
         "Destination must be in E.164 format without '+' (e.g. 5511999999999)",
       );
+    }
+
+    if (channel === NotificationChannel.EMAIL && (normalized.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized))) {
+      throw new InvalidDestinationError("Destination must be a valid email address");
     }
 
     return normalized;

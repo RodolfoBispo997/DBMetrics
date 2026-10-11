@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { GetDatabaseMetricsRequestDTO } from "./dto/get-database-metrics-request.dto";
 import { GetDatabaseMetricsResponseDTO } from "./dto/get-database-metrics-response.dto";
 import { DatabaseConnectionNotFoundError } from "../../../domain/errors/database-connection-not-found-error";
+import { DatabaseConnectionForbiddenError } from "../../../domain/errors/database-connection-forbidden-error";
 import { DatabaseConnectionRepository } from "../../repositories/database-connection-repository";
 import { DatabaseMetricCollectorFactory } from "../../services/database-metric/database-metric-collector-factory";
 import { DatabaseHealthService } from "../../services/database-health/database-health-service";
@@ -29,15 +30,11 @@ export class GetDatabaseMetricsUseCase {
     );
 
     if (!connection) {
-      throw new DatabaseConnectionNotFoundError(
-        "Database connection not found",
-      );
+      throw new DatabaseConnectionNotFoundError("Database connection not found");
     }
 
     if (data.userId !== connection.userId) {
-      throw new DatabaseConnectionNotFoundError(
-        "Database connection not found",
-      );
+      throw new DatabaseConnectionForbiddenError();
     }
 
     const collector = this.databaseMetricCollectorFactory.get(
@@ -53,8 +50,8 @@ export class GetDatabaseMetricsUseCase {
         ...metrics,
         health,
       };
-    } catch (error) {
-      this.logger.error(error);
+    } catch {
+      this.logger.error("Database metrics collection failed");
       return {
         databaseVersion: "",
         tablesCount: 0,
@@ -68,7 +65,7 @@ export class GetDatabaseMetricsUseCase {
         health: {
           status: "OFFLINE",
           message:
-            error instanceof Error ? error.message : "Database unavailable",
+            "Database unavailable",
           checkedAt: new Date(),
         },
       };

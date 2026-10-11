@@ -3,15 +3,21 @@ import { NotificationFactory } from "../../application/services/notification-fac
 import { EvolutionNotificationService } from "./evolution/evolution-notification.service";
 import { NotificationChannel } from "../../domain/enums/notification-channel.enum";
 import { NotificationService } from "../../application/services/notification.service";
+import { ResendEmailAlertNotificationService } from "./resend-email-alert-notification.service";
 
 @Injectable()
 export class NotificationFactoryImpl implements NotificationFactory {
-  constructor(private readonly evolution: EvolutionNotificationService) {}
+  constructor(
+    private readonly evolution: EvolutionNotificationService,
+    private readonly email: ResendEmailAlertNotificationService,
+  ) {}
 
   get(channel: NotificationChannel): NotificationService {
     switch (channel) {
       case NotificationChannel.WHATSAPP:
         return this.evolution;
+      case NotificationChannel.EMAIL:
+        return this.email;
 
       default:
         throw new Error("Notification channel not implemented");

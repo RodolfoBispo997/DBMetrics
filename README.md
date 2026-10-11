@@ -631,7 +631,7 @@ abaixo; a aplicação falha no startup se a configuração estiver incompleta.
 | Variável | Descrição |
 | -------- | --------- |
 | `PUBLIC_REGISTRATION_ENABLED` | Habilita cadastro, verificação e reenvio; padrão `false` |
-| `EMAIL_PROVIDER` | Deve ser `resend` ao habilitar o cadastro fora de development/test |
+| `EMAIL_PROVIDER` | `resend` para enviar pelo Resend ou `local` para exibir o link localmente em development/test; cadastro público fora desses ambientes exige `resend` |
 | `RESEND_API_KEY` | Chave obtida pelo operador; mantê-la somente no ambiente seguro do processo |
 | `EMAIL_FROM` | Remetente configurado no Resend |
 | `PUBLIC_WEB_URL` | URL base do frontend; o link enviado usa `/verify-email?token=...` |

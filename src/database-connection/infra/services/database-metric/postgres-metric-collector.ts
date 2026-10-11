@@ -3,13 +3,16 @@ import { DatabaseMetricCollector } from "../../../application/services/database-
 import { DatabaseConnection } from "../../../domain/entities/database-connection";
 import { DatabaseMetricData } from "../../../application/types/database-metric-data.type";
 import { getEnvironmentConfig } from "../../../../shared/config/environment.config";
+import { resolveDatabaseHost } from "../database-host-security";
 
 export class PostgresMetricCollector implements DatabaseMetricCollector {
   async collect(connection: DatabaseConnection): Promise<DatabaseMetricData> {
     const timeoutMs =
       getEnvironmentConfig().scheduler.databaseMetrics.connectionTimeoutMs;
+    const resolved = await resolveDatabaseHost(connection.host);
     const client = new Client({
-      host: connection.host,
+      // Connect to the pinned validated address, never re-resolve user DNS.
+      host: resolved.addresses[0],
       port: connection.port,
       database: connection.database,
       user: connection.username,

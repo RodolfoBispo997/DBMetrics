@@ -14,10 +14,7 @@ import { PublicRegistrationEnabledGuard } from "./guards/public-registration-ena
 import { PrismaPublicRegistrationRepository } from "../user/infra/repositories/prisma-public-registration.repository";
 import { BcryptHashGenerator } from "../shared/cryptography/bcrypt-hash-generator";
 import { EMAIL_CONFIRMATION_SENDER } from "../user/application/use-cases/public-registration/email-confirmation-sender";
-import { LocalEmailConfirmationSender } from "../user/infra/email-confirmation/local-email-confirmation-sender";
-import { UnconfiguredEmailConfirmationSender } from "../user/infra/email-confirmation/unconfigured-email-confirmation-sender";
-import { ResendEmailConfirmationSender } from "../user/infra/email-confirmation/resend-email-confirmation-sender";
-import { Resend } from "resend";
+import { createEmailConfirmationSender } from "./email-confirmation-sender.factory";
 import { ResendVerificationUseCase } from "../user/application/use-cases/public-registration/resend-verification.use-case";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { CreateRefreshSessionUseCase } from "../user/application/use-cases/refresh-session/create-refresh-session.use-case";
@@ -70,32 +67,7 @@ import { REFRESH_TOKEN_TTL_DAYS } from "../user/application/use-cases/refresh-se
     {
       provide: EMAIL_CONFIRMATION_SENDER,
       useFactory: () => {
-        const config = getEnvironmentConfig();
-        if (
-          process.env.NODE_ENV !== "development" &&
-          process.env.NODE_ENV !== "test"
-        ) {
-          if (config.publicRegistrationEnabled) {
-            if (
-              config.email.provider !== "resend" ||
-              !config.email.apiKey ||
-              !config.email.from
-            ) {
-              throw new Error(
-                "Public registration requires a complete Resend configuration outside development and test",
-              );
-            }
-
-            return new ResendEmailConfirmationSender(
-              new Resend(config.email.apiKey),
-              config.email.from,
-              config.email.publicWebUrl,
-            );
-          }
-          return new UnconfiguredEmailConfirmationSender();
-        }
-
-        return new LocalEmailConfirmationSender(config.email.publicWebUrl);
+        return createEmailConfirmationSender(getEnvironmentConfig());
       },
     },
     {
