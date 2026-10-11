@@ -82,6 +82,20 @@ test("CreateAlertRuleUseCase saves an owned rule and preserves its requested coo
   assert.equal(rule.cooldownMinutes, 45);
 });
 
+test("CreateAlertRuleUseCase saves a valid EMAIL destination", async () => {
+  let saved: AlertRule | undefined;
+  const useCase = new CreateAlertRuleUseCase(
+    { save: async (rule) => { saved = rule; }, findById: async () => null,
+      findManyByConnectionId: async () => [], update: async () => undefined, delete: async () => undefined },
+    connRepo(),
+  );
+  const rule = await useCase.execute({ userId: owner, connectionId, metric: AlertMetric.DATABASE_SIZE,
+    operator: AlertOperator.GREATER_THAN, threshold: 10, channel: NotificationChannel.EMAIL,
+    destination: "notify@example.com", cooldownMinutes: 30 });
+  assert.equal(saved, rule);
+  assert.equal(rule.channel, NotificationChannel.EMAIL);
+  assert.equal(rule.destination, "notify@example.com");
+});
 test("Alert rule management preserves ownership and avoids writes on rejected operations", async () => {
   const rule = makeRule();
   let writes = 0;

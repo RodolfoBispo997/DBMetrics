@@ -30,7 +30,7 @@ export type EnvironmentConfig = {
   appReadinessTimeoutMs: number;
   refreshTokenTtlDays: number;
   email: {
-    provider: "resend" | undefined;
+    provider: "resend" | "local" | undefined;
     apiKey: string | undefined;
     from: string | undefined;
     publicWebUrl: string;
@@ -161,8 +161,8 @@ function getEmailConfiguration(
   registrationEnabled: boolean,
 ): EnvironmentConfig["email"] {
   const providerValue = process.env.EMAIL_PROVIDER?.trim();
-  if (providerValue && providerValue !== "resend") {
-    throw new Error('EMAIL_PROVIDER must be "resend"');
+  if (providerValue && providerValue !== "resend" && providerValue !== "local") {
+    throw new Error('EMAIL_PROVIDER must be "resend" or "local"');
   }
 
   const apiKey = process.env.RESEND_API_KEY?.trim() || undefined;
@@ -200,7 +200,9 @@ function getEmailConfiguration(
   }
 
   return {
-    provider: providerValue === "resend" ? "resend" : undefined,
+    provider: providerValue === "resend" || providerValue === "local"
+      ? providerValue
+      : undefined,
     apiKey,
     from,
     publicWebUrl: publicWebUrl.replace(/\/+$/, ""),

@@ -12,6 +12,7 @@ import { DatabaseMetricScheduler } from "./infra/scheduler/database-metric.sched
 import { CollectDatabaseMetricsUseCase } from "./application/use-cases/collect-database-metrics/collect-database-metrics.use-case";
 import { AlertsModule } from "../alerts/alerts.module";
 import { SecurityModule } from "../shared/security/security.module";
+import { UserAwareThrottlerGuard } from "../auth/guards/user-aware-throttler.guard";
 
 @Module({
   imports: [AlertsModule, SecurityModule],
@@ -22,6 +23,7 @@ import { SecurityModule } from "../shared/security/security.module";
     RecordDatabaseMetricUseCase,
     DatabaseMetricScheduler,
     CollectDatabaseMetricsUseCase,
+    UserAwareThrottlerGuard,
 
     MysqlMetricCollector,
     PostgresMetricCollector,

@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { DatabaseConnectionNotFoundError } from "../../../domain/errors/database-connection-not-found-error";
+import { DatabaseConnectionForbiddenError } from "../../../domain/errors/database-connection-forbidden-error";
 import { DatabaseConnectionRepository } from "../../repositories/database-connection-repository";
 import { DeleteDatabaseConnectionRequestDTO } from "./dto/delete-database-connection-request.dto";
 
@@ -16,15 +17,11 @@ export class DeleteDatabaseConnectionUseCase {
     );
 
     if (!databaseConnection) {
-      throw new DatabaseConnectionNotFoundError(
-        "Database connection not found",
-      );
+      throw new DatabaseConnectionNotFoundError("Database connection not found");
     }
 
     if (databaseConnection.userId !== data.userId) {
-      throw new DatabaseConnectionNotFoundError(
-        "Database connection not found",
-      );
+      throw new DatabaseConnectionForbiddenError();
     }
 
     await this.databaseConnectionRepository.delete(data.id);

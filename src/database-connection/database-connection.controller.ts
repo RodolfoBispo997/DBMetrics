@@ -14,6 +14,8 @@ import {
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
+import { UserAwareThrottlerGuard } from "../auth/guards/user-aware-throttler.guard";
+import { Throttle } from "@nestjs/throttler";
 
 import { CreateDatabaseConnectionHttpDTO } from "./presentation/dto/create-database-connection-http.dto";
 import { CreateDatabaseConnectionUseCase } from "./application/use-cases/create-database-connection/create-database-connection.use-case";
@@ -41,6 +43,7 @@ import {
   ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiTooManyRequestsResponse,
 } from "@nestjs/swagger";
 
 @ApiTags("Database Connections")
@@ -59,7 +62,7 @@ export class DatabaseConnectionController {
   ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN")
+  @Roles("ADMIN", "MEMBER")
   @Post()
   @ApiOperation({ summary: "Create database connection" })
   @ApiCreatedResponse({ description: "Creates a database connection." })
@@ -137,7 +140,7 @@ export class DatabaseConnectionController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN")
+  @Roles("ADMIN", "MEMBER")
   @Delete(":id")
   @ApiOperation({ summary: "Delete database connection" })
   @ApiNoContentResponse({ description: "Deletes the selected database connection." })
@@ -157,9 +160,10 @@ export class DatabaseConnectionController {
     return this.deleteDatabaseConnectionUseCase.execute({ id, userId });
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles("ADMIN")
+  @UseGuards(JwtAuthGuard, RolesGuard, UserAwareThrottlerGuard)
+  @Roles("ADMIN", "MEMBER")
   @Post(":id/test")
+  @Throttle({ default: { limit: 5, ttl: 60 * 1000 } })
   @ApiOperation({ summary: "Test database connection" })
   @ApiOkResponse({
     description: "Tests connectivity with the selected database connection.",
@@ -171,6 +175,7 @@ export class DatabaseConnectionController {
     format: "uuid",
   })
   @ApiForbiddenResponse()
+  @ApiTooManyRequestsResponse({ description: "Too many connection test requests." })
   @HttpCode(HttpStatus.OK)
   async test(
     @Req() request: AuthenticatedRequest,
@@ -180,8 +185,9 @@ export class DatabaseConnectionController {
     return this.testDatabaseConnectionUseCase.execute({ connectionId, userId });
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserAwareThrottlerGuard)
   @Get(":id/metrics")
+  @Throttle({ default: { limit: 5, ttl: 60 * 1000 } })
   @ApiOperation({ summary: "Get database metrics" })
   @ApiOkResponse({
     description:
@@ -193,6 +199,7 @@ export class DatabaseConnectionController {
     example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
     format: "uuid",
   })
+  @ApiTooManyRequestsResponse({ description: "Too many real-time metrics requests." })
   async metrics(
     @Req() request: AuthenticatedRequest,
     @Param("id") connectionId: string,

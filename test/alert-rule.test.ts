@@ -21,6 +21,43 @@ function createRule(cooldownMinutes = 30): AlertRule {
   });
 }
 
+
+test("accepts EMAIL destinations and keeps WhatsApp phone validation channel-specific", () => {
+  const emailRule = AlertRule.create({
+    metric: AlertMetric.DATABASE_SIZE,
+    operator: AlertOperator.GREATER_THAN,
+    threshold: 1,
+    channel: NotificationChannel.EMAIL,
+    destination: "  person@example.com  ",
+    cooldownMinutes: 30,
+    databaseConnectionId: "550e8400-e29b-41d4-a716-446655440000",
+  });
+  assert.equal(emailRule.channel, NotificationChannel.EMAIL);
+  assert.equal(emailRule.destination, "person@example.com");
+
+  assert.throws(() => AlertRule.create({
+    metric: AlertMetric.DATABASE_SIZE,
+    operator: AlertOperator.GREATER_THAN,
+    threshold: 1,
+    channel: NotificationChannel.EMAIL,
+    destination: "not-an-email",
+    cooldownMinutes: 30,
+    databaseConnectionId: "550e8400-e29b-41d4-a716-446655440000",
+  }));
+  assert.throws(() => createRuleWithDestination("person@example.com"));
+});
+
+function createRuleWithDestination(destination: string): AlertRule {
+  return AlertRule.create({
+    metric: AlertMetric.ACTIVE_CONNECTIONS,
+    operator: AlertOperator.GREATER_THAN,
+    threshold: 10,
+    channel: NotificationChannel.WHATSAPP,
+    destination,
+    cooldownMinutes: 30,
+    databaseConnectionId: "550e8400-e29b-41d4-a716-446655440000",
+  });
+}
 test("creates a NORMAL rule with an empty notification timestamp", () => {
   const rule = createRule();
 

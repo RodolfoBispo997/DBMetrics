@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { DatabaseConnectionNotFoundError } from "../../../domain/errors/database-connection-not-found-error";
+import { DatabaseConnectionForbiddenError } from "../../../domain/errors/database-connection-forbidden-error";
 import { DatabaseConnectionRepository } from "../../repositories/database-connection-repository";
 import { DatabaseConnectionTesterFactory } from "../../services/database-connection-tester-factory";
 import { TestDatabaseConnectionRequestDTO } from "./dto/test-database-connection-request.dto";
@@ -22,15 +23,11 @@ export class TestDatabaseConnectionUseCase {
     );
 
     if (!connection) {
-      throw new DatabaseConnectionNotFoundError(
-        "Database connection not found",
-      );
+      throw new DatabaseConnectionNotFoundError("Database connection not found");
     }
 
     if (data.userId !== connection.userId) {
-      throw new DatabaseConnectionNotFoundError(
-        "Database connection not found",
-      );
+      throw new DatabaseConnectionForbiddenError();
     }
 
     const tester = this.databaseConnectionTesterFactory.get(

@@ -9,6 +9,8 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { UserAwareThrottlerGuard } from "../auth/guards/user-aware-throttler.guard";
+import { Throttle } from "@nestjs/throttler";
 import { CollectDatabaseMetricUseCase } from "./application/use-cases/collect-database-metric/collect-database-metric.use-case";
 import { GetDatabaseMetricUseCase } from "./application/use-cases/get-database-metric/get-database-metric.use-case";
 import { GetDatabaseMetricResponseDTO } from "./application/use-cases/get-database-metric/dto/get-database-metric-response.dto";
@@ -20,6 +22,7 @@ import {
   ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiTooManyRequestsResponse,
 } from "@nestjs/swagger";
 
 @ApiTags("Database Metrics")
@@ -32,8 +35,9 @@ export class DatabaseMetricController {
     private readonly getDatabaseMetricUseCase: GetDatabaseMetricUseCase,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserAwareThrottlerGuard)
   @Post(":id/collect")
+  @Throttle({ default: { limit: 5, ttl: 60 * 1000 } })
   @ApiOperation({ summary: "Collect database metrics" })
   @ApiOkResponse({
     description:
@@ -45,6 +49,7 @@ export class DatabaseMetricController {
     example: "a36c0ca4-b6c8-48e4-a9f5-8499c8f4d45d",
     format: "uuid",
   })
+  @ApiTooManyRequestsResponse({ description: "Too many manual collection requests." })
   @HttpCode(HttpStatus.OK)
   async collect(
     @Req() request: AuthenticatedRequest,

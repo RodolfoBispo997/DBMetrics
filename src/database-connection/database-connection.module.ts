@@ -17,6 +17,7 @@ import { PostgresMetricCollector } from "./infra/services/database-metric/postgr
 import { MysqlMetricCollector } from "./infra/services/database-metric/mysql-metric-collector";
 import { DatabaseHealthServiceImpl } from "./infra/services/database-health/database-health.service";
 import { SecurityModule } from "../shared/security/security.module";
+import { UserAwareThrottlerGuard } from "../auth/guards/user-aware-throttler.guard";
 
 @Module({
   imports: [SecurityModule],
@@ -35,6 +36,7 @@ import { SecurityModule } from "../shared/security/security.module";
 
     PostgresConnectionTester,
     MysqlConnectionTester,
+    UserAwareThrottlerGuard,
 
     {
       provide: "DatabaseConnectionRepository",
