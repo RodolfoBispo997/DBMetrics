@@ -4,13 +4,19 @@ import { DatabaseMetricCollector } from "../../../application/services/database-
 import { DatabaseConnection } from "../../../domain/entities/database-connection";
 import { DatabaseMetricData } from "../../../application/types/database-metric-data.type";
 import { getEnvironmentConfig } from "../../../../shared/config/environment.config";
-import { connectMysqlToValidatedAddress, resolveDatabaseHost } from "../database-host-security";
+import { Optional, Inject } from "@nestjs/common";
+import { connectMysqlToValidatedAddress, DatabaseHostResolver, getMysqlTlsOptions, resolveDatabaseHost } from "../database-host-security";
 
 export class MysqlMetricCollector implements DatabaseMetricCollector {
+  constructor(
+    @Optional() @Inject("MYSQL_DATABASE_HOST_RESOLVER")
+    private readonly injectedHostResolver?: DatabaseHostResolver,
+  ) {}
+
   async collect(connection: DatabaseConnection): Promise<DatabaseMetricData> {
     const timeoutMs =
       getEnvironmentConfig().scheduler.databaseMetrics.connectionTimeoutMs;
-    const resolved = await resolveDatabaseHost(connection.host);
+    const resolved = await (this.injectedHostResolver ?? resolveDatabaseHost)(connection.host);
     const stream = await connectMysqlToValidatedAddress(
       resolved.addresses[0],
       connection.port,
@@ -23,6 +29,10 @@ export class MysqlMetricCollector implements DatabaseMetricCollector {
       user: connection.username,
       password: connection.password,
       stream,
+      ssl: getMysqlTlsOptions(
+        process.env.NODE_ENV,
+        getEnvironmentConfig().mysql.tlsCa,
+      ),
       connectTimeout: timeoutMs,
     });
     const queryOptions = { timeout: timeoutMs };

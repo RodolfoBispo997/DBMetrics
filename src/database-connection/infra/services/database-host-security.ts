@@ -15,6 +15,13 @@ export class DatabaseConnectionTimeoutError extends Error {
   }
 }
 
+export class MysqlTlsConfigurationError extends Error {
+  constructor() {
+    super("MySQL TLS is not configured for production");
+    this.name = "MysqlTlsConfigurationError";
+  }
+}
+
 export async function runWithConnectionTimeout<T>(
   operation: () => Promise<T>,
   timeoutMs: number,
@@ -48,6 +55,10 @@ export type DatabaseConnectionTestProbe = {
   run(): Promise<void>;
   cancel(): void;
 };
+
+export type DatabaseHostResolver = (
+  hostname: string,
+) => Promise<DatabaseHostResolution>;
 
 type HostLookup = (hostname: string) => Promise<string[]>;
 
@@ -129,6 +140,25 @@ export async function connectMysqlToValidatedAddress(
   });
   socket.setTimeout(0);
   return socket;
+}
+
+export type MysqlTlsOptions = {
+  ca: string;
+  rejectUnauthorized: true;
+  verifyIdentity: true;
+};
+
+export function getMysqlTlsOptions(
+  environment = process.env.NODE_ENV,
+  ca?: string,
+): MysqlTlsOptions | undefined {
+  if (environment === "development" || environment === "test") {
+    return undefined;
+  }
+  if (!ca) {
+    throw new MysqlTlsConfigurationError();
+  }
+  return { ca, rejectUnauthorized: true, verifyIdentity: true };
 }
 
 function isPublicIpv4(address: string): boolean {

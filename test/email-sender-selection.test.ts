@@ -11,6 +11,7 @@ function config(provider: "resend" | "local" | undefined, publicRegistrationEnab
     jwtSecret: "test-jwt-secret",
     databaseCredentialsKey: Buffer.alloc(32),
     scheduler: { databaseMetrics: { enabled: false, cron: "* * * * *", connectionTimeoutMs: 1 } },
+    mysql: { tlsCa: undefined },
     evolution: { baseUrl: "", apiKey: "", instance: "" },
     alerts: { asyncDeliveryEnabled: false, rabbitMqUrl: "", outbox: { leaseMs: 1, pollIntervalMs: 1, maxAttempts: 1, retryBaseDelayMs: 1, retryMaxDelayMs: 1 } },
     publicRegistrationEnabled,

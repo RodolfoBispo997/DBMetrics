@@ -7,25 +7,31 @@ import { getEnvironmentConfig } from "../../../shared/config/environment.config"
 import {
   connectMysqlToValidatedAddress,
   DatabaseConnectionTestProbe,
+  DatabaseHostResolver,
   DatabaseConnectionTimeoutError,
   resolveDatabaseHost,
   runWithConnectionTimeout,
+  getMysqlTlsOptions,
 } from "./database-host-security";
 
 const MYSQL_PROBE_FACTORY = "MYSQL_DATABASE_CONNECTION_PROBE_FACTORY";
+const MYSQL_HOST_RESOLVER = "MYSQL_DATABASE_HOST_RESOLVER";
 type MysqlProbeFactory = (connection: DatabaseConnection) => DatabaseConnectionTestProbe;
 
 export class MysqlConnectionTester implements DatabaseConnectionTester {
   constructor(
     @Optional() @Inject(MYSQL_PROBE_FACTORY)
     private readonly injectedProbeFactory?: MysqlProbeFactory,
+    @Optional() @Inject(MYSQL_HOST_RESOLVER)
+    private readonly injectedHostResolver?: DatabaseHostResolver,
   ) {}
 
   async test(
     connection: DatabaseConnection,
   ): Promise<{ success: boolean; message: string }> {
     const timeoutMs = getEnvironmentConfig().scheduler.databaseMetrics.connectionTimeoutMs;
-    const probe = (this.injectedProbeFactory ?? createMysqlProbe)(connection);
+    const probe = (this.injectedProbeFactory ?? ((value) =>
+      createMysqlProbe(value, this.injectedHostResolver)))(connection);
     let cancelled = false;
     const cancel = () => {
       if (cancelled) return;
@@ -47,14 +53,17 @@ export class MysqlConnectionTester implements DatabaseConnectionTester {
   }
 }
 
-function createMysqlProbe(connection: DatabaseConnection): DatabaseConnectionTestProbe {
+function createMysqlProbe(
+  connection: DatabaseConnection,
+  hostResolver?: DatabaseHostResolver,
+): DatabaseConnectionTestProbe {
   const socket = new Socket();
   let client: mysql.Connection | undefined;
   let cancelled = false;
   return {
     run: async () => {
       const timeoutMs = getEnvironmentConfig().scheduler.databaseMetrics.connectionTimeoutMs;
-      const resolved = await resolveDatabaseHost(connection.host);
+      const resolved = await (hostResolver ?? resolveDatabaseHost)(connection.host);
       if (cancelled) throw new DatabaseConnectionTimeoutError();
       const stream = await connectMysqlToValidatedAddress(
         resolved.addresses[0], connection.port, timeoutMs, socket,
@@ -65,6 +74,10 @@ function createMysqlProbe(connection: DatabaseConnection): DatabaseConnectionTes
         // supplied connected socket pins TCP to the validated address.
         host: resolved.hostname,
         stream,
+        ssl: getMysqlTlsOptions(
+          process.env.NODE_ENV,
+          getEnvironmentConfig().mysql.tlsCa,
+        ),
         port: connection.port,
         database: connection.database,
         user: connection.username,
