@@ -10,6 +10,7 @@ import {
   DatabaseConnectionTimeoutError,
   resolveDatabaseHost,
   runWithConnectionTimeout,
+  secureMysqlStream,
 } from "./database-host-security";
 
 const MYSQL_PROBE_FACTORY = "MYSQL_DATABASE_CONNECTION_PROBE_FACTORY";
@@ -60,11 +61,17 @@ function createMysqlProbe(connection: DatabaseConnection): DatabaseConnectionTes
         resolved.addresses[0], connection.port, timeoutMs, socket,
       );
       if (cancelled) throw new DatabaseConnectionTimeoutError();
+      const secureStream = await secureMysqlStream(
+        stream,
+        resolved.hostname,
+        process.env.NODE_ENV,
+        getEnvironmentConfig().mysql.tlsCa,
+      );
       client = await mysql.createConnection({
         // Keep the submitted hostname for TLS SNI/identity checks while the
         // supplied connected socket pins TCP to the validated address.
         host: resolved.hostname,
-        stream,
+        stream: secureStream,
         port: connection.port,
         database: connection.database,
         user: connection.username,

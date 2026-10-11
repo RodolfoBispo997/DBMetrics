@@ -1,5 +1,6 @@
 import { lookup as dnsLookup } from "node:dns/promises";
 import { isIP, Socket } from "node:net";
+import { checkServerIdentity, connect as tlsConnect, TLSSocket } from "node:tls";
 
 export class UnsafeDatabaseHostError extends Error {
   constructor() {
@@ -12,6 +13,13 @@ export class DatabaseConnectionTimeoutError extends Error {
   constructor() {
     super("Database connection test timed out");
     this.name = "DatabaseConnectionTimeoutError";
+  }
+}
+
+export class MysqlTlsConfigurationError extends Error {
+  constructor() {
+    super("MySQL TLS is not configured for production");
+    this.name = "MysqlTlsConfigurationError";
   }
 }
 
@@ -129,6 +137,41 @@ export async function connectMysqlToValidatedAddress(
   });
   socket.setTimeout(0);
   return socket;
+}
+
+export async function secureMysqlStream(
+  socket: Socket,
+  hostname: string,
+  environment = process.env.NODE_ENV,
+  ca?: string,
+): Promise<Socket | TLSSocket> {
+  if (environment === "development" || environment === "test") {
+    return socket;
+  }
+  if (!ca) {
+    socket.destroy();
+    throw new MysqlTlsConfigurationError();
+  }
+
+  return new Promise((resolve, reject) => {
+    const secureSocket = tlsConnect({
+      socket,
+      servername: hostname,
+      ca,
+      rejectUnauthorized: true,
+      checkServerIdentity: (serverName, certificate) =>
+        checkServerIdentity(serverName, certificate),
+    });
+    const onError = (error: Error) => {
+      secureSocket.destroy();
+      reject(error);
+    };
+    secureSocket.once("secureConnect", () => {
+      secureSocket.removeListener("error", onError);
+      resolve(secureSocket);
+    });
+    secureSocket.once("error", onError);
+  });
 }
 
 function isPublicIpv4(address: string): boolean {

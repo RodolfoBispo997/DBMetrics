@@ -4,7 +4,7 @@ import { DatabaseMetricCollector } from "../../../application/services/database-
 import { DatabaseConnection } from "../../../domain/entities/database-connection";
 import { DatabaseMetricData } from "../../../application/types/database-metric-data.type";
 import { getEnvironmentConfig } from "../../../../shared/config/environment.config";
-import { connectMysqlToValidatedAddress, resolveDatabaseHost } from "../database-host-security";
+import { connectMysqlToValidatedAddress, resolveDatabaseHost, secureMysqlStream } from "../database-host-security";
 
 export class MysqlMetricCollector implements DatabaseMetricCollector {
   async collect(connection: DatabaseConnection): Promise<DatabaseMetricData> {
@@ -16,13 +16,19 @@ export class MysqlMetricCollector implements DatabaseMetricCollector {
       connection.port,
       timeoutMs,
     );
+    const secureStream = await secureMysqlStream(
+      stream,
+      resolved.hostname,
+      process.env.NODE_ENV,
+      getEnvironmentConfig().mysql.tlsCa,
+    );
     const client = await mysql.createConnection({
       host: resolved.hostname,
       port: connection.port,
       database: connection.database,
       user: connection.username,
       password: connection.password,
-      stream,
+      stream: secureStream,
       connectTimeout: timeoutMs,
     });
     const queryOptions = { timeout: timeoutMs };

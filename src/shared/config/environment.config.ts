@@ -10,6 +10,9 @@ export type EnvironmentConfig = {
       connectionTimeoutMs: number;
     };
   };
+  mysql: {
+    tlsCa: string | undefined;
+  };
   evolution: {
     baseUrl: string;
     apiKey: string;
@@ -74,6 +77,9 @@ export function getEnvironmentConfig(): EnvironmentConfig {
           10000,
         ),
       },
+    },
+    mysql: {
+      tlsCa: process.env.MYSQL_TLS_CA?.trim() || undefined,
     },
     evolution: {
       baseUrl: process.env.EVOLUTION_API_URL ?? "",

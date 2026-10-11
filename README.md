@@ -959,3 +959,15 @@ Por isso, hash não seria suficiente. O projeto utiliza criptografia autenticada
 ## Autor
 
 Desenvolvido por **Rodolfo Bispo** como projeto de portfólio voltado à aplicação prática de engenharia backend em uma plataforma SaaS de monitoramento de bancos de dados.
+### MySQL TLS
+
+Em `production`, o tester e o collector MySQL sempre estabelecem TLS antes do
+handshake MySQL, validam a cadeia com `rejectUnauthorized=true` e validam o
+hostname original do formulário. A conexão TCP continua presa ao endereço IP
+aprovado pela proteção SSRF.
+
+Configure a CA PEM no backend com `MYSQL_TLS_CA`, usando o secret store da
+implantação. A CA não faz parte do formulário, não é armazenada por conexão e
+nunca deve ser enviada pelo frontend. Para Aiven, use a CA do projeto obtida no
+Console Aiven. Em `development` e `test`, o socket local permanece sem TLS para
+permitir bancos locais de teste.
